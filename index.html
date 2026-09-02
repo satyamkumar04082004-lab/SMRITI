@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SMRITI (स्मृति) — Cognitive Care & Memory Companion</title>
+  <meta name="description" content="AI-Powered Cognitive Care & Memory Companion for Elderly — Cognitive training games, memory aids, and multilingual support.">
+  <meta name="theme-color" content="#9B2C2C">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Global error catcher — shows JS errors on screen
+    window.onerror = function(msg, src, line, col, err) {
+      document.getElementById('root').innerHTML =
+        '<div style="padding:20px;color:red;font-family:monospace;white-space:pre-wrap;">' +
+        '<h2>JS Error:</h2>' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col +
+        (err && err.stack ? '\n\nStack:\n' + err.stack : '') + '</div>';
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      document.getElementById('root').innerHTML =
+        '<div style="padding:20px;color:red;font-family:monospace;white-space:pre-wrap;">' +
+        '<h2>Promise Error:</h2>' + (e.reason ? (e.reason.message || e.reason) : 'Unknown') +
+        (e.reason && e.reason.stack ? '\n\nStack:\n' + e.reason.stack : '') + '</div>';
+    });
+  </script>
+</head>
+<body>
+  <div id="root"><p style="padding:20px;font-size:1.2rem;color:#666;">Loading SMRITI...</p></div>
+
+  <!-- App entry — imports everything it needs -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

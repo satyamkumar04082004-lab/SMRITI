@@ -1,0 +1,20 @@
+{
+  "name": "smriti",
+  "version": "1.0.0",
+  "description": "SMRITI (स्मृति) — AI-Powered Cognitive Care & Memory Companion",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "smriti",
+    "cognitive-care",
+    "memory-companion",
+    "wellness",
+    "ai-companion",
+    "sih2026"
+  ],
+  "author": "SMRITI Team",
+  "license": "MIT"
+}
