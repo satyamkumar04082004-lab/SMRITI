@@ -102,12 +102,17 @@ export default function JourneyPage(container) {
 
       <!-- Action Button -->
       <div class="text-center">
-        <button class="btn btn-primary" onclick="window.location.hash='#/games'" style="padding: 0.75rem 2.5rem;">
+        <button id="btn-journey-play" class="btn btn-primary" style="padding: 0.75rem 2.5rem;">
           🎮 Play Games & Earn XP
         </button>
       </div>
     </div>
   `;
+
+  const playBtn = container.querySelector('#btn-journey-play');
+  if (playBtn) {
+    playBtn.addEventListener('click', () => { window.location.hash = '#/games'; });
+  }
 
   return { cleanup() {} };
 }

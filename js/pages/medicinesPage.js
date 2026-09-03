@@ -262,6 +262,27 @@ export default function MedicinesPage(container) {
       });
     });
 
+    // Add manual reminder time
+    const addReminderManualBtn = container.querySelector('#btn-add-reminder-manual');
+    if (addReminderManualBtn) {
+      addReminderManualBtn.addEventListener('click', () => {
+        const time = prompt('Enter reminder time (e.g. 02:00 PM):', '02:00 PM');
+        if (time && time.trim()) {
+          reminders.push({
+            id: 'rem_' + Date.now(),
+            medName: 'Prescription Dose',
+            time: time.trim(),
+            period: 'Afternoon',
+            active: true,
+            dose: '1 tablet'
+          });
+          Storage.setMedicineReminders(reminders);
+          if (window.SmritiToast) window.SmritiToast.show('New reminder scheduled for ' + time, 'success');
+          render();
+        }
+      });
+    }
+
     // Add / Edit modals
     const addMedBtn = container.querySelector('#btn-add-med-manual');
     if (addMedBtn) {

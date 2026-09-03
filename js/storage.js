@@ -40,16 +40,26 @@ const Storage = {
   getUser() {
     try {
       const raw = localStorage.getItem(this._key('currentUser'));
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+      if (raw) return JSON.parse(raw);
+      if (localStorage.getItem(this._key('loggedOut')) === 'true') return null;
+      const defaultUser = { name: 'Meera Das', phone: '9876543210', role: 'patient' };
+      this.setUser(defaultUser);
+      return defaultUser;
+    } catch { return { name: 'Meera Das', phone: '9876543210', role: 'patient' }; }
   },
 
   setUser(user) {
+    try {
+      localStorage.removeItem(this._key('loggedOut'));
+    } catch {}
     this.set('currentUser', user);
   },
 
   clearUser() {
     this.remove('currentUser');
+    try {
+      localStorage.setItem(this._key('loggedOut'), 'true');
+    } catch {}
   },
 
   isLoggedIn() {

@@ -88,7 +88,7 @@ export default function Home(container) {
                 Thank you for sharing! You checked in as <strong>${todayMood.emoji} ${todayMood.label}</strong> today.
               </span>
               <div style="margin-top: 0.5rem;">
-                <button class="btn btn-secondary btn-sm" onclick="window.location.hash='#/smriti'">
+                <button id="btn-mood-talk" class="btn btn-secondary btn-sm">
                   🤖 Talk to Smriti about your day
                 </button>
               </div>
@@ -119,7 +119,7 @@ export default function Home(container) {
             ${recommendedGame.desc}
           </p>
 
-          <button class="btn btn-primary btn-block" onclick="window.location.hash='${recommendedGame.route}'" style="min-height: 52px; font-size: 1.15rem;">
+          <button id="btn-start-activity" class="btn btn-primary btn-block" style="min-height: 52px; font-size: 1.15rem;">
             ▶ START ACTIVITY
           </button>
         </div>
@@ -160,13 +160,13 @@ export default function Home(container) {
               <p style="color: #115E59; margin: 0; font-size: 0.95rem;">“Would you like to hear an uplifting story or chat?”</p>
             </div>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="window.location.hash='#/smriti'" style="white-space: nowrap; padding: 0.6rem 1.1rem;">
+          <button id="btn-talk-smriti-teaser" class="btn btn-secondary btn-sm" style="white-space: nowrap; padding: 0.6rem 1.1rem;">
             🎤 Talk
           </button>
         </div>
 
         <!-- 5. My Journey Widget -->
-        <div class="card card-elevated mb-md" style="padding: 1.25rem 1.5rem; border-radius: 16px; cursor: pointer;" onclick="window.location.hash='#/journey'">
+        <div id="widget-journey-home" class="card card-elevated mb-md" style="padding: 1.25rem 1.5rem; border-radius: 16px; cursor: pointer;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <span style="font-size: 1.6rem;">${journey.levelIcon}</span>
@@ -190,32 +190,32 @@ export default function Home(container) {
           </h3>
 
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center;">
-            <div class="card card-game" onclick="window.location.hash='#/games'" style="padding: 1rem 0.5rem;">
+            <div class="card card-game home-nav-card" data-route="#/games" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🎮</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: var(--maroon);">Games Hub</div>
             </div>
 
-            <div class="card card-game" onclick="window.location.hash='#/wellness'" style="padding: 1rem 0.5rem;">
+            <div class="card card-game home-nav-card" data-route="#/wellness" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌿</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #065F46;">Wellness</div>
             </div>
 
-            <div class="card card-game" onclick="window.location.hash='#/improvement'" style="padding: 1rem 0.5rem;">
+            <div class="card card-game home-nav-card" data-route="#/improvement" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">📈</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: var(--teal-dark);">Progress</div>
             </div>
 
-            <div class="card card-game" onclick="window.location.hash='#/medicines'" style="padding: 1rem 0.5rem;">
+            <div class="card card-game home-nav-card" data-route="#/medicines" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">💊</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #1E40AF;">Medicines</div>
             </div>
 
-            <div class="card card-game" onclick="window.location.hash='#/journey'" style="padding: 1rem 0.5rem;">
+            <div class="card card-game home-nav-card" data-route="#/journey" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌱</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #78350F;">My Journey</div>
             </div>
 
-            <div class="card card-game" onclick="window.location.hash='#/emergency'" style="padding: 1rem 0.5rem;">
+            <div class="card card-game home-nav-card" data-route="#/emergency" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🆘</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #DC2626;">Emergency</div>
             </div>
@@ -244,6 +244,22 @@ export default function Home(container) {
       });
     });
 
+    // Mood talk button
+    const moodTalkBtn = container.querySelector('#btn-mood-talk');
+    if (moodTalkBtn) {
+      moodTalkBtn.addEventListener('click', () => {
+        window.location.hash = '#/smriti';
+      });
+    }
+
+    // Start activity button
+    const startActBtn = container.querySelector('#btn-start-activity');
+    if (startActBtn) {
+      startActBtn.addEventListener('click', () => {
+        window.location.hash = recommendedGame.route;
+      });
+    }
+
     // Good thought controls
     const newThoughtBtn = container.querySelector('#btn-new-thought');
     if (newThoughtBtn) {
@@ -260,6 +276,30 @@ export default function Home(container) {
         TTS.speak(currentThought.text);
       });
     }
+
+    // Smriti teaser
+    const talkSmritiBtn = container.querySelector('#btn-talk-smriti-teaser');
+    if (talkSmritiBtn) {
+      talkSmritiBtn.addEventListener('click', () => {
+        window.location.hash = '#/smriti';
+      });
+    }
+
+    // Journey widget
+    const journeyWidget = container.querySelector('#widget-journey-home');
+    if (journeyWidget) {
+      journeyWidget.addEventListener('click', () => {
+        window.location.hash = '#/journey';
+      });
+    }
+
+    // Quick navigation cards
+    container.querySelectorAll('.home-nav-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const targetRoute = card.getAttribute('data-route');
+        if (targetRoute) window.location.hash = targetRoute;
+      });
+    });
   }
 
   render();

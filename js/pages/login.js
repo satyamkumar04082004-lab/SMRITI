@@ -33,16 +33,42 @@ export default function Login(container) {
             </div>
           </div>
           <button id="btn-next-1" class="btn" style="width: 100%; min-height: 56px; background: #0D9488; color: white; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer;">Next ➔</button>
+
+          <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; text-align: center;">
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">For Testing & Demo:</p>
+            <button id="btn-demo-login" class="btn" style="width: 100%; min-height: 48px; background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; border-radius: 8px; font-size: 1.05rem; cursor: pointer; font-weight: 700; margin-bottom: 8px;">
+              🚀 Instant Demo Login (Meera Das)
+            </button>
+            <button id="btn-demo-caregiver" class="btn" style="width: 100%; min-height: 48px; background: #E6F4F1; color: #0D9488; border: 1px solid #99F6E4; border-radius: 8px; font-size: 1.05rem; cursor: pointer; font-weight: 700;">
+              👨‍⚕️ Caregiver Hub Demo (Dr. Verma)
+            </button>
+          </div>
         </div>
       `;
 
       container.querySelector('#role-patient').addEventListener('click', () => { role = 'patient'; render(); });
       container.querySelector('#role-caregiver').addEventListener('click', () => { role = 'caregiver'; render(); });
-      container.querySelector('#btn-next-1').addEventListener('click', () => {
+
+      const proceedStep1 = () => {
         name = container.querySelector('#login-name').value.trim();
         if (!name) return alert('Please enter your name');
         step = 2;
         render();
+      };
+
+      container.querySelector('#btn-next-1').addEventListener('click', proceedStep1);
+      container.querySelector('#login-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') proceedStep1();
+      });
+
+      container.querySelector('#btn-demo-login').addEventListener('click', () => {
+        Auth.login({ name: 'Meera Das', phone: '9876543210', role: 'patient' });
+        window.location.hash = '#/home';
+      });
+
+      container.querySelector('#btn-demo-caregiver').addEventListener('click', () => {
+        Auth.login({ name: 'Dr. Verma', phone: '9876543212', role: 'caregiver' });
+        window.location.hash = '#/dashboard';
       });
     } else if (step === 2) {
       container.innerHTML = `

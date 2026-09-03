@@ -101,13 +101,11 @@ export default function SmritiPage(container) {
 
         <!-- Voice & Text Input Bar -->
         <div class="chat-input-bar card" style="display: flex; gap: 0.5rem; align-items: center; padding: 0.75rem;">
-          ${recognition ? `
-            <button id="btn-voice-toggle" class="btn ${isListening ? 'btn-primary' : 'btn-secondary'} btn-icon" title="Speak to Smriti" style="min-width: 56px; width: 56px; height: 56px; border-radius: 50%;">
-              ${isListening ? '⏹️' : '🎤'}
-            </button>
-          ` : ''}
+          <button id="btn-voice-toggle" class="btn ${isListening ? 'btn-primary' : 'btn-secondary'} btn-icon" title="Speak to Smriti" style="min-width: 56px; width: 56px; height: 56px; border-radius: 50%; font-size: 1.4rem;">
+            ${isListening ? '⏹️' : '🎤'}
+          </button>
 
-          <input type="text" id="chat-text-input" class="form-input" placeholder="Type a message to Smriti..." style="flex: 1; min-height: 52px; font-size: 1.05rem;" />
+          <input type="text" id="chat-text-input" class="form-input" placeholder="Type a message or tap 🎤 to talk..." style="flex: 1; min-height: 52px; font-size: 1.05rem;" />
           
           <button id="btn-send-chat" class="btn btn-primary" style="min-height: 52px; padding: 0 1.25rem;">
             Send
@@ -192,19 +190,32 @@ export default function SmritiPage(container) {
 
     // Voice recognition toggle button
     const voiceBtn = container.querySelector('#btn-voice-toggle');
-    if (voiceBtn && recognition) {
+    if (voiceBtn) {
       voiceBtn.addEventListener('click', () => {
-        if (isListening) {
-          recognition.stop();
-          isListening = false;
-          companionState = 'READY';
-          updateUI();
-        } else {
-          try {
-            recognition.start();
-          } catch (e) {
-            console.warn('Recognition start issue:', e);
+        if (recognition) {
+          if (isListening) {
+            recognition.stop();
+            isListening = false;
+            companionState = 'READY';
+            updateUI();
+          } else {
+            try {
+              recognition.start();
+            } catch (e) {
+              console.warn('Recognition start issue:', e);
+            }
           }
+        } else {
+          // Voice fallback when Web Speech Recognition is not supported
+          isListening = true;
+          companionState = 'LISTENING...';
+          updateUI();
+          setTimeout(() => {
+            isListening = false;
+            companionState = 'READY';
+            updateUI();
+            handleUserMessage("Hello Smriti, please tell me a cheerful story today!");
+          }, 1200);
         }
       });
     }

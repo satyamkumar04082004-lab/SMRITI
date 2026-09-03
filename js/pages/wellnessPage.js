@@ -141,12 +141,33 @@ export default function WellnessPage(container) {
 
       <!-- Back / Quick Link Button -->
       <div class="text-center mt-lg">
-        <button class="btn btn-secondary" onclick="window.location.hash='#/home'" style="padding: 0.75rem 2rem;">
+        <button id="btn-wellness-back-home" class="btn btn-secondary" style="padding: 0.75rem 2rem;">
           🏠 Back to Home
         </button>
       </div>
     </div>
   `;
+
+  // Toggle card details
+  container.querySelectorAll('.wellness-toggle-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const card = header.closest('.wellness-card');
+      const details = card.querySelector('.wellness-details');
+      const arrow = card.querySelector('.toggle-arrow');
+      if (details) {
+        const isHidden = details.style.display === 'none';
+        details.style.display = isHidden ? 'block' : 'none';
+        if (arrow) arrow.textContent = isHidden ? '▼' : '▶';
+      }
+    });
+  });
+
+  const backHomeBtn = container.querySelector('#btn-wellness-back-home');
+  if (backHomeBtn) {
+    backHomeBtn.addEventListener('click', () => {
+      window.location.hash = '#/home';
+    });
+  }
 
   return { cleanup() {} };
 }

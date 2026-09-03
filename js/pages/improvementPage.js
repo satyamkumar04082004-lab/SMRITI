@@ -108,15 +108,25 @@ export default function ImprovementPage(container) {
 
       <!-- Action Navigation -->
       <div style="display: flex; gap: 0.75rem; justify-content: center;">
-        <button class="btn btn-primary" onclick="window.location.hash='#/games'" style="flex: 1;">
+        <button id="btn-imp-play-games" class="btn btn-primary" style="flex: 1;">
           🎮 Play More Games
         </button>
-        <button class="btn btn-outline" onclick="window.location.hash='#/journey'" style="flex: 1;">
+        <button id="btn-imp-mind-journey" class="btn btn-outline" style="flex: 1;">
           🌱 Mind Journey
         </button>
       </div>
     </div>
   `;
+
+  const playGamesBtn = container.querySelector('#btn-imp-play-games');
+  if (playGamesBtn) {
+    playGamesBtn.addEventListener('click', () => { window.location.hash = '#/games'; });
+  }
+
+  const mindJourneyBtn = container.querySelector('#btn-imp-mind-journey');
+  if (mindJourneyBtn) {
+    mindJourneyBtn.addEventListener('click', () => { window.location.hash = '#/journey'; });
+  }
 
   return { cleanup() {} };
 }
