@@ -26,6 +26,9 @@ import PersonalisationPage from './pages/personalisationPage.js';
 import SettingsPage from './pages/settingsPage.js';
 import MemoryGalleryPage from './pages/memoryGalleryPage.js';
 import RemindersPage from './pages/remindersPage.js';
+import FeelingLostPage from './pages/feelingLostPage.js';
+import DailyRitualPage from './pages/dailyRitualPage.js';
+import AmbientAudio from './ambientAudio.js';
 
 // --- Game imports ---
 import HornbillMemoryNest from './games/hornbillMemoryNest.js';
@@ -87,6 +90,8 @@ const routes = {
   '#/history': { page: HistoryPage, auth: true, nav: true },
   '#/dashboard': { page: DashboardPage, auth: true, nav: true },
   '#/reminders': { page: RemindersPage, auth: true, nav: true },
+  '#/ritual': { page: DailyRitualPage, auth: true, nav: true },
+  '#/lost': { page: FeelingLostPage, auth: true, nav: false },
   '#/personalisation': { page: PersonalisationPage, auth: true, nav: true },
   '#/settings': { page: SettingsPage, auth: true, nav: true },
 };
@@ -116,6 +121,9 @@ function showQuickHelpModal() {
         <button id="modal-call-family" class="btn btn-primary" style="background: #DC2626; min-height: 52px; font-size: 1.1rem; justify-content: flex-start; padding-left: 1.25rem;">
           🛟 Call Primary: ${emergency.primaryName}
         </button>
+        <button id="modal-feeling-lost" class="btn btn-outline" style="border-color: #0D9488; color: #0F766E; background: #F0FDFA; min-height: 52px; font-size: 1.05rem; justify-content: flex-start; padding-left: 1.25rem; font-weight: 700;">
+          🧭 "I'm Feeling Lost" (Calm & Orient)
+        </button>
         <button id="modal-emergency-hub" class="btn btn-outline" style="border-color: #EF4444; color: #DC2626; min-height: 52px; font-size: 1.05rem; justify-content: flex-start; padding-left: 1.25rem;">
           🚨 Open Emergency Hub
         </button>
@@ -138,6 +146,11 @@ function showQuickHelpModal() {
   quickHelpModalEl.querySelector('#modal-call-family').addEventListener('click', () => {
     quickHelpModalEl.remove();
     window.location.hash = '#/emergency';
+  });
+
+  quickHelpModalEl.querySelector('#modal-feeling-lost').addEventListener('click', () => {
+    quickHelpModalEl.remove();
+    window.location.hash = '#/lost';
   });
 
   quickHelpModalEl.querySelector('#modal-emergency-hub').addEventListener('click', () => {
@@ -341,6 +354,11 @@ function renderHeader() {
         <span class="header-title">${I18n.t('appName')}</span>
       </div>
       <div class="header-actions">
+        <!-- 🎵 Ambient Audio Toggle Button -->
+        <button id="btn-ambient-sound" class="btn-ambient-badge" title="Ambient Nature Sounds" style="background: ${AmbientAudio.isPlaying() ? '#ECFDF5' : '#F8FAFC'}; color: ${AmbientAudio.isPlaying() ? '#047857' : '#64748B'}; border: 1.5px solid ${AmbientAudio.isPlaying() ? '#6EE7B7' : '#CBD5E1'}; border-radius: 999px; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
+          ${AmbientAudio.isPlaying() ? '🌿 Sound: On' : '🎵 Sound'}
+        </button>
+
         <!-- 🎙️ Voice Navigation Button -->
         <button id="btn-voice-nav" class="btn-voice-badge" title="Voice Navigation" style="background: #E6F4F1; color: var(--teal-dark); border: 1.5px solid #99F6E4; border-radius: 999px; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
           🎙️ Voice
@@ -368,6 +386,22 @@ function renderHeader() {
   headerEl.querySelector('#header-lang').addEventListener('click', () => {
     window.location.hash = '#/settings';
   });
+
+  const ambientBtn = headerEl.querySelector('#btn-ambient-sound');
+  if (ambientBtn) {
+    ambientBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      AmbientAudio.toggle();
+      const playing = AmbientAudio.isPlaying();
+      ambientBtn.innerHTML = playing ? '🌿 Sound: On' : '🎵 Sound';
+      ambientBtn.style.background = playing ? '#ECFDF5' : '#F8FAFC';
+      ambientBtn.style.color = playing ? '#047857' : '#64748B';
+      ambientBtn.style.borderColor = playing ? '#6EE7B7' : '#CBD5E1';
+      if (window.SmritiToast) {
+        window.SmritiToast.show(playing ? '🌿 Peaceful nature sounds playing' : '🔇 Nature sounds paused', 'info');
+      }
+    });
+  }
 
   headerEl.querySelector('#btn-voice-nav').addEventListener('click', (e) => {
     e.stopPropagation();

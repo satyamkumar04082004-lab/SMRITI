@@ -1,9 +1,12 @@
-/* ============================================================
-   SMRITI — Wellness & Educational Guide Section
-   Friendly, non-clinical wellness education and mindful habits
-   ============================================================ */
+import TTS from '../tts.js';
 
 export default function WellnessPage(container) {
+  let isBreathing = false;
+  let breathInterval = null;
+  let breathPhase = 'ready'; // ready | inhale | hold | exhale
+  let breathCount = 4;
+  let cycleCount = 0;
+
   const guides = [
     {
       id: 'sleep',
@@ -94,6 +97,27 @@ export default function WellnessPage(container) {
         <p style="color: #047857; font-size: 1.05rem; margin-bottom: 0;">Simple, peaceful daily practices for healthy living and joyful energy.</p>
       </div>
 
+      <!-- Interactive 4-4 Guided Breathing Exercise -->
+      <div class="card card-elevated mb-md text-center" style="background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 2px solid #BFDBFE; padding: 2rem 1.25rem; border-radius: 20px;">
+        <h3 style="color: #1E40AF; font-size: 1.35rem; margin-bottom: 0.25rem;">🫁 4-4 Guided Breathing Exercise</h3>
+        <p style="color: #1E3A8A; font-size: 1rem; margin-bottom: 1.5rem;">Follow the soothing expanding circle to release tension and calm your heartbeat.</p>
+
+        <!-- Animated Breathing Visual Circle -->
+        <div style="display: flex; justify-content: center; align-items: center; margin: 1rem auto 1.5rem auto; height: 180px;">
+          <div id="breath-circle" style="width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #60A5FA, #3B82F6); box-shadow: 0 0 35px rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.8rem; transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);">
+            <span id="breath-timer-text">🕊️</span>
+          </div>
+        </div>
+
+        <div id="breath-instruction" style="font-size: 1.25rem; font-weight: 700; color: #1E40AF; min-height: 36px; margin-bottom: 1rem;">
+          Ready to breathe peacefully?
+        </div>
+
+        <button id="btn-toggle-breath" class="btn btn-primary" style="min-height: 52px; font-size: 1.15rem; font-weight: 700; padding: 0.6rem 2.2rem; background: #2563EB;">
+          ▶ Start Breathing Exercise
+        </button>
+      </div>
+
       <!-- Medical Disclaimer -->
       <div class="safety-notice mb-md" style="background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; border-radius: 12px; padding: 0.9rem 1.1rem;">
         <span class="notice-icon" style="font-size: 1.3rem;">ℹ️</span>
@@ -148,6 +172,78 @@ export default function WellnessPage(container) {
     </div>
   `;
 
+  const btnToggleBreath = container.querySelector('#btn-toggle-breath');
+  const circle = container.querySelector('#breath-circle');
+  const timerText = container.querySelector('#breath-timer-text');
+  const instruction = container.querySelector('#breath-instruction');
+
+  function startBreathing() {
+    isBreathing = true;
+    btnToggleBreath.textContent = '⏹ Stop Exercise';
+    btnToggleBreath.style.background = '#DC2626';
+    cycleCount = 0;
+    runPhase('inhale');
+  }
+
+  function stopBreathing() {
+    isBreathing = false;
+    clearTimeout(breathInterval);
+    btnToggleBreath.textContent = '▶ Start Breathing Exercise';
+    btnToggleBreath.style.background = '#2563EB';
+    if (circle) circle.style.transform = 'scale(1)';
+    if (timerText) timerText.textContent = '🕊️';
+    if (instruction) instruction.textContent = 'Ready to breathe peacefully?';
+  }
+
+  function runPhase(phase) {
+    if (!isBreathing) return;
+    breathPhase = phase;
+    let count = 4;
+
+    if (phase === 'inhale') {
+      if (circle) circle.style.transform = 'scale(1.4)';
+      if (instruction) instruction.textContent = 'Breathe in gently... 🌸';
+      if (timerText) timerText.textContent = '4';
+      if (TTS && TTS.isSupported() && cycleCount === 0) TTS.speak('Breathe in gently');
+    } else {
+      if (circle) circle.style.transform = 'scale(1)';
+      if (instruction) instruction.textContent = 'Breathe out slowly... 🍃';
+      if (timerText) timerText.textContent = '4';
+      if (TTS && TTS.isSupported() && cycleCount === 0) TTS.speak('Breathe out slowly');
+    }
+
+    const countdown = () => {
+      if (!isBreathing) return;
+      count--;
+      if (count > 0) {
+        if (timerText) timerText.textContent = count;
+        breathInterval = setTimeout(countdown, 1000);
+      } else {
+        if (phase === 'inhale') {
+          runPhase('exhale');
+        } else {
+          cycleCount++;
+          if (cycleCount >= 4) {
+            stopBreathing();
+            if (instruction) instruction.textContent = 'Wonderful job! You feel calmer and centered. ✨';
+            if (TTS && TTS.isSupported()) TTS.speak('Wonderful job. Notice how calm and centered you feel.');
+          } else {
+            runPhase('inhale');
+          }
+        }
+      }
+    };
+
+    breathInterval = setTimeout(countdown, 1000);
+  }
+
+  if (btnToggleBreath) {
+    btnToggleBreath.addEventListener('click', () => {
+      if (isBreathing) stopBreathing();
+      else startBreathing();
+    });
+  }
+
   // Toggle card details
   container.querySelectorAll('.wellness-toggle-header').forEach(header => {
     header.addEventListener('click', () => {
@@ -169,5 +265,10 @@ export default function WellnessPage(container) {
     });
   }
 
-  return { cleanup() {} };
+  return {
+    cleanup() {
+      if (breathInterval) clearTimeout(breathInterval);
+      TTS.stop();
+    }
+  };
 }

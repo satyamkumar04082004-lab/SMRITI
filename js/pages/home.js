@@ -97,6 +97,31 @@ export default function Home(container) {
           </div>
         </div>
 
+        <!-- Quick Family Call & Daily Ritual Action Cards -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+          <!-- 📞 One-Tap Family Call Card -->
+          <div id="btn-home-quick-call" class="card card-elevated" style="padding: 1rem 1.1rem; border-radius: 16px; background: #FEF2F2; border: 2px solid #FECACA; cursor: pointer; display: flex; align-items: center; gap: 0.85rem;">
+            <div style="font-size: 2rem; background: #FEE2E2; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              📞
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">Call Loved One</div>
+              <div style="font-weight: 700; color: var(--maroon); font-size: 1.05rem;">${Storage.getEmergencyContacts().primaryName}</div>
+            </div>
+          </div>
+
+          <!-- 🌅 Daily Ritual 3-Step Mode -->
+          <div onclick="window.location.hash='#/ritual'" class="card card-elevated" style="padding: 1rem 1.1rem; border-radius: 16px; background: #F0FDF4; border: 2px solid #BBF7D0; cursor: pointer; display: flex; align-items: center; gap: 0.85rem;">
+            <div style="font-size: 2rem; background: #DCFCE7; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              🌅
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #16A34A; text-transform: uppercase;">Daily Ritual</div>
+              <div style="font-weight: 700; color: #14532D; font-size: 1.05rem;">3-Step Guide ➔</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Gentle Reminder Banner (If pending) -->
         ${nextReminder ? `
           <div class="card card-elevated mb-md" style="padding: 1.25rem 1.4rem; border-radius: 16px; border-left: 6px solid #D97706; background: #FFFBEB;">
@@ -371,6 +396,17 @@ export default function Home(container) {
           TTS.speak('Got it. Reminding you in ten minutes.');
         }
         render();
+      });
+    }
+
+    // Quick Call loved one action
+    const btnQuickCall = container.querySelector('#btn-home-quick-call');
+    if (btnQuickCall) {
+      btnQuickCall.addEventListener('click', () => {
+        const emergency = Storage.getEmergencyContacts();
+        if (window.confirm(`Call ${emergency.primaryName} (${emergency.primaryPhone}) now?`)) {
+          window.location.href = `tel:${emergency.primaryPhone}`;
+        }
       });
     }
 
