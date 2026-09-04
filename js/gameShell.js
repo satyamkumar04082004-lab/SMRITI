@@ -165,7 +165,10 @@ class GameController {
 
     this.container.innerHTML = `
       <div class="container page-enter">
-        <div class="game-header">
+        <div class="game-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <button id="btn-game-leave" class="btn btn-ghost btn-sm" style="font-weight: 700; color: var(--gray-700); font-size: 1rem; padding: 0.35rem 0.75rem; border: 1px solid #E2E8F0; border-radius: 8px;">
+            ← Leave
+          </button>
           <div class="game-score" id="game-score">
             ${I18n.t('score')}: <span id="score-value">0</span>
           </div>
@@ -174,6 +177,33 @@ class GameController {
         <div id="game-area"></div>
       </div>
     `;
+
+    // Exit confirmation on Leave button
+    this.container.querySelector('#btn-game-leave').addEventListener('click', () => {
+      this._showExitConfirmation(() => {
+        this.cleanup();
+        window.location.hash = '#/games';
+      });
+    });
+
+    // Handle back button interception during active play
+    try {
+      history.pushState({ inGame: true }, '');
+      this._popstateHandler = () => {
+        if (this.phase === 'play') {
+          history.pushState({ inGame: true }, '');
+          this._showExitConfirmation(() => {
+            if (this._popstateHandler) {
+              window.removeEventListener('popstate', this._popstateHandler);
+              this._popstateHandler = null;
+            }
+            this.cleanup();
+            window.location.hash = '#/games';
+          });
+        }
+      };
+      window.addEventListener('popstate', this._popstateHandler);
+    } catch {}
 
     // Create timer based on user selection
     if (this.timeLimit > 0) {
@@ -204,6 +234,100 @@ class GameController {
     if (this.config.onStart) {
       this.config.onStart(this.difficulty, gameArea, this);
     }
+  }
+
+  _showExitConfirmation(onConfirm) {
+    const existing = document.querySelector('.game-exit-confirm-overlay');
+    if (existing) existing.remove();
+
+    if (this.timer && typeof this.timer.pause === 'function') {
+      this.timer.pause();
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay game-exit-confirm-overlay';
+    modal.innerHTML = `
+      <div class="modal-content text-center" style="max-width: 400px; padding: 2rem 1.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+        <div style="font-size: 3.2rem; margin-bottom: 0.5rem;">🚪🤔</div>
+        <h3 style="color: var(--maroon); font-size: 1.45rem; margin-bottom: 0.4rem;">Do you want to leave the game?</h3>
+        <p style="color: var(--gray-600); font-size: 1.05rem; margin-bottom: 1.5rem; line-height: 1.4;">
+          Your current game progress will be saved.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <button id="btn-exit-cancel" class="btn btn-primary" style="min-height: 52px; font-size: 1.15rem; font-weight: 700; justify-content: center; background: #059669;">
+            No, Keep Playing 😊
+          </button>
+          <button id="btn-exit-confirm" class="btn btn-outline" style="min-height: 52px; font-size: 1.05rem; font-weight: 600; justify-content: center; border-color: #CBD5E1; color: var(--gray-700);">
+            Yes, Leave Game 🚪
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('#btn-exit-cancel').addEventListener('click', () => {
+      modal.remove();
+      if (this.timer && typeof this.timer.resume === 'function') {
+        this.timer.resume();
+      }
+    });
+
+    modal.querySelector('#btn-exit-confirm').addEventListener('click', () => {
+      modal.remove();
+      onConfirm();
+    });
+  }
+
+  _triggerGentleConfetti() {
+    const confettiBox = document.createElement('div');
+    confettiBox.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; overflow: hidden;';
+    document.body.appendChild(confettiBox);
+
+    const colors = ['#FBCFE8', '#FED7AA', '#FEF08A', '#A7F3D0', '#BAE6FD', '#DDD6FE'];
+    const count = 28;
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      const size = Math.floor(Math.random() * 8) + 10;
+      const left = Math.random() * 100;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const isRound = Math.random() > 0.4;
+      const duration = Math.random() * 1.5 + 2.5;
+      const delay = Math.random() * 0.6;
+
+      piece.style.cssText = `
+        position: absolute;
+        top: -20px;
+        left: ${left}vw;
+        width: ${size}px;
+        height: ${size}px;
+        background: ${color};
+        border-radius: ${isRound ? '50%' : '4px'};
+        opacity: 0.9;
+        transform: rotate(${Math.random() * 360}deg);
+        animation: gentleDrift ${duration}s ease-out ${delay}s forwards;
+      `;
+      confettiBox.appendChild(piece);
+    }
+
+    // Add keyframe style if not already present
+    if (!document.getElementById('confetti-drift-style')) {
+      const style = document.createElement('style');
+      style.id = 'confetti-drift-style';
+      style.textContent = `
+        @keyframes gentleDrift {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          80% { opacity: 0.8; }
+          100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    setTimeout(() => {
+      confettiBox.remove();
+    }, 4000);
   }
 
   /**
@@ -288,13 +412,16 @@ class GameController {
 
     this.phase = 'result';
 
-    // Voice feedback on completion
+    // 1. Trigger Gentle, Senior-Friendly Confetti
+    this._triggerGentleConfetti();
+
+    // 2. Short Personalized Encouraging Voice Message
     try {
-      const vSettings = Storage.getVoiceSettings();
-      if (vSettings.voiceGuidanceEnabled && vSettings.voiceFeedback) {
-        const feedbackSentence = `${title}. You completed ${I18n.t(this.config.titleKey)} with ${accuracy} percent accuracy and earned ${coinCalc.total} coins. Wonderful job!`;
-        TTS.speak(feedbackSentence);
-      }
+      const user = Storage.getUser();
+      const prefs = Storage.getPreferences();
+      const userName = prefs.preferredName || (user ? user.name.split(' ')[0] : 'Friend');
+      const feedbackSentence = `Well done ${userName}! You did great today.`;
+      TTS.speak(feedbackSentence);
     } catch {}
 
     this.container.innerHTML = `
@@ -351,6 +478,13 @@ class GameController {
    * Cleanup resources
    */
   cleanup() {
+    if (this._popstateHandler) {
+      window.removeEventListener('popstate', this._popstateHandler);
+      this._popstateHandler = null;
+    }
+    const modal = document.querySelector('.game-exit-confirm-overlay');
+    if (modal) modal.remove();
+
     if (this.timer) {
       this.timer.destroy();
       this.timer = null;

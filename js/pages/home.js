@@ -70,6 +70,9 @@ export default function Home(container) {
   function render() {
     const recommended = AIService.recommendActivity(todayMood?.mood);
     const adaptive = todayMood ? getMoodAdaptive(todayMood.mood) : null;
+    const reminders = Storage.getReminders();
+    const activeReminders = reminders.filter(r => r.active && !r.completedToday);
+    const nextReminder = activeReminders[0];
 
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 680px; padding-bottom: 2.5rem;">
@@ -93,6 +96,38 @@ export default function Home(container) {
             </div>
           </div>
         </div>
+
+        <!-- Gentle Reminder Banner (If pending) -->
+        ${nextReminder ? `
+          <div class="card card-elevated mb-md" style="padding: 1.25rem 1.4rem; border-radius: 16px; border-left: 6px solid #D97706; background: #FFFBEB;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #B45309; text-transform: uppercase; letter-spacing: 0.5px;">⏰ Next Gentle Reminder</span>
+              <button class="btn btn-ghost btn-sm" onclick="window.location.hash='#/reminders'" style="color: #B45309; font-size: 0.95rem; font-weight: 600; padding: 0;">View All Reminders ➔</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem;">
+              <div style="font-size: 2.2rem; background: #FEF3C7; width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                ${nextReminder.icon || '⏰'}
+              </div>
+              <div>
+                <h4 style="margin: 0; color: var(--maroon); font-size: 1.2rem;">${nextReminder.title}</h4>
+                <p style="margin: 0.2rem 0 0 0; color: var(--gray-700); font-size: 0.95rem;">
+                  ${nextReminder.notes} • <strong style="color: #B45309;">${nextReminder.time} (${nextReminder.period})</strong>
+                </p>
+              </div>
+            </div>
+
+            <!-- Very Easy To Tap Action Buttons -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <button class="btn btn-secondary btn-home-rem-done" data-id="${nextReminder.id}" style="min-height: 52px; font-size: 1.05rem; font-weight: 700; background: #059669; justify-content: center;">
+                ✅ Mark Done
+              </button>
+              <button class="btn btn-outline btn-home-rem-snooze" data-id="${nextReminder.id}" style="min-height: 52px; font-size: 1.05rem; font-weight: 700; border-color: #D97706; color: #B45309; background: #FFFFFF; justify-content: center;">
+                ⏰ Remind in 10 mins
+              </button>
+            </div>
+          </div>
+        ` : ''}
 
         <!-- 1. Daily Mood Section with Meaningful Adaptive Responses -->
         <div class="card card-elevated mb-md" style="padding: 1.25rem 1.5rem; border-radius: 16px;">
@@ -123,7 +158,7 @@ export default function Home(container) {
             </button>
           </div>
 
-          <!-- Meaningful Adaptive Response Card -->
+          <!-- Meaningful Adaptive Response Card (Max 3 buttons) -->
           ${adaptive ? `
             <div class="mood-adaptive-card" style="background: ${adaptive.bg}; border: 2px solid ${adaptive.border}; border-radius: 14px; padding: 1rem 1.15rem; margin-top: 0.85rem;">
               <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
@@ -300,9 +335,44 @@ export default function Home(container) {
         if (window.SmritiToast) {
           window.SmritiToast.show(`Mood logged: ${emoji} ${label}`, 'success');
         }
+
+        // Voice comforting feedback if enabled
+        const voice = Storage.getVoiceSettings();
+        if (voice && voice.voiceGuidanceEnabled !== false && (mood === 'low' || mood === 'worried')) {
+          TTS.speak(`I am right here with you ${displayName}. Take a slow, peaceful breath.`);
+        }
+
         render();
       });
     });
+
+    // Home reminder action buttons
+    const btnDone = container.querySelector('.btn-home-rem-done');
+    if (btnDone) {
+      btnDone.addEventListener('click', () => {
+        const id = btnDone.getAttribute('data-id');
+        Storage.markReminderDone(id);
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Wonderful! Reminder completed for today. 🌿', 'success');
+        }
+        render();
+      });
+    }
+
+    const btnSnooze = container.querySelector('.btn-home-rem-snooze');
+    if (btnSnooze) {
+      btnSnooze.addEventListener('click', () => {
+        const id = btnSnooze.getAttribute('data-id');
+        Storage.snoozeReminder(id, 10);
+        if (window.SmritiToast) {
+          window.SmritiToast.show('We will gently remind you in 10 minutes! 🕊️', 'info');
+        }
+        if (TTS && TTS.isSupported()) {
+          TTS.speak('Got it. Reminding you in ten minutes.');
+        }
+        render();
+      });
+    }
 
     // Adaptive mood action buttons
     container.querySelectorAll('.btn-mood-action').forEach(btn => {

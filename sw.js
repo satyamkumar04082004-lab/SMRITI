@@ -1,8 +1,8 @@
-﻿/* ============================================================
+/* ============================================================
    SMRITI — Service Worker for Offline Resilience & Low Data Mode
    ============================================================ */
 
-const CACHE_NAME = 'smriti-v1';
+const CACHE_NAME = 'smriti-v2';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -15,14 +15,15 @@ const PRECACHE_URLS = [
   './js/auth.js',
   './js/i18n.js',
   './js/tts.js',
-  './js/stt.js',
+  './js/coins.js',
+  './js/timer.js',
   './js/aiService.js',
   './js/gameShell.js',
-  './js/ocrService.js',
   './js/leaderboard.js',
   './js/pages/home.js',
   './js/pages/login.js',
   './js/pages/gamesHub.js',
+  './js/pages/smritiPage.js',
   './js/pages/historyPage.js',
   './js/pages/leaderboardPage.js',
   './js/pages/dashboardPage.js',
@@ -30,9 +31,11 @@ const PRECACHE_URLS = [
   './js/pages/settingsPage.js',
   './js/pages/memoryGalleryPage.js',
   './js/pages/medicinesPage.js',
+  './js/pages/remindersPage.js',
   './js/pages/emergencyPage.js',
   './js/pages/improvementPage.js',
-  './js/pages/wellnessHub.js',
+  './js/pages/wellnessPage.js',
+  './js/pages/journeyPage.js',
   './js/games/hornbillMemoryNest.js',
   './js/games/memoryMoments.js',
   './js/games/familiarFaces.js',

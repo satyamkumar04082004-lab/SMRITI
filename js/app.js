@@ -7,6 +7,7 @@ import Storage from './storage.js';
 import I18n from './i18n.js';
 import Auth from './auth.js';
 import Coins from './coins.js';
+import TTS from './tts.js';
 
 // --- Page imports ---
 import LoginPage from './pages/login.js';
@@ -24,6 +25,7 @@ import DashboardPage from './pages/dashboardPage.js';
 import PersonalisationPage from './pages/personalisationPage.js';
 import SettingsPage from './pages/settingsPage.js';
 import MemoryGalleryPage from './pages/memoryGalleryPage.js';
+import RemindersPage from './pages/remindersPage.js';
 
 // --- Game imports ---
 import HornbillMemoryNest from './games/hornbillMemoryNest.js';
@@ -84,6 +86,7 @@ const routes = {
   '#/leaderboard': { page: LeaderboardPage, auth: true, nav: true },
   '#/history': { page: HistoryPage, auth: true, nav: true },
   '#/dashboard': { page: DashboardPage, auth: true, nav: true },
+  '#/reminders': { page: RemindersPage, auth: true, nav: true },
   '#/personalisation': { page: PersonalisationPage, auth: true, nav: true },
   '#/settings': { page: SettingsPage, auth: true, nav: true },
 };
@@ -105,7 +108,7 @@ function showQuickHelpModal() {
   quickHelpModalEl.className = 'modal-overlay';
   quickHelpModalEl.innerHTML = `
     <div class="modal-content text-center" style="max-width: 380px; padding: 1.75rem 1.25rem;">
-      <div style="font-size: 3rem; margin-bottom: 0.25rem;">🆘 🛟</div>
+      <div style="font-size: 3.2rem; margin-bottom: 0.25rem;">🛟</div>
       <h3 style="color: var(--maroon); font-size: 1.4rem; margin-bottom: 0.25rem;">Emergency & Quick Help</h3>
       <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">How can we assist you right now?</p>
 
@@ -165,20 +168,27 @@ function showVoiceNavigationModal() {
   const modal = document.createElement('div');
   modal.className = 'modal-overlay voice-nav-modal-overlay';
   modal.innerHTML = `
-    <div class="modal-content text-center" style="max-width: 420px; padding: 1.75rem 1.25rem;">
-      <div style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: floatSlow 2s infinite ease-in-out;">🎙️✨</div>
+    <div class="modal-content text-center" style="max-width: 440px; padding: 1.75rem 1.25rem;">
+      <div id="voice-nav-icon" style="font-size: 3.5rem; margin-bottom: 0.5rem; transition: transform 0.3s ease;">🎙️✨</div>
       <h3 style="color: var(--maroon); font-size: 1.4rem; margin-bottom: 0.35rem;">Voice Navigation</h3>
-      <p style="color: var(--gray-700); font-size: 1.05rem; margin-bottom: 1.25rem;" id="voice-nav-status">
-        Listening... Say: <strong>Home, Games, Memories, Wellness, Progress, Medicines, or Help</strong>
+      <p style="color: var(--gray-700); font-size: 1.05rem; min-height: 48px; margin-bottom: 1.25rem; line-height: 1.4;" id="voice-nav-status">
+        Listening... Say: <strong>Home, Games, Memories, Wellness, Progress, Medicines, Reminders, or Help</strong>
       </p>
 
-      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem;">
+        <button id="btn-voice-retry" class="btn btn-secondary btn-sm" style="font-weight: 600; padding: 0.5rem 1rem;">
+          🎙️ Speak Again
+        </button>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem;">
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/home">🏠 Home</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/games">🎮 Games</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/memories">🖼️ Memories</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/wellness">🌿 Wellness</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/improvement">📈 Progress</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/medicines">💊 Medicines</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/reminders">⏰ Reminders</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/emergency" style="border-color: #EF4444; color: #DC2626;">🛟 Help</button>
       </div>
 
@@ -191,18 +201,67 @@ function showVoiceNavigationModal() {
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec = null;
-  if (SpeechRecognition) {
+
+  function startListening() {
+    const statusEl = modal.querySelector('#voice-nav-status');
+    const iconEl = modal.querySelector('#voice-nav-icon');
+
+    if (!SpeechRecognition) {
+      if (statusEl) {
+        statusEl.innerHTML = 'Speech recognition is not supported in this browser. Please tap any destination below:';
+      }
+      return;
+    }
+
     try {
+      if (rec) {
+        try { rec.stop(); } catch {}
+      }
       rec = new SpeechRecognition();
       rec.continuous = false;
       rec.interimResults = false;
-      rec.lang = I18n.lang === 'hi' ? 'hi-IN' : 'en-IN';
+
+      // Select speech recognition language matching UI
+      const lang = I18n.lang;
+      rec.lang = lang === 'hi' ? 'hi-IN' : lang === 'bn' ? 'bn-IN' : 'en-IN';
+
+      if (statusEl) {
+        statusEl.innerHTML = 'Listening now... <em>Speak your destination clearly</em>';
+      }
+      if (iconEl) {
+        iconEl.style.transform = 'scale(1.2)';
+      }
+
       rec.onresult = (event) => {
         const text = (event.results[0][0].transcript || '').toLowerCase();
         handleVoiceDestination(text);
       };
+
+      rec.onerror = (e) => {
+        console.warn('Speech recognition warning:', e.error);
+        if (iconEl) iconEl.style.transform = 'scale(1)';
+        if (statusEl) {
+          if (e.error === 'not-allowed') {
+            statusEl.innerHTML = 'Microphone permission needed. Please tap <strong>Speak Again</strong> or select a destination below.';
+          } else if (e.error === 'no-speech') {
+            statusEl.innerHTML = 'No speech heard. Tap <strong>"🎙️ Speak Again"</strong> or choose below:';
+          } else {
+            statusEl.innerHTML = 'Could not catch that clearly. Tap <strong>"🎙️ Speak Again"</strong> or choose below:';
+          }
+        }
+      };
+
+      rec.onend = () => {
+        if (iconEl) iconEl.style.transform = 'scale(1)';
+      };
+
       rec.start();
-    } catch {}
+    } catch (err) {
+      console.warn('SpeechRecognition start failed:', err);
+      if (statusEl) {
+        statusEl.innerHTML = 'Tap <strong>"🎙️ Speak Again"</strong> or choose any destination below:';
+      }
+    }
   }
 
   function handleVoiceDestination(text) {
@@ -210,25 +269,45 @@ function showVoiceNavigationModal() {
     let target = null;
     let name = '';
 
-    if (text.includes('game') || text.includes('khel')) { target = '#/games'; name = 'Games Hub'; }
-    else if (text.includes('memory') || text.includes('memories') || text.includes('story') || text.includes('yaad')) { target = '#/memories'; name = 'Life Story Memories'; }
-    else if (text.includes('wellness') || text.includes('breath') || text.includes('health') || text.includes('swasth')) { target = '#/wellness'; name = 'Wellness Guide'; }
-    else if (text.includes('progress') || text.includes('score') || text.includes('improvement')) { target = '#/improvement'; name = 'Mind Progress'; }
-    else if (text.includes('medicine') || text.includes('dawa') || text.includes('pill')) { target = '#/medicines'; name = 'Medicines'; }
-    else if (text.includes('emergency') || text.includes('help') || text.includes('sos') || text.includes('madad')) { target = '#/emergency'; name = 'Emergency Help'; }
-    else if (text.includes('home') || text.includes('ghar')) { target = '#/home'; name = 'Home'; }
+    if (text.includes('game') || text.includes('khel') || text.includes('khela') || text.includes('play')) {
+      target = '#/games'; name = 'Games Hub';
+    } else if (text.includes('memory') || text.includes('memories') || text.includes('story') || text.includes('yaad') || text.includes('smriti') || text.includes('chhobi')) {
+      target = '#/memories'; name = 'Life Story Memories';
+    } else if (text.includes('wellness') || text.includes('breath') || text.includes('health') || text.includes('swasth') || text.includes('shanti') || text.includes('saans')) {
+      target = '#/wellness'; name = 'Wellness & Calm';
+    } else if (text.includes('progress') || text.includes('score') || text.includes('improvement') || text.includes('garden') || text.includes('streak')) {
+      target = '#/improvement'; name = 'Mind Progress Garden';
+    } else if (text.includes('medicine') || text.includes('medicines') || text.includes('dawa') || text.includes('oshudh') || text.includes('pill')) {
+      target = '#/medicines'; name = 'Medicines';
+    } else if (text.includes('reminder') || text.includes('reminders') || text.includes('alarm') || text.includes('samay') || text.includes('somoy')) {
+      target = '#/reminders'; name = 'Gentle Reminders';
+    } else if (text.includes('emergency') || text.includes('help') || text.includes('sos') || text.includes('madad') || text.includes('shahajjo') || text.includes('doctor')) {
+      target = '#/emergency'; name = 'Emergency Help';
+    } else if (text.includes('home') || text.includes('ghar') || text.includes('bari') || text.includes('start')) {
+      target = '#/home'; name = 'Home';
+    }
 
     if (target) {
-      if (statusEl) statusEl.textContent = `Navigating to ${name}...`;
-      TTS.speak(`Opening ${name}`);
+      if (statusEl) statusEl.innerHTML = `Navigating to <strong>${name}</strong>...`;
+      if (TTS && TTS.isSupported()) {
+        TTS.speak(`Opening ${name}`);
+      }
       setTimeout(() => {
         modal.remove();
+        if (rec) { try { rec.stop(); } catch {} }
         window.location.hash = target;
-      }, 700);
+      }, 600);
     } else {
-      if (statusEl) statusEl.textContent = `Heard "${text}". Please tap a destination or try again.`;
+      if (statusEl) {
+        statusEl.innerHTML = `Heard "<em>${text}</em>". Tap <strong>Speak Again</strong> or choose below:`;
+      }
     }
   }
+
+  // Bind Buttons
+  modal.querySelector('#btn-voice-retry').addEventListener('click', () => {
+    startListening();
+  });
 
   modal.querySelectorAll('.btn-voice-dest').forEach(b => {
     b.addEventListener('click', () => {
@@ -243,6 +322,8 @@ function showVoiceNavigationModal() {
     if (rec) { try { rec.stop(); } catch {} }
     modal.remove();
   });
+
+  startListening();
 }
 
 // --- Header ---
@@ -265,9 +346,9 @@ function renderHeader() {
           🎙️ Voice
         </button>
 
-        <!-- 🆘 Persistent Quick Help Button -->
-        <button id="btn-quick-sos" class="btn-sos-badge" title="Quick Help">
-          🆘 Help
+        <!-- 🛟 Persistent Quick Help Button -->
+        <button id="btn-quick-sos" class="btn-sos-badge" title="Emergency Help">
+          🛟 SOS
         </button>
 
         <!-- Language Badge -->

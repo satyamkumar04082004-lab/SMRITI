@@ -326,31 +326,82 @@ const Storage = {
     return meds;
   },
 
-  getMedicineReminders() {
-    return this.getUserData('medicineReminders', [
-      { id: 'rem1', medName: 'Pantoprazole (40mg)', time: '08:00 AM', period: 'Morning', active: true, dose: '1 tablet before breakfast' },
-      { id: 'rem2', medName: 'Multivitamin', time: '01:30 PM', period: 'Afternoon', active: true, dose: '1 capsule after lunch' },
-      { id: 'rem3', medName: 'Calcium + Vit D3', time: '08:30 PM', period: 'Night', active: true, dose: '1 tablet after dinner' }
+  // --- Generic Daily Reminders (Meds, Hydration, Walks, Calls) ---
+  getReminders() {
+    return this.getUserData('dailyReminders', [
+      { id: 'rem_1', title: 'Morning Blood Pressure Medicine', category: 'medication', icon: '💊', time: '08:30 AM', period: 'Morning', notes: '1 tablet with a warm glass of water', active: true, completedToday: false },
+      { id: 'rem_2', title: 'Drink Warm Water & Stretch', category: 'hydration', icon: '💧', time: '09:30 AM', period: 'Morning', notes: '1 full glass of warm water', active: true, completedToday: false },
+      { id: 'rem_3', title: 'Gentle Sunlight Garden Walk', category: 'activity', icon: '🚶', time: '10:30 AM', period: 'Morning', notes: 'Breathe fresh air in the sunlight', active: true, completedToday: false },
+      { id: 'rem_4', title: 'Afternoon Water & Tea', category: 'hydration', icon: '🍵', time: '02:00 PM', period: 'Afternoon', notes: 'Rest and enjoy warm ginger tea', active: true, completedToday: false },
+      { id: 'rem_5', title: 'Call Family / Grandchildren', category: 'call', icon: '📞', time: '05:30 PM', period: 'Evening', notes: 'Call Raj or Riya to hear their voices', active: true, completedToday: false },
+      { id: 'rem_6', title: 'Night Calcium & Relaxing Rest', category: 'medication', icon: '🌙', time: '08:45 PM', period: 'Night', notes: '1 tablet after dinner with warm milk', active: true, completedToday: false }
     ]);
   },
 
+  setReminders(reminders) {
+    this.setUserData('dailyReminders', reminders);
+  },
+
+  addReminder(reminder) {
+    const list = this.getReminders();
+    reminder.id = reminder.id || 'rem_' + Date.now();
+    reminder.active = reminder.active !== false;
+    reminder.completedToday = false;
+    list.push(reminder);
+    this.setReminders(list);
+    return list;
+  },
+
+  updateReminder(id, patch) {
+    const list = this.getReminders().map(r => r.id === id ? { ...r, ...patch } : r);
+    this.setReminders(list);
+    return list;
+  },
+
+  deleteReminder(id) {
+    const list = this.getReminders().filter(r => r.id !== id);
+    this.setReminders(list);
+    return list;
+  },
+
+  toggleReminder(id) {
+    const list = this.getReminders().map(r => r.id === id ? { ...r, active: !r.active } : r);
+    this.setReminders(list);
+    return list;
+  },
+
+  markReminderDone(id) {
+    const list = this.getReminders().map(r => r.id === id ? { ...r, completedToday: true, snoozedUntil: null } : r);
+    this.setReminders(list);
+    return list;
+  },
+
+  snoozeReminder(id, minutes = 10) {
+    const snoozeTime = Date.now() + minutes * 60 * 1000;
+    const list = this.getReminders().map(r => r.id === id ? { ...r, snoozedUntil: snoozeTime } : r);
+    this.setReminders(list);
+    return list;
+  },
+
+  // Backward compatibility aliases
+  getMedicineReminders() {
+    return this.getReminders().map(r => ({ id: r.id, medName: r.title, time: r.time, period: r.period, active: r.active, dose: r.notes }));
+  },
   setMedicineReminders(reminders) {
     this.setUserData('medicineReminders', reminders);
   },
-
   addMedicineReminder(reminder) {
-    const list = this.getMedicineReminders();
-    reminder.id = reminder.id || 'rem_' + Date.now();
-    reminder.active = reminder.active !== false;
-    list.push(reminder);
-    this.setMedicineReminders(list);
-    return list;
+    return this.addReminder({
+      title: reminder.medName || reminder.title,
+      time: reminder.time,
+      period: reminder.period || 'Morning',
+      notes: reminder.dose || reminder.notes || '',
+      category: 'medication',
+      icon: '💊'
+    });
   },
-
   deleteMedicineReminder(id) {
-    const list = this.getMedicineReminders().filter(r => r.id !== id);
-    this.setMedicineReminders(list);
-    return list;
+    return this.deleteReminder(id);
   },
 
   // --- AI & Voice Settings ---
