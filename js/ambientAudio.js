@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    SMRITI — Ambient Nature Sounds & Soothing Audio
    Web Audio API synthesized calm stream & gentle chimes
    100% offline, zero network data usage
@@ -17,27 +17,34 @@ const AmbientAudio = {
         this._ctx = new AudioContext();
       }
     }
+    if (this._ctx && this._ctx.state === 'suspended') {
+      this._ctx.resume();
+    }
   },
 
   isPlaying() {
     return this._isPlaying;
   },
 
-  start() {
+  async start() {
     this.init();
     if (!this._ctx) return false;
 
-    if (this._ctx.state === 'suspended') {
-      this._ctx.resume();
+    try {
+      if (this._ctx.state === 'suspended') {
+        await this._ctx.resume();
+      }
+    } catch (e) {
+      console.warn('AudioContext resume failed:', e);
     }
 
     if (this._isPlaying) return true;
 
     try {
-      // Master Gain
+      // Master Gain - clear, audible volume for elderly
       this._gainNode = this._ctx.createGain();
       this._gainNode.gain.setValueAtTime(0.01, this._ctx.currentTime);
-      this._gainNode.gain.exponentialRampToValueAtTime(0.12, this._ctx.currentTime + 2);
+      this._gainNode.gain.linearRampToValueAtTime(0.28, this._ctx.currentTime + 1.2);
       this._gainNode.connect(this._ctx.destination);
 
       // Pink noise buffer for soft flowing stream / breeze
@@ -71,11 +78,12 @@ const AmbientAudio = {
       whiteNoise.start(0);
       this._whiteNoise = whiteNoise;
 
-      // Periodic gentle musical chime (pentatonic scale for peaceful relaxation)
-      const pentatonic = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C D E G A C
+      // Periodic gentle musical chime & birdsong chirp
+      const pentatonic = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33]; // C D E G A C D
       const playChime = () => {
-        if (!this._isPlaying) return;
+        if (!this._isPlaying || !this._ctx) return;
         try {
+          // 1. Play musical chime
           const freq = pentatonic[Math.floor(Math.random() * pentatonic.length)];
           const osc = this._ctx.createOscillator();
           const oscGain = this._ctx.createGain();
@@ -84,7 +92,7 @@ const AmbientAudio = {
           osc.frequency.setValueAtTime(freq, this._ctx.currentTime);
 
           oscGain.gain.setValueAtTime(0, this._ctx.currentTime);
-          oscGain.gain.linearRampToValueAtTime(0.03, this._ctx.currentTime + 0.3);
+          oscGain.gain.linearRampToValueAtTime(0.08, this._ctx.currentTime + 0.2);
           oscGain.gain.exponentialRampToValueAtTime(0.0001, this._ctx.currentTime + 3.5);
 
           osc.connect(oscGain);
@@ -92,13 +100,38 @@ const AmbientAudio = {
 
           osc.start();
           osc.stop(this._ctx.currentTime + 3.6);
+
+          // 2. Occasional peaceful birdsong tweet (50% chance)
+          if (Math.random() > 0.45) {
+            setTimeout(() => {
+              if (!this._isPlaying || !this._ctx) return;
+              try {
+                const birdOsc = this._ctx.createOscillator();
+                const birdGain = this._ctx.createGain();
+                birdOsc.type = 'sine';
+                const baseF = 2000 + Math.random() * 800;
+                birdOsc.frequency.setValueAtTime(baseF, this._ctx.currentTime);
+                birdOsc.frequency.exponentialRampToValueAtTime(baseF + 500, this._ctx.currentTime + 0.08);
+                birdOsc.frequency.exponentialRampToValueAtTime(baseF, this._ctx.currentTime + 0.16);
+
+                birdGain.gain.setValueAtTime(0.0001, this._ctx.currentTime);
+                birdGain.gain.linearRampToValueAtTime(0.04, this._ctx.currentTime + 0.04);
+                birdGain.gain.exponentialRampToValueAtTime(0.0001, this._ctx.currentTime + 0.2);
+
+                birdOsc.connect(birdGain);
+                birdGain.connect(this._gainNode);
+                birdOsc.start();
+                birdOsc.stop(this._ctx.currentTime + 0.22);
+              } catch {}
+            }, 600);
+          }
         } catch {}
 
-        const nextTime = Math.random() * 3000 + 2500;
+        const nextTime = Math.random() * 2500 + 2000;
         this._timer = setTimeout(playChime, nextTime);
       };
 
-      this._timer = setTimeout(playChime, 1200);
+      this._timer = setTimeout(playChime, 800);
       this._isPlaying = true;
 
       // Dispatch event for UI buttons

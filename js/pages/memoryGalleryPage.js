@@ -36,11 +36,16 @@ export default function MemoryGalleryPage(container) {
         
         <!-- Header & View Mode Switcher -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-          <div>
-            <h2 style="color: var(--maroon); margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
-              <span>🖼️</span> Life Story & Memories
-            </h2>
-            <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.95rem;">Treasured moments with your loved ones</p>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <button id="btn-close-gallery-top" class="btn btn-outline btn-sm" style="border-radius: 12px; font-weight: 700; color: var(--maroon); border-color: var(--maroon); padding: 0.4rem 0.85rem; font-size: 1rem; display: flex; align-items: center; gap: 0.35rem;">
+              ⬅ Back
+            </button>
+            <div>
+              <h2 style="color: var(--maroon); margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>🖼️</span> Life Story & Memories
+              </h2>
+              <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.95rem;">Treasured moments with your loved ones</p>
+            </div>
           </div>
 
           <div style="display: flex; gap: 0.5rem;">
@@ -81,6 +86,16 @@ export default function MemoryGalleryPage(container) {
             <p style="font-size: 1.2rem; line-height: 1.6; color: var(--gray-700); margin-bottom: 1.25rem; background: #FFF8EE; padding: 1rem 1.25rem; border-radius: 12px; border-left: 5px solid var(--gold);">
               ${current.story}
             </p>
+
+            <!-- Personalized Reminiscence Question (if present or auto-generated) -->
+            <div style="background: linear-gradient(135deg, #FEF3C7, #FFFBEB); border: 1.5px solid #FDE68A; border-radius: 14px; padding: 1rem 1.15rem; margin-bottom: 1.25rem;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: #92400E; text-transform: uppercase; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
+                <span>💭</span> Personalized Memory Question
+              </div>
+              <p style="margin: 0; color: #78350F; font-size: 1.05rem; font-weight: 600; line-height: 1.45;">
+                “${current.question || `Do you remember what made ${current.title} so memorable with your family?`}”
+              </p>
+            </div>
 
             <!-- Spoken Voice Note Button -->
             <div style="text-align: center; margin-bottom: 1.5rem;">
@@ -125,43 +140,67 @@ export default function MemoryGalleryPage(container) {
         <!-- Add Memory Modal for Family / Caregivers -->
         ${showAddModal ? `
           <div class="modal-overlay">
-            <div class="modal-content" style="max-width: 480px; padding: 1.75rem; border-radius: 18px;">
+            <div class="modal-content" style="max-width: 500px; padding: 1.75rem; border-radius: 18px; max-height: 90vh; overflow-y: auto;">
               <h3 style="color: var(--maroon); margin-top: 0; font-size: 1.4rem;">📷 Add Precious Family Memory</h3>
-              <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">Family members can upload moments for the patient to cherish and listen to.</p>
+              <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">Upload a photo from your device or paste an image link for your loved one to cherish and listen to.</p>
 
               <form id="form-add-memory" style="display: flex; flex-direction: column; gap: 0.85rem;">
                 <div class="form-group">
-                  <label class="form-label">Memory Title *</label>
-                  <input type="text" id="new-mem-title" class="form-input" placeholder="e.g. Grandson Aryan's Birthday" required />
+                  <label class="form-label" style="font-weight: 600;">Memory Title *</label>
+                  <input type="text" id="new-mem-title" class="form-input" placeholder="e.g. Grandson Aryan's 5th Birthday" required />
+                </div>
+
+                <!-- Image Upload (Local File + URL Option) -->
+                <div class="form-group" style="background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1.5px dashed #CBD5E1;">
+                  <label class="form-label" style="font-weight: 700; color: var(--teal-dark); margin-bottom: 6px;">
+                    🖼️ Upload Photo from Device
+                  </label>
+                  <input type="file" id="new-mem-file" accept="image/*" class="form-input" style="padding: 6px; font-size: 0.95rem; background: white;" />
+                  <div id="file-upload-preview" style="display: none; margin-top: 8px; border-radius: 8px; overflow: hidden; max-height: 140px;">
+                    <img id="img-preview" src="" alt="Preview" style="width: 100%; height: 140px; object-fit: cover;" />
+                  </div>
+                  <div style="font-size: 0.85rem; color: var(--gray-500); margin-top: 6px;">
+                    Or paste an image web link below:
+                  </div>
+                  <input type="url" id="new-mem-image" class="form-input" style="margin-top: 4px;" placeholder="https://example.com/photo.jpg" />
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label" style="font-weight: 600;">Category</label>
+                    <select id="new-mem-tag" class="form-select">
+                      <option value="Family">Family 👨‍👩‍👧</option>
+                      <option value="Childhood">Childhood 🧸</option>
+                      <option value="Celebration">Celebration / Festival 🪔</option>
+                      <option value="Nature">Travel & Nature 🌿</option>
+                      <option value="Wedding">Wedding / Milestone 💍</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label" style="font-weight: 600;">Date or Era</label>
+                    <input type="text" id="new-mem-date" class="form-input" placeholder="e.g. Diwali 2022" />
+                  </div>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Photo Image URL</label>
-                  <input type="url" id="new-mem-image" class="form-input" placeholder="Paste image link (or leave default family photo)" />
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <label class="form-label" style="font-weight: 600; margin: 0;">Story / Voice Narration Text *</label>
+                    <span style="font-size: 0.8rem; color: var(--teal-dark); font-weight: 600;">💡 Spoken aloud</span>
+                  </div>
+                  <textarea id="new-mem-story" class="form-input" rows="3" placeholder="Write the story behind this moment. Smriti will narrate it whenever listened to." required></textarea>
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">Category</label>
-                  <select id="new-mem-tag" class="form-select">
-                    <option value="Family">Family</option>
-                    <option value="Childhood">Childhood</option>
-                    <option value="Celebration">Celebration / Festival</option>
-                    <option value="Nature">Travel & Nature</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Date or Era</label>
-                  <input type="text" id="new-mem-date" class="form-input" placeholder="e.g. Diwali 2023 or Summer 1975" />
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Story / Voice Narration Text *</label>
-                  <textarea id="new-mem-story" class="form-input" rows="3" placeholder="Write the story behind this moment. Smriti will speak it aloud when listened to." required></textarea>
+                <!-- Personalized Memory Reflection Questions -->
+                <div class="form-group" style="background: #FEF3C7; padding: 10px 12px; border-radius: 10px; border: 1px solid #FDE68A;">
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #92400E; margin-bottom: 4px;">
+                    💭 Suggested Reminiscence Question (Optional)
+                  </div>
+                  <input type="text" id="new-mem-question" class="form-input" style="font-size: 0.95rem; background: white;" placeholder="e.g. Do you remember who made the sweets that day?" />
                 </div>
 
                 <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-                  <button type="submit" class="btn btn-primary" style="flex: 1; min-height: 50px;">
+                  <button type="submit" class="btn btn-primary" style="flex: 1; min-height: 50px; font-weight: 700;">
                     ✓ Save Memory
                   </button>
                   <button type="button" id="btn-cancel-add-memory" class="btn btn-ghost" style="flex: 1; min-height: 50px;">
@@ -186,6 +225,35 @@ export default function MemoryGalleryPage(container) {
   }
 
   function attachEvents() {
+    // Top Close/Back button
+    const topCloseBtn = container.querySelector('#btn-close-gallery-top');
+    if (topCloseBtn) {
+      topCloseBtn.addEventListener('click', () => {
+        TTS.stop();
+        window.location.hash = '#/home';
+      });
+    }
+
+    // File input preview handling
+    let uploadedBase64 = null;
+    const fileInput = container.querySelector('#new-mem-file');
+    const filePreview = container.querySelector('#file-upload-preview');
+    const imgPreview = container.querySelector('#img-preview');
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            uploadedBase64 = evt.target.result;
+            if (imgPreview) imgPreview.src = uploadedBase64;
+            if (filePreview) filePreview.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
     // Mode toggle
     const toggleBtn = container.querySelector('#btn-toggle-view');
     if (toggleBtn) {
@@ -220,10 +288,12 @@ export default function MemoryGalleryPage(container) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const title = container.querySelector('#new-mem-title').value.trim();
-        const image = container.querySelector('#new-mem-image').value.trim() || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&auto=format&fit=crop&q=80';
+        const image = uploadedBase64 || container.querySelector('#new-mem-image').value.trim() || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&auto=format&fit=crop&q=80';
         const tag = container.querySelector('#new-mem-tag').value;
         const date = container.querySelector('#new-mem-date').value.trim() || 'Precious Time';
         const story = container.querySelector('#new-mem-story').value.trim();
+        const questionInput = container.querySelector('#new-mem-question');
+        const question = questionInput ? questionInput.value.trim() : '';
 
         if (!title || !story) return alert('Please enter both title and story');
 
@@ -233,7 +303,8 @@ export default function MemoryGalleryPage(container) {
           image,
           tag,
           date,
-          story
+          story,
+          question
         };
 
         Storage.addMemory(newMem);

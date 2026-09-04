@@ -1,10 +1,11 @@
-﻿/* ============================================================
+/* ============================================================
    SMRITI — Gentle Daily Reminders Page
    Medication, hydration, sunlight walks, family calls & rest
    ============================================================ */
 
 import Storage from '../storage.js';
 import TTS from '../tts.js';
+import I18n from '../i18n.js';
 
 export default function RemindersPage(container) {
   let reminders = Storage.getReminders();
@@ -12,6 +13,36 @@ export default function RemindersPage(container) {
   let activeFilter = 'all'; // all | morning | afternoon | evening | night
 
   function render() {
+    const lang = I18n.lang;
+    let pageTitle = "Daily Gentle Reminders";
+    let pageSub = "Caring prompts for your medicines, hydration, fresh air and family calls.";
+    let addBtnText = "➕ Add Reminder";
+    let filterAll = "All Day 🗓️";
+    let filterMorn = "Morning ☀️";
+    let filterAft = "Afternoon 🌤️";
+    let filterEve = "Evening 🌆";
+    let filterNight = "Night 🌙";
+
+    if (lang === 'hi') {
+      pageTitle = "दैनिक सौम्य अनुस्मारक";
+      pageSub = "दवाइयों, पानी पीने, ताज़ी हवा और पारिवारिक बातचीत के लिए प्यार भरे संकेत।";
+      addBtnText = "➕ नया अनुस्मारक जोड़ें";
+      filterAll = "पूरा दिन 🗓️";
+      filterMorn = "सुबह ☀️";
+      filterAft = "दोपहर 🌤️";
+      filterEve = "शाम 🌆";
+      filterNight = "रात 🌙";
+    } else if (lang === 'bn') {
+      pageTitle = "দৈনিক যত্নশীল অনুস্মারক";
+      pageSub = "ওষুধ, পর্যাপ্ত জলপান, মুক্ত বাতাস ও পরিবারের সাথে কথার সময় মনে রাখার সহায়ক।";
+      addBtnText = "➕ নতুন অনুস্মারক যোগ করুন";
+      filterAll = "সারাদিন 🗓️";
+      filterMorn = "সকাল ☀️";
+      filterAft = "দুপুর 🌤️";
+      filterEve = "সন্ধ্যা 🌆";
+      filterNight = "রাত 🌙";
+    }
+
     const filtered = activeFilter === 'all' 
       ? reminders 
       : reminders.filter(r => r.period.toLowerCase() === activeFilter);
@@ -23,24 +54,24 @@ export default function RemindersPage(container) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
           <div>
             <h2 style="color: var(--maroon); margin: 0; font-size: 1.85rem; display: flex; align-items: center; gap: 0.5rem;">
-              <span>⏰</span> Daily Gentle Reminders
+              <span>⏰</span> ${pageTitle}
             </h2>
             <p style="color: var(--gray-600); margin: 0.25rem 0 0 0; font-size: 1rem;">
-              Caring prompts for your medicines, hydration, fresh air and family calls.
+              ${pageSub}
             </p>
           </div>
           <button id="btn-open-add-rem" class="btn btn-primary btn-sm" style="min-height: 46px; font-size: 1rem; padding: 0.5rem 1.2rem;">
-            ➕ Add Reminder
+            ${addBtnText}
           </button>
         </div>
 
         <!-- Filter Chips -->
         <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
-          <button class="chip-btn ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">All Day 🗓️</button>
-          <button class="chip-btn ${activeFilter === 'morning' ? 'active' : ''}" data-filter="morning">Morning ☀️</button>
-          <button class="chip-btn ${activeFilter === 'afternoon' ? 'active' : ''}" data-filter="afternoon">Afternoon 🌤️</button>
-          <button class="chip-btn ${activeFilter === 'evening' ? 'active' : ''}" data-filter="evening">Evening 🌆</button>
-          <button class="chip-btn ${activeFilter === 'night' ? 'active' : ''}" data-filter="night">Night 🌙</button>
+          <button class="chip-btn ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">${filterAll}</button>
+          <button class="chip-btn ${activeFilter === 'morning' ? 'active' : ''}" data-filter="morning">${filterMorn}</button>
+          <button class="chip-btn ${activeFilter === 'afternoon' ? 'active' : ''}" data-filter="afternoon">${filterAft}</button>
+          <button class="chip-btn ${activeFilter === 'evening' ? 'active' : ''}" data-filter="evening">${filterEve}</button>
+          <button class="chip-btn ${activeFilter === 'night' ? 'active' : ''}" data-filter="night">${filterNight}</button>
         </div>
 
         <!-- Add Modal (Conditional) -->
@@ -140,15 +171,15 @@ export default function RemindersPage(container) {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 1.1rem; padding-top: 0.85rem; border-top: 1px solid ${isCompleted ? '#BBF7D0' : '#F1F5F9'};">
                   ${!isCompleted ? `
                     <button class="btn btn-secondary btn-rem-done" data-id="${r.id}" style="min-height: 52px; font-size: 1.05rem; font-weight: 700; background: #059669; justify-content: center;">
-                      ✅ Mark Done
+                      ${lang === 'hi' ? '✅ पूरा हुआ' : (lang === 'bn' ? '✅ সম্পন্ন হয়েছে' : '✅ Mark Done')}
                     </button>
                     <!-- Super easy to tap Remind in 10 mins button -->
                     <button class="btn btn-outline btn-rem-snooze" data-id="${r.id}" style="min-height: 52px; font-size: 1.05rem; font-weight: 700; border-color: #D97706; color: #B45309; background: #FFFBEB; justify-content: center;">
-                      ⏰ Remind in 10 mins
+                      ${lang === 'hi' ? '⏰ 10 मिनट बाद याद दिलाएं' : (lang === 'bn' ? '⏰ ১০ মিনিট পর মনে করান' : '⏰ Remind in 10 mins')}
                     </button>
                   ` : `
                     <button class="btn btn-outline btn-rem-done" data-id="${r.id}" style="min-height: 48px; font-size: 0.95rem; border-color: #10B981; color: #065F46; justify-content: center;">
-                      ✓ Completed for Today
+                      ${lang === 'hi' ? '✓ आज के लिए पूर्ण' : (lang === 'bn' ? '✓ আজকের জন্য সম্পন্ন' : '✓ Completed for Today')}
                     </button>
                   `}
                 </div>

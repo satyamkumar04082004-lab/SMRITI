@@ -1373,3 +1373,84 @@ body.has-nav {
 .chat-bubble-body {
   font-size: 1.05rem;
 }
+
+/* ============================================================
+   MOBILE RESPONSIVENESS & TOUCH OPTIMIZATIONS (< 640px)
+   Senior-friendly touch targets, smooth scrolling & safe areas
+   ============================================================ */
+@media (max-width: 640px) {
+  html {
+    font-size: 16px;
+  }
+
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Header adjustments for compact mobile widths */
+  .app-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .header-title {
+    font-size: 1.05rem;
+  }
+
+  .header-actions {
+    gap: 0.35rem;
+  }
+
+  .btn-ambient-badge,
+  .btn-voice-badge,
+  .btn-sos-badge,
+  .coin-badge,
+  .lang-badge {
+    padding: 0.28rem 0.55rem;
+    font-size: 0.85rem;
+  }
+
+  /* Touch buttons friendly minimum sizes */
+  button, .btn, .mood-btn, .nav-item {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Bottom nav mobile spacing and safe-area */
+  .bottom-nav {
+    padding: 0.35rem 0.2rem;
+    padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
+  }
+
+  .nav-item {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.68rem;
+  }
+
+  .nav-item .nav-icon {
+    font-size: 1.35rem;
+  }
+
+  /* Modals on mobile full width with comfortable margins */
+  .modal-content {
+    margin: 10px;
+    max-width: calc(100vw - 20px) !important;
+    padding: 1.25rem 1rem !important;
+  }
+
+  /* Form inputs ease of tap */
+  .form-input, .form-select {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  /* Cards mobile padding */
+  .card {
+    padding: 1rem;
+  }
+
+  /* Memory slideshow */
+  .memory-card {
+    min-height: 75px;
+  }
+}

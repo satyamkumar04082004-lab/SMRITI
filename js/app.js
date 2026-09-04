@@ -389,9 +389,9 @@ function renderHeader() {
 
   const ambientBtn = headerEl.querySelector('#btn-ambient-sound');
   if (ambientBtn) {
-    ambientBtn.addEventListener('click', (e) => {
+    ambientBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      AmbientAudio.toggle();
+      await AmbientAudio.toggle();
       const playing = AmbientAudio.isPlaying();
       ambientBtn.innerHTML = playing ? '🌿 Sound: On' : '🎵 Sound';
       ambientBtn.style.background = playing ? '#ECFDF5' : '#F8FAFC';
@@ -427,14 +427,14 @@ function renderNav(activeHash) {
   const isCaregiver = user && user.role === 'caregiver';
 
   const navItems = [
-    { hash: '#/home', icon: '🏠', label: 'Home' },
-    { hash: '#/games', icon: '🎮', label: 'Games' },
+    { hash: '#/home', icon: '🏠', label: I18n.t('navHome') || 'Home' },
+    { hash: '#/games', icon: '🎮', label: I18n.t('navGames') || 'Games' },
     { hash: '#/smriti', icon: '🤖', label: 'Smriti' },
-    { hash: '#/wellness', icon: '🌿', label: 'Wellness' },
-    { hash: '#/improvement', icon: '📈', label: 'Progress' },
+    { hash: '#/wellness', icon: '🌿', label: I18n.t('wellness') || 'Wellness' },
+    { hash: '#/improvement', icon: '📈', label: I18n.t('navLeaderboard') || 'Progress' },
     isCaregiver
-      ? { hash: '#/dashboard', icon: '📋', label: 'Caregiver' }
-      : { hash: '#/settings', icon: '⚙️', label: 'Settings' },
+      ? { hash: '#/dashboard', icon: '📋', label: I18n.t('navDashboard') || 'Caregiver' }
+      : { hash: '#/settings', icon: '⚙️', label: I18n.t('settings') || 'Settings' },
   ];
 
   navEl = document.createElement('nav');

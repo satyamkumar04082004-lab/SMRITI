@@ -6,6 +6,7 @@
 import Storage from '../storage.js';
 import AIService from '../aiService.js';
 import TTS from '../tts.js';
+import I18n from '../i18n.js';
 
 export default function Home(container) {
   const user = Storage.getUser() || { name: 'Friend' };
@@ -30,49 +31,129 @@ export default function Home(container) {
   }
 
   function getMoodAdaptive(moodKey) {
+    const lang = I18n.lang;
     if (moodKey === 'low' || moodKey === 'worried') {
+      let text = "I see you’re feeling a bit low or worried today. Would you like a gentle breathing exercise or a peaceful memory game to bring calm and warmth?";
+      let bLabel = '🫁 Calming Breathing';
+      let gLabel = '🦅 Gentle Memory Game';
+      let sLabel = '🤖 Talk to Smriti';
+      if (lang === 'hi') {
+        text = "हम समझते हैं कि आज आप थोड़ा उदास महसूस कर रहे हैं। क्या आप एक शांत श्वास व्यायाम या सुखद स्मृति खेल खेलना चाहेंगे?";
+        bLabel = '🫁 शांतिदायक सांस';
+        gLabel = '🦅 शांत स्मृति खेल';
+        sLabel = '🤖 स्मृति से बात करें';
+      } else if (lang === 'bn') {
+        text = "আমরা বুঝতে পারছি আজ আপনার মন কিছুটা ভারী। আপনি কি একটু গভীর নিঃশ্বাস নেওয়ার শান্ত অনুশীলন বা মধুর স্মৃতি খেলা খেলতে চান?";
+        bLabel = '🫁 শান্ত শ্বাস ব্যায়াম';
+        gLabel = '🦅 মধুর স্মৃতি খেলা';
+        sLabel = '🤖 স্মৃতির সাথে কথা বলুন';
+      }
       return {
-        text: "I see you’re feeling a bit low or worried today. Would you like a gentle breathing exercise or a peaceful memory game to bring calm and warmth?",
+        text,
         bg: '#FFF7ED',
         border: '#FED7AA',
         color: '#9A3412',
         actions: [
-          { label: '🫁 Calming Breathing', route: '#/wellness' },
-          { label: '🦅 Gentle Memory Game', route: '#/games/hornbill' },
-          { label: '🤖 Talk to Smriti', route: '#/smriti' }
+          { label: bLabel, route: '#/wellness' },
+          { label: gLabel, route: '#/games/hornbill' },
+          { label: sLabel, route: '#/smriti' }
         ]
       };
     } else if (moodKey === 'great' || moodKey === 'good') {
+      let text = "Wonderful! Let’s keep this positive, vibrant energy going with today’s mindful activity.";
+      let aLabel = '▶ Start Today’s Game';
+      let sLabel = '📖 Story Recall Game';
+      if (lang === 'hi') {
+        text = "अद्भुत! इस सकारात्मक और ऊर्जावान मन के साथ आज की मानसिक गतिविधि शुरू करें।";
+        aLabel = '▶ आज का खेल शुरू करें';
+        sLabel = '📖 कहानी स्मरण खेल';
+      } else if (lang === 'bn') {
+        text = "চমৎকার! এই সুন্দর মনোভাব নিয়ে চলুন আজকের আনন্দের মনচর্চা খেলা শুরু করি।";
+        aLabel = '▶ আজকের খেলা শুরু করুন';
+        sLabel = '📖 গল্পের স্মৃতি খেলা';
+      }
       return {
-        text: "Wonderful! Let’s keep this positive, vibrant energy going with today’s mindful activity.",
+        text,
         bg: '#F0FDF4',
         border: '#BBF7D0',
         color: '#166534',
         actions: [
-          { label: '▶ Start Today’s Game', route: recommendedGame.route },
-          { label: '📖 Story Recall Game', route: '#/games/memory-moments' }
+          { label: aLabel, route: recommendedGame.route },
+          { label: sLabel, route: '#/games/memory-moments' }
         ]
       };
     } else { // 'okay'
+      let text = "Steady and peaceful. A gentle brain exercise or browsing fond family memories can bring a pleasant spark to your day.";
+      let aLabel = '▶ Start Mindful Activity';
+      let mLabel = '🖼️ Life Story & Memories';
+      if (lang === 'hi') {
+        text = "शांत और संतुलित। एक हल्का दिमागी अभ्यास या पारिवारिक यादें देखना आपके दिन में आनंद लाएगा।";
+        aLabel = '▶ मन की गतिविधि शुरू करें';
+        mLabel = '🖼️ जीवन की यादें';
+      } else if (lang === 'bn') {
+        text = "শান্ত ও প্রফুল্ল। একটি সুন্দর মনচর্চা বা পরিবারের সোনালী স্মৃতি দেখা আপনার দিনটি সুন্দর করবে।";
+        aLabel = '▶ মনচর্চা শুরু করুন';
+        mLabel = '🖼️ জীবনের মধুর স্মৃতি';
+      }
       return {
-        text: "Steady and peaceful. A gentle brain exercise or browsing fond family memories can bring a pleasant spark to your day.",
+        text,
         bg: '#F0FDFA',
         border: '#99F6E4',
         color: '#0F766E',
         actions: [
-          { label: '▶ Start Mindful Activity', route: recommendedGame.route },
-          { label: '🖼️ Life Story & Memories', route: '#/memories' }
+          { label: aLabel, route: recommendedGame.route },
+          { label: mLabel, route: '#/memories' }
         ]
       };
     }
   }
 
   function render() {
+    const user = Storage.getUser() || { name: 'Friend' };
+    const prefs = Storage.getPreferences();
+    const displayName = prefs.preferredName || user.name.split(' ')[0] || user.name || 'Friend';
+
+    const hour = new Date().getHours();
+    let timeGreeting = 'Good morning';
+    let timeIcon = '🌻';
+    if (hour >= 12 && hour < 17) {
+      timeGreeting = 'Good afternoon';
+      timeIcon = '☀️';
+    } else if (hour >= 17) {
+      timeGreeting = 'Good evening';
+      timeIcon = '🌙';
+    }
+
     const recommended = AIService.recommendActivity(todayMood?.mood);
     const adaptive = todayMood ? getMoodAdaptive(todayMood.mood) : null;
     const reminders = Storage.getReminders();
     const activeReminders = reminders.filter(r => r.active && !r.completedToday);
-    const nextReminder = activeReminders[0];
+    const lang = I18n.lang;
+    let welcomeSub = "Welcome to your daily memory and wellness sanctuary.";
+    let callLovedOne = "Call Loved One";
+    let dailyRitualLabel = "Daily Ritual";
+    let ritualStep = "3-Step Guide ➔";
+    let howFeel = "How are you feeling today?";
+    let checkDoneLabel = "✅ Mark Done";
+    let snoozeLabel = "⏰ Remind in 10 mins";
+
+    if (lang === 'hi') {
+      welcomeSub = "आपके दैनिक स्मृति और मानसिक स्वास्थ्य साथी में आपका स्वागत है।";
+      callLovedOne = "प्रियजन को कॉल करें";
+      dailyRitualLabel = "दैनिक नियम";
+      ritualStep = "३-चरणीय अभ्यास ➔";
+      howFeel = "आज आप कैसा महसूस कर रहे हैं?";
+      checkDoneLabel = "✅ पूरा हुआ";
+      snoozeLabel = "⏰ 10 मिनट बाद याद दिलाएं";
+    } else if (lang === 'bn') {
+      welcomeSub = "আপনার স্মৃতি ও মনের যত্নের ভালোবাসার ঠিকানায় স্বাগতম।";
+      callLovedOne = "প্রিয়জনকে ফোন করুন";
+      dailyRitualLabel = "দৈনিক নিয়ম";
+      ritualStep = "৩-ধাপের গাইড ➔";
+      howFeel = "আজ আপনার মন কেমন আছে?";
+      checkDoneLabel = "✅ সম্পন্ন হয়েছে";
+      snoozeLabel = "⏰ ১০ মিনিট পর মনে করান";
+    }
 
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 680px; padding-bottom: 2.5rem;">
@@ -88,7 +169,7 @@ export default function Home(container) {
                 ${displayName}!
               </h1>
               <p style="margin: 0; color: var(--gray-700); font-size: 1.05rem;">
-                Welcome to your daily memory and wellness sanctuary.
+                ${welcomeSub}
               </p>
             </div>
             <div style="font-size: 3.5rem; animation: floatSlow 3s ease-in-out infinite;">
@@ -105,7 +186,7 @@ export default function Home(container) {
               📞
             </div>
             <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">Call Loved One</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">${callLovedOne}</div>
               <div style="font-weight: 700; color: var(--maroon); font-size: 1.05rem;">${Storage.getEmergencyContacts().primaryName}</div>
             </div>
           </div>
@@ -116,8 +197,8 @@ export default function Home(container) {
               🌅
             </div>
             <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: #16A34A; text-transform: uppercase;">Daily Ritual</div>
-              <div style="font-weight: 700; color: #14532D; font-size: 1.05rem;">3-Step Guide ➔</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #16A34A; text-transform: uppercase;">${dailyRitualLabel}</div>
+              <div style="font-weight: 700; color: #14532D; font-size: 1.05rem;">${ritualStep}</div>
             </div>
           </div>
         </div>
@@ -157,29 +238,29 @@ export default function Home(container) {
         <!-- 1. Daily Mood Section with Meaningful Adaptive Responses -->
         <div class="card card-elevated mb-md" style="padding: 1.25rem 1.5rem; border-radius: 16px;">
           <h3 style="color: var(--maroon); font-size: 1.2rem; margin-bottom: 0.75rem; text-align: center;">
-            How are you feeling today?
+            ${howFeel}
           </h3>
 
           <div class="mood-selector-grid" style="display: flex; justify-content: space-around; gap: 0.5rem; margin-bottom: 0.5rem;">
-            <button class="mood-btn ${todayMood?.mood === 'great' ? 'active' : ''}" data-mood="great" data-emoji="😊" data-label="Great">
+            <button class="mood-btn ${todayMood?.mood === 'great' ? 'active' : ''}" data-mood="great" data-emoji="😊" data-label="${lang === 'hi' ? 'बहुत अच्छा' : (lang === 'bn' ? 'দারুণ' : 'Great')}">
               <span class="mood-emoji">😊</span>
-              <span class="mood-label">Great</span>
+              <span class="mood-label">${lang === 'hi' ? 'बहुत अच्छा' : (lang === 'bn' ? 'দারুণ' : 'Great')}</span>
             </button>
-            <button class="mood-btn ${todayMood?.mood === 'good' ? 'active' : ''}" data-mood="good" data-emoji="🙂" data-label="Good">
+            <button class="mood-btn ${todayMood?.mood === 'good' ? 'active' : ''}" data-mood="good" data-emoji="🙂" data-label="${lang === 'hi' ? 'अच्छा' : (lang === 'bn' ? 'ভালো' : 'Good')}">
               <span class="mood-emoji">🙂</span>
-              <span class="mood-label">Good</span>
+              <span class="mood-label">${lang === 'hi' ? 'अच्छा' : (lang === 'bn' ? 'ভালো' : 'Good')}</span>
             </button>
-            <button class="mood-btn ${todayMood?.mood === 'okay' ? 'active' : ''}" data-mood="okay" data-emoji="😐" data-label="Okay">
+            <button class="mood-btn ${todayMood?.mood === 'okay' ? 'active' : ''}" data-mood="okay" data-emoji="😐" data-label="${lang === 'hi' ? 'सामान्य' : (lang === 'bn' ? 'মোটামুটি' : 'Okay')}">
               <span class="mood-emoji">😐</span>
-              <span class="mood-label">Okay</span>
+              <span class="mood-label">${lang === 'hi' ? 'सामान्य' : (lang === 'bn' ? 'মোটামুটি' : 'Okay')}</span>
             </button>
-            <button class="mood-btn ${todayMood?.mood === 'low' ? 'active' : ''}" data-mood="low" data-emoji="😔" data-label="Low">
+            <button class="mood-btn ${todayMood?.mood === 'low' ? 'active' : ''}" data-mood="low" data-emoji="😔" data-label="${lang === 'hi' ? 'उदास' : (lang === 'bn' ? 'মন খারাপ' : 'Low')}">
               <span class="mood-emoji">😔</span>
-              <span class="mood-label">Low</span>
+              <span class="mood-label">${lang === 'hi' ? 'उदास' : (lang === 'bn' ? 'মন খারাপ' : 'Low')}</span>
             </button>
-            <button class="mood-btn ${todayMood?.mood === 'worried' ? 'active' : ''}" data-mood="worried" data-emoji="😟" data-label="Worried">
+            <button class="mood-btn ${todayMood?.mood === 'worried' ? 'active' : ''}" data-mood="worried" data-emoji="😟" data-label="${lang === 'hi' ? 'चिंतित' : (lang === 'bn' ? 'চিন্তিত' : 'Worried')}">
               <span class="mood-emoji">😟</span>
-              <span class="mood-label">Worried</span>
+              <span class="mood-label">${lang === 'hi' ? 'चिंतित' : (lang === 'bn' ? 'চিন্তিত' : 'Worried')}</span>
             </button>
           </div>
 
@@ -306,38 +387,38 @@ export default function Home(container) {
         <!-- 6. Quick Access Navigation Grid -->
         <div class="card card-elevated" style="padding: 1.5rem; border-radius: 16px;">
           <h3 style="color: var(--maroon); font-size: 1.2rem; margin-bottom: 1rem;">
-            ❤️ Quick Navigation
+            ❤️ ${lang === 'hi' ? 'त्वरित नेविगेशन' : (lang === 'bn' ? 'দ্রুত মেনু' : 'Quick Navigation')}
           </h3>
 
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center;">
             <div class="card card-game home-nav-card" data-route="#/games" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🎮</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: var(--maroon);">Games Hub</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: var(--maroon);">${lang === 'hi' ? 'खेल' : (lang === 'bn' ? 'খেলাধুলো' : 'Games Hub')}</div>
             </div>
 
             <div class="card card-game home-nav-card" data-route="#/memories" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🖼️</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: #B45309;">Life Story</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #B45309;">${lang === 'hi' ? 'जीवन की यादें' : (lang === 'bn' ? 'স্মৃতিমালা' : 'Life Story')}</div>
             </div>
 
             <div class="card card-game home-nav-card" data-route="#/wellness" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌿</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: #065F46;">Wellness</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #065F46;">${lang === 'hi' ? 'स्वास्थ्य' : (lang === 'bn' ? 'সুস্থতা' : 'Wellness')}</div>
             </div>
 
             <div class="card card-game home-nav-card" data-route="#/improvement" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">📈</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: var(--teal-dark);">Progress</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: var(--teal-dark);">${lang === 'hi' ? 'प्रगति' : (lang === 'bn' ? 'অগ্রগতি' : 'Progress')}</div>
             </div>
 
             <div class="card card-game home-nav-card" data-route="#/medicines" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">💊</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: #1E40AF;">Medicines</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #1E40AF;">${lang === 'hi' ? 'दवाइयाँ' : (lang === 'bn' ? 'ওষুধ' : 'Medicines')}</div>
             </div>
 
             <div class="card card-game home-nav-card" data-route="#/emergency" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🛟</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: #DC2626;">Emergency</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #DC2626;">${lang === 'hi' ? 'आपातकाल' : (lang === 'bn' ? 'জরুরি সাহায্য' : 'Emergency')}</div>
             </div>
           </div>
         </div>
@@ -361,10 +442,41 @@ export default function Home(container) {
           window.SmritiToast.show(`Mood logged: ${emoji} ${label}`, 'success');
         }
 
-        // Voice comforting feedback if enabled
-        const voice = Storage.getVoiceSettings();
-        if (voice && voice.voiceGuidanceEnabled !== false && (mood === 'low' || mood === 'worried')) {
-          TTS.speak(`I am right here with you ${displayName}. Take a slow, peaceful breath.`);
+        // Spoken voice comforting response on mood selection
+        const lang = I18n.lang;
+        const curUser = Storage.getUser();
+        const curPrefs = Storage.getPreferences();
+        const curName = curPrefs.preferredName || (curUser ? curUser.name.split(' ')[0] : 'Friend');
+
+        let spokenMessage = '';
+        if (mood === 'low' || mood === 'worried') {
+          if (lang === 'hi') {
+            spokenMessage = `मैं समझ सकता हूँ कि आप थोड़ा उदास महसूस कर रहे हैं, ${curName}। क्या आप एक आरामदायक सांस का व्यायाम करना चाहेंगे?`;
+          } else if (lang === 'bn') {
+            spokenMessage = `আমি বুঝতে পারছি আজ আপনার মন কিছুটা খারাপ, ${curName}। আপনি কি একটু গভীর শ্বাস নেওয়ার শান্ত অনুশীলন করতে চান?`;
+          } else {
+            spokenMessage = `I see you’re feeling a bit low today, ${curName}. Would you like a gentle breathing exercise?`;
+          }
+        } else if (mood === 'great' || mood === 'good') {
+          if (lang === 'hi') {
+            spokenMessage = `बहुत बढ़िया ${curName}! यह जानकर बहुत खुशी हुई। आइए आज का मनपसंद खेल खेलें।`;
+          } else if (lang === 'bn') {
+            spokenMessage = `অসাধারণ ${curName}! জেনে খুব আনন্দ হলো। চলুন আজকের মনচর্চা শুরু করি।`;
+          } else {
+            spokenMessage = `Wonderful ${curName}! So glad you are feeling good today. Let's enjoy today's mindful activity.`;
+          }
+        } else { // okay
+          if (lang === 'hi') {
+            spokenMessage = `नमस्ते ${curName}। एक शांत और सुखद दिन के लिए हम हमेशा आपके साथ हैं।`;
+          } else if (lang === 'bn') {
+            spokenMessage = `নমস্কার ${curName}। একটি শান্ত ও সুন্দর দিনের জন্য আমরা আপনার সাথেই আছি।`;
+          } else {
+            spokenMessage = `Hello ${curName}. Take it easy and enjoy a peaceful day.`;
+          }
+        }
+
+        if (spokenMessage && TTS && TTS.isSupported()) {
+          TTS.speak(spokenMessage);
         }
 
         render();
@@ -469,11 +581,17 @@ export default function Home(container) {
     });
   }
 
+  const profileUpdateHandler = () => {
+    render();
+  };
+  window.addEventListener('userProfileUpdated', profileUpdateHandler);
+
   render();
 
   return {
     cleanup() {
       TTS.stop();
+      window.removeEventListener('userProfileUpdated', profileUpdateHandler);
     }
   };
 }

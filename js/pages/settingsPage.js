@@ -196,6 +196,11 @@ export default function SettingsPage(container) {
         user = { ...user, name, age, role, phone };
         Storage.setUser(user);
 
+        // Also update preferredName in preferences so home greeting always reflects the new name
+        const prefs = Storage.getPreferences();
+        prefs.preferredName = name.split(' ')[0] || name;
+        Storage.setPreferences(prefs);
+
         emergency = {
           ...emergency,
           primaryName: emgName || emergency.primaryName,
@@ -204,6 +209,9 @@ export default function SettingsPage(container) {
           doctorPhone: docPhone || emergency.doctorPhone
         };
         Storage.setEmergencyContacts(emergency);
+
+        // Dispatch profile update event so any open screens/headers refresh immediately
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', { detail: { user, prefs } }));
 
         isEditingProfile = false;
         if (window.SmritiToast) {

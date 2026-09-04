@@ -415,12 +415,20 @@ class GameController {
     // 1. Trigger Gentle, Senior-Friendly Confetti
     this._triggerGentleConfetti();
 
-    // 2. Short Personalized Encouraging Voice Message
+    // 2. Short Personalized Encouraging Voice Message (Localized)
     try {
       const user = Storage.getUser();
       const prefs = Storage.getPreferences();
       const userName = prefs.preferredName || (user ? user.name.split(' ')[0] : 'Friend');
-      const feedbackSentence = `Well done ${userName}! You did great today.`;
+      const lang = I18n.lang;
+      let feedbackSentence = `Well done ${userName}! You did great today.`;
+
+      if (lang === 'hi') {
+        feedbackSentence = `शाबाश ${userName}! आज आपने बहुत अच्छा खेल खेला।`;
+      } else if (lang === 'bn') {
+        feedbackSentence = `খুব সুন্দর ${userName}! আজ আপনি দারুণ খেলেছেন।`;
+      }
+
       TTS.speak(feedbackSentence);
     } catch {}
 
