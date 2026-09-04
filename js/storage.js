@@ -338,7 +338,22 @@ const Storage = {
     this.setUserData('medicineReminders', reminders);
   },
 
-  // --- AI Companion Settings ---
+  addMedicineReminder(reminder) {
+    const list = this.getMedicineReminders();
+    reminder.id = reminder.id || 'rem_' + Date.now();
+    reminder.active = reminder.active !== false;
+    list.push(reminder);
+    this.setMedicineReminders(list);
+    return list;
+  },
+
+  deleteMedicineReminder(id) {
+    const list = this.getMedicineReminders().filter(r => r.id !== id);
+    this.setMedicineReminders(list);
+    return list;
+  },
+
+  // --- AI & Voice Settings ---
   getAISettings() {
     return this.getUserData('aiSettings', {
       voiceEnabled: true,
@@ -351,6 +366,73 @@ const Storage = {
 
   setAISettings(settings) {
     this.setUserData('aiSettings', settings);
+  },
+
+  getVoiceSettings() {
+    return this.getUserData('voiceSettings', {
+      voiceGuidanceEnabled: true,
+      autoReadInstructions: true,
+      voiceFeedback: true,
+      voiceNavigation: true,
+      speechRate: 0.85
+    });
+  },
+
+  setVoiceSettings(settings) {
+    this.setUserData('voiceSettings', settings);
+  },
+
+  // --- Life Story & Memory Gallery ---
+  getMemories() {
+    return this.getUserData('familyMemories', [
+      {
+        id: 'mem1',
+        title: "Granddaughter Riya's Wedding",
+        tag: 'Family',
+        date: 'November 2024',
+        image: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop&q=80',
+        story: 'The most joyful day when our sweet Riya got married in Guwahati. The courtyard was decorated with fragrant marigold flowers, and everyone danced to traditional melodies until evening.',
+        voiceNote: 'The whole family had gathered together, smiling and blessing our beloved Riya. What a golden, cherished memory.'
+      },
+      {
+        id: 'mem2',
+        title: 'Morning Walk at Jorhat Tea Gardens',
+        tag: 'Nature',
+        date: 'Spring 1988',
+        image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80',
+        story: 'Walking with Ashok along the lush green tea slopes in the cool morning mist. The scent of fresh tea leaves and warm ginger tea from our thermos flask made every morning special.',
+        voiceNote: 'Ashok would always pick two fresh tea blossoms and smile. The morning breeze was so peaceful.'
+      },
+      {
+        id: 'mem3',
+        title: 'Bihu Feast with Grandchildren',
+        tag: 'Celebration',
+        date: 'January 2022',
+        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&auto=format&fit=crop&q=80',
+        story: 'Making homemade coconut pitha and sesame laddoos for all our neighbors and grandchildren. Seeing the children smile with sweet sticky hands was pure happiness.',
+        voiceNote: 'The aroma of roasted rice flour and jaggery filled our entire home.'
+      },
+      {
+        id: 'mem4',
+        title: 'Old Courtyard Mango Tree',
+        tag: 'Childhood',
+        date: 'Summer 1965',
+        image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&auto=format&fit=crop&q=80',
+        story: 'Sitting under the shade of our ancestral mango tree on warm summer afternoons, reading stories and sharing slices of raw green mango with a pinch of rock salt.',
+        voiceNote: 'That giant old tree sheltered generations of our family with love and shade.'
+      }
+    ]);
+  },
+
+  setMemories(memories) {
+    this.setUserData('familyMemories', memories);
+  },
+
+  addMemory(memory) {
+    const list = this.getMemories();
+    list.unshift(memory);
+    this.setMemories(list);
+    return list;
   },
 
   // --- Reset / Demo Data Population ---

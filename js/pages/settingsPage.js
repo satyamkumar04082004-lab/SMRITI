@@ -40,6 +40,35 @@ export default function SettingsPage(container) {
         <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px; margin-bottom: 0;">Updates game titles, instructions, and companion speech text.</p>
       </div>
 
+      <!-- Voice-First Guidance & Spoken Audio -->
+      <div class="card card-elevated mb-md" style="padding: 1.25rem;">
+        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎙️ Voice Guidance & Spoken Companion</h3>
+        <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 12px;">Make the app speak instructions, give encouraging feedback, and navigate by voice.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-weight: 600; color: var(--gray-700);">Enable Voice Guidance</span>
+            <input type="checkbox" id="toggle-voice-enabled" style="width: 22px; height: 22px; cursor: pointer;" />
+          </label>
+
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-size: 0.95rem; color: var(--gray-700);">Auto-Read Game Instructions</span>
+            <input type="checkbox" id="toggle-voice-instructions" style="width: 22px; height: 22px; cursor: pointer;" />
+          </label>
+
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-size: 0.95rem; color: var(--gray-700);">Voice Feedback on Game Finish</span>
+            <input type="checkbox" id="toggle-voice-feedback" style="width: 22px; height: 22px; cursor: pointer;" />
+          </label>
+
+          <div style="margin-top: 0.35rem;">
+            <button id="btn-test-voice" class="btn btn-outline btn-sm" style="width: 100%;">
+              🔊 Test Spoken Voice
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Cultural Personalisation -->
       <div class="card card-elevated mb-md" style="padding: 1.25rem;">
         <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎨 Cultural Personalisation</h3>
@@ -68,6 +97,42 @@ export default function SettingsPage(container) {
   `;
 
   // Event handlers
+  const voiceSettings = Storage.getVoiceSettings();
+  const toggleVoiceEnabled = container.querySelector('#toggle-voice-enabled');
+  const toggleVoiceInstructions = container.querySelector('#toggle-voice-instructions');
+  const toggleVoiceFeedback = container.querySelector('#toggle-voice-feedback');
+  const btnTestVoice = container.querySelector('#btn-test-voice');
+
+  if (toggleVoiceEnabled) {
+    toggleVoiceEnabled.checked = voiceSettings.voiceGuidanceEnabled !== false;
+    toggleVoiceEnabled.addEventListener('change', (e) => {
+      voiceSettings.voiceGuidanceEnabled = e.target.checked;
+      Storage.setVoiceSettings(voiceSettings);
+    });
+  }
+
+  if (toggleVoiceInstructions) {
+    toggleVoiceInstructions.checked = voiceSettings.autoReadInstructions !== false;
+    toggleVoiceInstructions.addEventListener('change', (e) => {
+      voiceSettings.autoReadInstructions = e.target.checked;
+      Storage.setVoiceSettings(voiceSettings);
+    });
+  }
+
+  if (toggleVoiceFeedback) {
+    toggleVoiceFeedback.checked = voiceSettings.voiceFeedback !== false;
+    toggleVoiceFeedback.addEventListener('change', (e) => {
+      voiceSettings.voiceFeedback = e.target.checked;
+      Storage.setVoiceSettings(voiceSettings);
+    });
+  }
+
+  if (btnTestVoice) {
+    btnTestVoice.addEventListener('click', () => {
+      TTS.speak("Hello! I am Smriti, your daily voice companion. I am here to guide you with love and patience.");
+    });
+  }
+
   const langSelect = container.querySelector('#lang-select');
   if (langSelect) {
     langSelect.addEventListener('change', (e) => {

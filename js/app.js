@@ -23,6 +23,7 @@ import HistoryPage from './pages/historyPage.js';
 import DashboardPage from './pages/dashboardPage.js';
 import PersonalisationPage from './pages/personalisationPage.js';
 import SettingsPage from './pages/settingsPage.js';
+import MemoryGalleryPage from './pages/memoryGalleryPage.js';
 
 // --- Game imports ---
 import HornbillMemoryNest from './games/hornbillMemoryNest.js';
@@ -67,6 +68,7 @@ const routes = {
   '#/home': { page: HomePage, auth: true, nav: true },
   '#/games': { page: GamesHubPage, auth: true, nav: true },
   '#/smriti': { page: SmritiPage, auth: true, nav: true },
+  '#/memories': { page: MemoryGalleryPage, auth: true, nav: true },
   '#/wellness': { page: WellnessPage, auth: true, nav: true },
   '#/improvement': { page: ImprovementPage, auth: true, nav: true },
   '#/journey': { page: JourneyPage, auth: true, nav: true },
@@ -103,13 +105,13 @@ function showQuickHelpModal() {
   quickHelpModalEl.className = 'modal-overlay';
   quickHelpModalEl.innerHTML = `
     <div class="modal-content text-center" style="max-width: 380px; padding: 1.75rem 1.25rem;">
-      <div style="font-size: 3rem; margin-bottom: 0.25rem;">🆘❤️</div>
-      <h3 style="color: var(--maroon); font-size: 1.4rem; margin-bottom: 0.25rem;">Quick Support</h3>
-      <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">How can we help you right now?</p>
+      <div style="font-size: 3rem; margin-bottom: 0.25rem;">🆘 🛟</div>
+      <h3 style="color: var(--maroon); font-size: 1.4rem; margin-bottom: 0.25rem;">Emergency & Quick Help</h3>
+      <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">How can we assist you right now?</p>
 
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
         <button id="modal-call-family" class="btn btn-primary" style="background: #DC2626; min-height: 52px; font-size: 1.1rem; justify-content: flex-start; padding-left: 1.25rem;">
-          ❤️ Call ${emergency.primaryName}
+          🛟 Call Primary: ${emergency.primaryName}
         </button>
         <button id="modal-emergency-hub" class="btn btn-outline" style="border-color: #EF4444; color: #DC2626; min-height: 52px; font-size: 1.05rem; justify-content: flex-start; padding-left: 1.25rem;">
           🚨 Open Emergency Hub
@@ -155,6 +157,94 @@ function showQuickHelpModal() {
   });
 }
 
+// --- Voice Navigation Modal ---
+function showVoiceNavigationModal() {
+  const existing = document.querySelector('.voice-nav-modal-overlay');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay voice-nav-modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content text-center" style="max-width: 420px; padding: 1.75rem 1.25rem;">
+      <div style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: floatSlow 2s infinite ease-in-out;">🎙️✨</div>
+      <h3 style="color: var(--maroon); font-size: 1.4rem; margin-bottom: 0.35rem;">Voice Navigation</h3>
+      <p style="color: var(--gray-700); font-size: 1.05rem; margin-bottom: 1.25rem;" id="voice-nav-status">
+        Listening... Say: <strong>Home, Games, Memories, Wellness, Progress, Medicines, or Help</strong>
+      </p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/home">🏠 Home</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/games">🎮 Games</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/memories">🖼️ Memories</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/wellness">🌿 Wellness</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/improvement">📈 Progress</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/medicines">💊 Medicines</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/emergency" style="border-color: #EF4444; color: #DC2626;">🛟 Help</button>
+      </div>
+
+      <button id="btn-close-voice-nav" class="btn btn-ghost" style="color: var(--gray-500);">
+        Close
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  if (SpeechRecognition) {
+    try {
+      rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = I18n.lang === 'hi' ? 'hi-IN' : 'en-IN';
+      rec.onresult = (event) => {
+        const text = (event.results[0][0].transcript || '').toLowerCase();
+        handleVoiceDestination(text);
+      };
+      rec.start();
+    } catch {}
+  }
+
+  function handleVoiceDestination(text) {
+    const statusEl = modal.querySelector('#voice-nav-status');
+    let target = null;
+    let name = '';
+
+    if (text.includes('game') || text.includes('khel')) { target = '#/games'; name = 'Games Hub'; }
+    else if (text.includes('memory') || text.includes('memories') || text.includes('story') || text.includes('yaad')) { target = '#/memories'; name = 'Life Story Memories'; }
+    else if (text.includes('wellness') || text.includes('breath') || text.includes('health') || text.includes('swasth')) { target = '#/wellness'; name = 'Wellness Guide'; }
+    else if (text.includes('progress') || text.includes('score') || text.includes('improvement')) { target = '#/improvement'; name = 'Mind Progress'; }
+    else if (text.includes('medicine') || text.includes('dawa') || text.includes('pill')) { target = '#/medicines'; name = 'Medicines'; }
+    else if (text.includes('emergency') || text.includes('help') || text.includes('sos') || text.includes('madad')) { target = '#/emergency'; name = 'Emergency Help'; }
+    else if (text.includes('home') || text.includes('ghar')) { target = '#/home'; name = 'Home'; }
+
+    if (target) {
+      if (statusEl) statusEl.textContent = `Navigating to ${name}...`;
+      TTS.speak(`Opening ${name}`);
+      setTimeout(() => {
+        modal.remove();
+        window.location.hash = target;
+      }, 700);
+    } else {
+      if (statusEl) statusEl.textContent = `Heard "${text}". Please tap a destination or try again.`;
+    }
+  }
+
+  modal.querySelectorAll('.btn-voice-dest').forEach(b => {
+    b.addEventListener('click', () => {
+      const r = b.getAttribute('data-route');
+      modal.remove();
+      if (rec) { try { rec.stop(); } catch {} }
+      window.location.hash = r;
+    });
+  });
+
+  modal.querySelector('#btn-close-voice-nav').addEventListener('click', () => {
+    if (rec) { try { rec.stop(); } catch {} }
+    modal.remove();
+  });
+}
+
 // --- Header ---
 function renderHeader() {
   if (headerEl) headerEl.remove();
@@ -170,6 +260,11 @@ function renderHeader() {
         <span class="header-title">${I18n.t('appName')}</span>
       </div>
       <div class="header-actions">
+        <!-- 🎙️ Voice Navigation Button -->
+        <button id="btn-voice-nav" class="btn-voice-badge" title="Voice Navigation" style="background: #E6F4F1; color: var(--teal-dark); border: 1.5px solid #99F6E4; border-radius: 999px; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
+          🎙️ Voice
+        </button>
+
         <!-- 🆘 Persistent Quick Help Button -->
         <button id="btn-quick-sos" class="btn-sos-badge" title="Quick Help">
           🆘 Help
@@ -191,6 +286,11 @@ function renderHeader() {
 
   headerEl.querySelector('#header-lang').addEventListener('click', () => {
     window.location.hash = '#/settings';
+  });
+
+  headerEl.querySelector('#btn-voice-nav').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showVoiceNavigationModal();
   });
 
   headerEl.querySelector('#btn-quick-sos').addEventListener('click', (e) => {

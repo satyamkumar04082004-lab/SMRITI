@@ -62,7 +62,7 @@ const translations = {
     leaderboard: 'Leaderboard',
     history: 'History',
     
-    // Game Common
+    // Game Common & Timer Controls
     play: 'Play',
     playAgain: 'Play Again',
     exitToHub: 'Back to Games',
@@ -79,6 +79,51 @@ const translations = {
     readInstruction: '🔊 Read Instruction',
     startGame: 'Start Game',
     gameOver: 'Game Complete!',
+    timeLimit: 'Game Time Limit',
+    relaxedMode: 'No Rush 🕊️ (Take your time)',
+    timeAdjustment: 'Adjust Time',
+
+    // Moods & Adaptive
+    howAreYouFeeling: 'How are you feeling today?',
+    moodHappy: 'Happy 🌸',
+    moodCalm: 'Calm 🍃',
+    moodOkay: 'Okay ☀️',
+    moodLow: 'Low 🌧️',
+    moodWorried: 'Worried 🍂',
+    takeDeepBreath: 'Take Deep Breath',
+    playGentleGame: 'Play Gentle Game',
+    talkToCompanion: 'Talk to Companion',
+
+    // Memories & Life Story
+    memories: 'Memories',
+    memoriesTitle: 'Life Story & Memory Gallery',
+    memoriesSubtitle: 'Cherished family moments, photos, and spoken stories',
+    slideshow: 'Slideshow Mode',
+    allMemories: 'All Memories',
+    listenVoiceStory: '🔊 Listen to Voice Story',
+    addMemory: 'Add Memory',
+    uploadPhotoStory: 'Upload Photo Story',
+
+    // Voice & Companion
+    voiceGuide: 'Voice Guidance',
+    voiceNav: 'Voice Navigation',
+    tapToSpeak: 'Tap to Speak',
+    voiceListening: 'Listening...',
+
+    // Mindful Progress Garden
+    mindGarden: 'Your Growing Mind Garden',
+    mindfulStreak: 'Mindfulness Streak',
+    weeklySummary: 'Weekly Positive Summary',
+    gardenSprout: 'Tender Sprout 🌱',
+    gardenSapling: 'Young Sapling 🌿',
+    gardenBlossom: 'Blooming Flower 🌸',
+    gardenSanctuary: 'Serene Sanctuary Tree 🌳',
+
+    // Emergency & Caregiver
+    emergencyHelp: 'Emergency Help 🛟',
+    caregiverHub: 'Caregiver Hub',
+    caregiverNotice: 'Caregiver Caring Notice',
+    dailyReminders: 'Daily Gentle Reminders',
     
     // Encouragement
     excellent: 'Excellent! 🌟',
@@ -295,6 +340,52 @@ const translations = {
     g7Desc: 'चमकते अनुक्रम को दोहराएं',
     g7Tag: 'ध्यान',
     g7Instruction: 'पैड को जलते देखें, फिर उसी क्रम में अनुक्रम दोहराएं।',
+    timeLimit: 'खेल की समय सीमा',
+    relaxedMode: 'आराम से 🕊️ (कोई जल्दबाजी नहीं)',
+    timeAdjustment: 'समय समायोजित करें',
+
+    // Moods & Adaptive
+    howAreYouFeeling: 'आज आप कैसा महसूस कर रहे हैं?',
+    moodHappy: 'प्रसन्न 🌸',
+    moodCalm: 'शांत 🍃',
+    moodOkay: 'ठीक-ठाक ☀️',
+    moodLow: 'उदास 🌧️',
+    moodWorried: 'चिंतित 🍂',
+    takeDeepBreath: 'गहरी सांस लें',
+    playGentleGame: 'हल्का खेल खेलें',
+    talkToCompanion: 'साथी से बात करें',
+
+    // Memories & Life Story
+    memories: 'यादें',
+    memoriesTitle: 'जीवन की यादें और फोटो संग्रह',
+    memoriesSubtitle: 'परिवार के अनमोल पल, तस्वीरें और मधुर कहानियां',
+    slideshow: 'स्लाइडशो मोड',
+    allMemories: 'सभी यादें',
+    listenVoiceStory: '🔊 कहानी सुनें',
+    addMemory: 'नई याद जोड़ें',
+    uploadPhotoStory: 'फोटो कहानी अपलोड करें',
+
+    // Voice & Companion
+    voiceGuide: 'आवाज मार्गदर्शन',
+    voiceNav: 'आवाज नेविगेशन',
+    tapToSpeak: 'बोलने के लिए टैप करें',
+    voiceListening: 'सुन रहे हैं...',
+
+    // Mindful Progress Garden
+    mindGarden: 'आपका बढ़ता विचार बगीचा',
+    mindfulStreak: 'माइंडफुलनेस निरंतरता',
+    weeklySummary: 'साप्ताहिक सकारात्मक सारांश',
+    gardenSprout: 'कोमल अंकुर 🌱',
+    gardenSapling: 'छोटा पौधा 🌿',
+    gardenBlossom: 'खिला हुआ फूल 🌸',
+    gardenSanctuary: 'विशाल शांत वृक्ष 🌳',
+
+    // Emergency & Caregiver
+    emergencyHelp: 'आपातकालीन सहायता 🛟',
+    caregiverHub: 'देखभालकर्ता हब',
+    caregiverNotice: 'देखभालकर्ता सूचना',
+    dailyReminders: 'दैनिक कोमल अनुस्मारक',
+
     lbTitle: 'लीडरबोर्ड',
     historyTitle: 'खेल इतिहास',
     historyEmpty: 'अभी तक कोई खेल नहीं खेला। अपनी प्रगति देखने के लिए खेलना शुरू करें!',

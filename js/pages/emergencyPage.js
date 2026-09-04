@@ -16,9 +16,9 @@ export default function EmergencyPage(container) {
       <div class="container page-enter" style="max-width: 650px; padding-bottom: 2rem;">
         <!-- Banner -->
         <div class="card card-elevated text-center" style="background: linear-gradient(135deg, #FEF2F2, #FEE2E2); border: 2px solid #FCA5A5; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 18px;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🆘❤️</div>
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🆘 🛟</div>
           <h2 style="color: var(--maroon); font-size: 1.8rem; margin-bottom: 0.25rem;">Emergency & Family Help</h2>
-          <p style="color: #991B1B; font-size: 1.05rem; margin-bottom: 0;">Quick, simple access to your family and emergency support anytime.</p>
+          <p style="color: #991B1B; font-size: 1.05rem; margin-bottom: 0;">Quick, direct access to your primary contact, doctor, and emergency assistance.</p>
         </div>
 
         <!-- Giant Primary Contact Call Button -->
@@ -27,8 +27,8 @@ export default function EmergencyPage(container) {
             Primary Family Contact
           </div>
           
-          <button id="btn-call-primary" class="btn btn-primary btn-block" style="min-height: 76px; font-size: 1.6rem; border-radius: 16px; background: #DC2626; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35); display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
-            ❤️ CALL ${contacts.primaryName.toUpperCase()}
+          <button id="btn-call-primary" class="btn btn-primary btn-block" style="min-height: 76px; font-size: 1.55rem; border-radius: 16px; background: #DC2626; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35); display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+            🛟 CALL ${contacts.primaryName.toUpperCase()}
           </button>
 
           <div style="margin-top: 0.75rem; color: var(--gray-500); font-size: 1rem;">
@@ -105,7 +105,7 @@ export default function EmergencyPage(container) {
         ${showConfirmCallModal && callTarget ? `
           <div class="modal-overlay">
             <div class="modal-content text-center" style="max-width: 400px; padding: 2rem 1.5rem;">
-              <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📞❤️</div>
+              <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📞 🛟</div>
               <h3 style="color: var(--maroon); font-size: 1.4rem; margin-bottom: 0.5rem;">Call Confirmation</h3>
               <p style="color: var(--gray-700); font-size: 1.1rem; margin-bottom: 1.5rem;">
                 Would you like to initiate a phone call to <strong>${callTarget.name}</strong> at <strong>${callTarget.phone}</strong>?

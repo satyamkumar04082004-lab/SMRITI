@@ -195,24 +195,128 @@ const AIService = {
   },
 
   // ------------------------------------------------------------
-  // 4. ACTIVITY RECOMMENDER
+  // 4. PERSONALIZED ACTIVITY RECOMMENDER
+  // Considers: mood, performance history, weak cognitive areas, time of day
   // ------------------------------------------------------------
-  recommendActivity() {
+  recommendActivity(overrideMood = null, customHistory = null) {
     const games = [
-      { id: 'hornbill', name: 'Hornbill Memory Nest', icon: '🦅', tag: 'Visual Memory', route: '#/games/hornbill', desc: 'Match gentle nature cards in the forest' },
-      { id: 'memory-moments', name: 'Memory Moments', icon: '📖', tag: 'Story Recall', route: '#/games/memory-moments', desc: 'Recall pleasant daily life stories' },
-      { id: 'familiar-faces', name: 'Familiar Faces', icon: '👨‍👩‍👧', tag: 'Recognition', route: '#/games/familiar-faces', desc: 'Connect faces with friendly hints' },
-      { id: 'remember-home', name: 'Remember My Home', icon: '🏠', tag: 'Spatial Focus', route: '#/games/remember-home', desc: 'Spot and remember household objects' },
-      { id: 'my-day', name: 'My Day', icon: '☀️', tag: 'Routine Focus', route: '#/games/my-day', desc: 'Arrange healthy daily steps in order' },
-      { id: 'listen-remember', name: 'Listen & Remember', icon: '👂', tag: 'Auditory Memory', route: '#/games/listen-remember', desc: 'Listen to clear uplifting sentences' },
-      { id: 'bamboo-sequence', name: 'Bamboo Sequence', icon: '🎋', tag: 'Pattern Attention', route: '#/games/bamboo-sequence', desc: 'Repeat peaceful glowing bamboo pads' }
+      { id: 'hornbill', name: 'Hornbill Memory Nest', icon: '🦅', tag: 'Visual Working Memory', route: '#/games/hornbill', desc: 'Match gentle nature cards in the forest', area: 'Visual Memory' },
+      { id: 'memory-moments', name: 'Memory Moments', icon: '📖', tag: 'Episodic Story Recall', route: '#/games/memory-moments', desc: 'Recall pleasant daily life stories and details', area: 'Story Recall' },
+      { id: 'familiar-faces', name: 'Familiar Faces', icon: '👨‍👩‍👧', tag: 'Social Recognition', route: '#/games/familiar-faces', desc: 'Connect friendly faces with warm hints', area: 'Face Recognition' },
+      { id: 'remember-home', name: 'Remember My Home', icon: '🏠', tag: 'Spatial Focus', route: '#/games/remember-home', desc: 'Spot and remember household objects in rooms', area: 'Spatial Memory' },
+      { id: 'my-day', name: 'My Day', icon: '☀️', tag: 'Routine Sequencing', route: '#/games/my-day', desc: 'Arrange healthy daily steps in sequential order', area: 'Executive Function' },
+      { id: 'listen-remember', name: 'Listen & Remember', icon: '👂', tag: 'Auditory Attention', route: '#/games/listen-remember', desc: 'Listen to clear uplifting sentences and recall words', area: 'Auditory Memory' },
+      { id: 'bamboo-sequence', name: 'Bamboo Sequence', icon: '🎋', tag: 'Pattern Attention', route: '#/games/bamboo-sequence', desc: 'Repeat peaceful glowing bamboo rhythm pads', area: 'Sequential Memory' }
     ];
 
+    const mood = overrideMood || (Storage.getTodayMood() ? Storage.getTodayMood().mood : null);
+    const history = customHistory || Storage.getGameHistory() || [];
     const hour = new Date().getHours();
-    if (hour < 12) return games[0]; // Hornbill in morning
-    if (hour < 16) return games[1]; // Memory moments in afternoon
-    if (hour < 20) return games[5]; // Listen & remember in evening
-    return games[6]; // Bamboo sequence at night
+
+    // 1. If user is feeling Low or Worried, recommend comforting, non-stressful games
+    if (mood === 'low' || mood === 'worried') {
+      const comfortingGames = [
+        {
+          game: games.find(g => g.id === 'familiar-faces'),
+          reason: 'Recommended because you felt low or worried today — connecting with familiar friendly faces brings comfort and reassurance.'
+        },
+        {
+          game: games.find(g => g.id === 'hornbill'),
+          reason: 'Recommended for your mood today — a gentle, peaceful nature card match to calm and refresh your thoughts.'
+        }
+      ];
+      // Pick based on which has been played less recently
+      const pick = comfortingGames[Math.floor(Date.now() / 3600000) % comfortingGames.length];
+      return { ...pick.game, reason: pick.reason };
+    }
+
+    // 2. If user is feeling Great or Good, offer an engaging cognitive challenge
+    if (mood === 'great' || mood === 'good') {
+      const challengeGames = [
+        {
+          game: games.find(g => g.id === 'bamboo-sequence'),
+          reason: 'Recommended because of your great positive energy today — challenge your pattern memory with glowing bamboo rhythms!'
+        },
+        {
+          game: games.find(g => g.id === 'memory-moments'),
+          reason: 'Recommended to match your cheerful spirits — engage your mind with delightful short stories and story recall.'
+        }
+      ];
+      const pick = challengeGames[Math.floor(Date.now() / 3600000) % challengeGames.length];
+      return { ...pick.game, reason: pick.reason };
+    }
+
+    // 3. Analyze weak cognitive areas from history
+    if (history.length >= 3) {
+      const statsByGame = {};
+      history.forEach(h => {
+        if (!statsByGame[h.gameId]) {
+          statsByGame[h.gameId] = { totalAcc: 0, count: 0 };
+        }
+        statsByGame[h.gameId].totalAcc += (h.accuracy || 0);
+        statsByGame[h.gameId].count++;
+      });
+
+      // Look for game with lowest accuracy below 85%
+      let lowestAccGameId = null;
+      let minAcc = 85;
+      for (const [gid, s] of Object.entries(statsByGame)) {
+        const avg = s.totalAcc / s.count;
+        if (avg < minAcc) {
+          minAcc = avg;
+          lowestAccGameId = gid;
+        }
+      }
+
+      if (lowestAccGameId) {
+        const target = games.find(g => g.id === lowestAccGameId);
+        if (target) {
+          return {
+            ...target,
+            reason: `Recommended to strengthen your ${target.area} — a little daily practice builds remarkable confidence!`
+          };
+        }
+      }
+
+      // Check for an unplayed or least-played game
+      const unplayed = games.find(g => !statsByGame[g.id]);
+      if (unplayed) {
+        return {
+          ...unplayed,
+          reason: `Recommended to explore new brain paths — you haven't tried ${unplayed.name} recently!`
+        };
+      }
+    }
+
+    // 4. Time of Day dynamic selection (varied by day of week so it never repeats daily)
+    const dayOfWeek = new Date().getDay();
+    if (hour < 12) {
+      const morningGames = [games[0], games[3], games[4]]; // Hornbill, Remember Home, My Day
+      const chosen = morningGames[dayOfWeek % morningGames.length];
+      return {
+        ...chosen,
+        reason: `Recommended for your morning routine — gentle morning focus to awaken your mind.`
+      };
+    } else if (hour < 17) {
+      const afternoonGames = [games[1], games[2], games[4]]; // Memory Moments, Familiar Faces, My Day
+      const chosen = afternoonGames[dayOfWeek % afternoonGames.length];
+      return {
+        ...chosen,
+        reason: `Recommended for your afternoon recharge — keeps your attention active and alert.`
+      };
+    } else if (hour < 21) {
+      const eveningGames = [games[5], games[0], games[6]]; // Listen & Remember, Hornbill, Bamboo
+      const chosen = eveningGames[dayOfWeek % eveningGames.length];
+      return {
+        ...chosen,
+        reason: `Recommended for a peaceful evening — relaxing mindful recall before bedtime.`
+      };
+    } else {
+      return {
+        ...games[6],
+        reason: `Recommended for gentle nighttime relaxation — glowing bamboo sequencing to wind down.`
+      };
+    }
   }
 };
 

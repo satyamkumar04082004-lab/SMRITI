@@ -29,7 +29,48 @@ export default function Home(container) {
     timeIcon = '🌙';
   }
 
+  function getMoodAdaptive(moodKey) {
+    if (moodKey === 'low' || moodKey === 'worried') {
+      return {
+        text: "I see you’re feeling a bit low or worried today. Would you like a gentle breathing exercise or a peaceful memory game to bring calm and warmth?",
+        bg: '#FFF7ED',
+        border: '#FED7AA',
+        color: '#9A3412',
+        actions: [
+          { label: '🫁 Calming Breathing', route: '#/wellness' },
+          { label: '🦅 Gentle Memory Game', route: '#/games/hornbill' },
+          { label: '🤖 Talk to Smriti', route: '#/smriti' }
+        ]
+      };
+    } else if (moodKey === 'great' || moodKey === 'good') {
+      return {
+        text: "Wonderful! Let’s keep this positive, vibrant energy going with today’s mindful activity.",
+        bg: '#F0FDF4',
+        border: '#BBF7D0',
+        color: '#166534',
+        actions: [
+          { label: '▶ Start Today’s Game', route: recommendedGame.route },
+          { label: '📖 Story Recall Game', route: '#/games/memory-moments' }
+        ]
+      };
+    } else { // 'okay'
+      return {
+        text: "Steady and peaceful. A gentle brain exercise or browsing fond family memories can bring a pleasant spark to your day.",
+        bg: '#F0FDFA',
+        border: '#99F6E4',
+        color: '#0F766E',
+        actions: [
+          { label: '▶ Start Mindful Activity', route: recommendedGame.route },
+          { label: '🖼️ Life Story & Memories', route: '#/memories' }
+        ]
+      };
+    }
+  }
+
   function render() {
+    const recommended = AIService.recommendActivity(todayMood?.mood);
+    const adaptive = todayMood ? getMoodAdaptive(todayMood.mood) : null;
+
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 680px; padding-bottom: 2.5rem;">
         
@@ -53,7 +94,7 @@ export default function Home(container) {
           </div>
         </div>
 
-        <!-- 1. Daily Mood Section -->
+        <!-- 1. Daily Mood Section with Meaningful Adaptive Responses -->
         <div class="card card-elevated mb-md" style="padding: 1.25rem 1.5rem; border-radius: 16px;">
           <h3 style="color: var(--maroon); font-size: 1.2rem; margin-bottom: 0.75rem; text-align: center;">
             How are you feeling today?
@@ -82,44 +123,63 @@ export default function Home(container) {
             </button>
           </div>
 
-          ${todayMood ? `
-            <div class="mood-feedback-banner" style="background: #F0FDFA; padding: 0.75rem 1rem; border-radius: 10px; text-align: center; margin-top: 0.75rem; border: 1px solid #CCFBF1;">
-              <span style="color: #0F766E; font-weight: 600; font-size: 0.95rem;">
-                Thank you for sharing! You checked in as <strong>${todayMood.emoji} ${todayMood.label}</strong> today.
-              </span>
-              <div style="margin-top: 0.5rem;">
-                <button id="btn-mood-talk" class="btn btn-secondary btn-sm">
-                  🤖 Talk to Smriti about your day
-                </button>
+          <!-- Meaningful Adaptive Response Card -->
+          ${adaptive ? `
+            <div class="mood-adaptive-card" style="background: ${adaptive.bg}; border: 2px solid ${adaptive.border}; border-radius: 14px; padding: 1rem 1.15rem; margin-top: 0.85rem;">
+              <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                <div style="font-size: 2.2rem; line-height: 1;">${todayMood.emoji}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; color: ${adaptive.color}; font-size: 1.05rem; margin-bottom: 0.2rem;">
+                    Checked in as ${todayMood.label}
+                  </div>
+                  <p style="color: ${adaptive.color}; margin: 0 0 0.75rem 0; font-size: 1rem; line-height: 1.45;">
+                    “${adaptive.text}”
+                  </p>
+                  <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                    ${adaptive.actions.map(act => `
+                      <button class="btn btn-sm btn-mood-action" data-route="${act.route}" style="background: white; border: 1.5px solid ${adaptive.border}; color: ${adaptive.color}; font-weight: 700; border-radius: 8px; padding: 0.45rem 0.85rem; font-size: 0.95rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+                        ${act.label}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
               </div>
             </div>
           ` : ''}
         </div>
 
-        <!-- 2. Today's Activity Recommendation -->
+        <!-- 2. Today's Personalized Activity Recommendation -->
         <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 16px; border-left: 6px solid var(--teal); background: #FFFFFF;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <span style="font-size: 1.8rem;">🎯</span>
               <div>
                 <div style="font-size: 0.8rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.5px;">
-                  Today's Recommended Activity
+                  Today's Personalized Activity
                 </div>
                 <h3 style="color: var(--maroon); margin: 0; font-size: 1.25rem;">
-                  ${recommendedGame.name}
+                  ${recommended.name}
                 </h3>
               </div>
             </div>
             <span class="card-tag" style="background: #E6F4F1; color: var(--teal-dark);">
-              ${recommendedGame.tag}
+              ${recommended.tag}
             </span>
           </div>
 
-          <p class="text-muted" style="margin: 0.5rem 0 1rem 0; font-size: 0.95rem;">
-            ${recommendedGame.desc}
+          <p class="text-muted" style="margin: 0.4rem 0 0.6rem 0; font-size: 0.95rem;">
+            ${recommended.desc}
           </p>
 
-          <button id="btn-start-activity" class="btn btn-primary btn-block" style="min-height: 52px; font-size: 1.15rem;">
+          <!-- Dynamic Personalized Reason -->
+          ${recommended.reason ? `
+            <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 10px; padding: 0.55rem 0.85rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.92rem; color: #166534; font-weight: 600;">
+              <span style="font-size: 1.15rem;">💡</span>
+              <span>${recommended.reason}</span>
+            </div>
+          ` : ''}
+
+          <button id="btn-start-activity" data-route="${recommended.route}" class="btn btn-primary btn-block" style="min-height: 52px; font-size: 1.15rem;">
             ▶ START ACTIVITY
           </button>
         </div>
@@ -195,6 +255,11 @@ export default function Home(container) {
               <div style="font-weight: 600; font-size: 0.95rem; color: var(--maroon);">Games Hub</div>
             </div>
 
+            <div class="card card-game home-nav-card" data-route="#/memories" style="padding: 1rem 0.5rem; cursor: pointer;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🖼️</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #B45309;">Life Story</div>
+            </div>
+
             <div class="card card-game home-nav-card" data-route="#/wellness" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌿</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #065F46;">Wellness</div>
@@ -210,13 +275,8 @@ export default function Home(container) {
               <div style="font-weight: 600; font-size: 0.95rem; color: #1E40AF;">Medicines</div>
             </div>
 
-            <div class="card card-game home-nav-card" data-route="#/journey" style="padding: 1rem 0.5rem; cursor: pointer;">
-              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌱</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: #78350F;">My Journey</div>
-            </div>
-
             <div class="card card-game home-nav-card" data-route="#/emergency" style="padding: 1rem 0.5rem; cursor: pointer;">
-              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🆘</div>
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🛟</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #DC2626;">Emergency</div>
             </div>
           </div>
@@ -244,19 +304,20 @@ export default function Home(container) {
       });
     });
 
-    // Mood talk button
-    const moodTalkBtn = container.querySelector('#btn-mood-talk');
-    if (moodTalkBtn) {
-      moodTalkBtn.addEventListener('click', () => {
-        window.location.hash = '#/smriti';
+    // Adaptive mood action buttons
+    container.querySelectorAll('.btn-mood-action').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const route = btn.getAttribute('data-route');
+        if (route) window.location.hash = route;
       });
-    }
+    });
 
     // Start activity button
     const startActBtn = container.querySelector('#btn-start-activity');
     if (startActBtn) {
       startActBtn.addEventListener('click', () => {
-        window.location.hash = recommendedGame.route;
+        const targetRoute = startActBtn.getAttribute('data-route') || '#/games';
+        window.location.hash = targetRoute;
       });
     }
 

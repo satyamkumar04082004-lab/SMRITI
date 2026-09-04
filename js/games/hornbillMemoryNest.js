@@ -47,14 +47,17 @@ export default function HornbillMemoryNest(container) {
         cards.sort(() => Math.random() - 0.5);
 
         gameArea.innerHTML = `
-            <div class="game-header">
-                <p>Moves: <span id="moves-count">0</span></p>
+            <div class="game-header" style="text-align: center; margin-bottom: 1rem;">
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--maroon);">
+                    🦅 Matches Found: <span id="matches-count">0</span> / ${targetPairs} &nbsp;•&nbsp; Moves: <span id="moves-count">0</span>
+                </div>
             </div>
-            <div class="memory-grid" style="display: grid; gap: 10px; grid-template-columns: repeat(${gridCols}, 1fr);">
+            <div class="memory-grid memory-grid-${gridCols}">
             </div>
         `;
         
         movesDisplay = gameArea.querySelector('#moves-count');
+        const matchesDisplay = gameArea.querySelector('#matches-count');
         const grid = gameArea.querySelector('.memory-grid');
 
         cards.forEach((emoji, index) => {
@@ -62,27 +65,23 @@ export default function HornbillMemoryNest(container) {
             card.className = 'memory-card';
             card.dataset.emoji = emoji;
             card.dataset.index = index;
-            card.style.height = '100px';
-            card.style.perspective = '1000px';
-            card.style.cursor = 'pointer';
 
             card.innerHTML = `
-                <div class="memory-card-inner" style="width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative;">
-                    <div class="memory-card-front memory-card-face card" style="width: 100%; height: 100%; position: absolute; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #9B2C2C; color: white;">?</div>
-                    <div class="memory-card-back memory-card-face card" style="width: 100%; height: 100%; position: absolute; backface-visibility: hidden; transform: rotateY(180deg); display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #FDF8F3;">${emoji}</div>
+                <div class="memory-card-inner">
+                    <div class="memory-card-face memory-card-back" title="Tap to flip">🪶</div>
+                    <div class="memory-card-face memory-card-front">${emoji}</div>
                 </div>
             `;
 
-            card.addEventListener('click', () => handleCardClick(card, controller));
+            card.addEventListener('click', () => handleCardClick(card, controller, matchesDisplay));
             grid.appendChild(card);
         });
     }
 
-    function handleCardClick(card, controller) {
+    function handleCardClick(card, controller, matchesDisplay) {
         if (isFlipping || card.classList.contains('flipped') || card.classList.contains('matched')) return;
 
         card.classList.add('flipped');
-        card.querySelector('.memory-card-inner').style.transform = 'rotateY(180deg)';
         flippedCards.push(card);
 
         if (flippedCards.length === 2) {
@@ -98,6 +97,7 @@ export default function HornbillMemoryNest(container) {
                     controller.addScore(10);
                     controller.recordCorrect();
                     pairsMatched++;
+                    if (matchesDisplay) matchesDisplay.textContent = pairsMatched;
                     flippedCards = [];
                     isFlipping = false;
 
@@ -105,13 +105,11 @@ export default function HornbillMemoryNest(container) {
                         const accuracy = Math.round((targetPairs / moves) * 100);
                         controller.endGame({ accuracy: Math.min(100, accuracy) });
                     }
-                }, 500);
+                }, 400);
             } else {
                 setTimeout(() => {
                     card1.classList.remove('flipped');
-                    card1.querySelector('.memory-card-inner').style.transform = 'rotateY(0deg)';
                     card2.classList.remove('flipped');
-                    card2.querySelector('.memory-card-inner').style.transform = 'rotateY(0deg)';
                     controller.recordWrong();
                     flippedCards = [];
                     isFlipping = false;
