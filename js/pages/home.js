@@ -128,6 +128,7 @@ export default function Home(container) {
     const adaptive = todayMood ? getMoodAdaptive(todayMood.mood) : null;
     const reminders = Storage.getReminders();
     const activeReminders = reminders.filter(r => r.active && !r.completedToday);
+    const nextReminder = activeReminders.length > 0 ? activeReminders[0] : null;
     const lang = I18n.lang;
     let welcomeSub = "Welcome to your daily memory and wellness sanctuary.";
     let callLovedOne = "Call Loved One";
