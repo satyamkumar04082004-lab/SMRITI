@@ -443,7 +443,8 @@ const Storage = {
         date: 'November 2024',
         image: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop&q=80',
         story: 'The most joyful day when our sweet Riya got married in Guwahati. The courtyard was decorated with fragrant marigold flowers, and everyone danced to traditional melodies until evening.',
-        voiceNote: 'The whole family had gathered together, smiling and blessing our beloved Riya. What a golden, cherished memory.'
+        voiceNote: 'The whole family had gathered together, smiling and blessing our beloved Riya. What a golden, cherished memory.',
+        question: 'Do you remember the traditional melodies everyone danced to?'
       },
       {
         id: 'mem2',
@@ -452,7 +453,8 @@ const Storage = {
         date: 'Spring 1988',
         image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80',
         story: 'Walking with Ashok along the lush green tea slopes in the cool morning mist. The scent of fresh tea leaves and warm ginger tea from our thermos flask made every morning special.',
-        voiceNote: 'Ashok would always pick two fresh tea blossoms and smile. The morning breeze was so peaceful.'
+        voiceNote: 'Ashok would always pick two fresh tea blossoms and smile. The morning breeze was so peaceful.',
+        question: 'How did the fresh morning breeze feel as you walked?'
       },
       {
         id: 'mem3',
@@ -461,7 +463,8 @@ const Storage = {
         date: 'January 2022',
         image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&auto=format&fit=crop&q=80',
         story: 'Making homemade coconut pitha and sesame laddoos for all our neighbors and grandchildren. Seeing the children smile with sweet sticky hands was pure happiness.',
-        voiceNote: 'The aroma of roasted rice flour and jaggery filled our entire home.'
+        voiceNote: 'The aroma of roasted rice flour and jaggery filled our entire home.',
+        question: 'Who enjoyed the homemade coconut pitha the most?'
       },
       {
         id: 'mem4',
@@ -470,7 +473,8 @@ const Storage = {
         date: 'Summer 1965',
         image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&auto=format&fit=crop&q=80',
         story: 'Sitting under the shade of our ancestral mango tree on warm summer afternoons, reading stories and sharing slices of raw green mango with a pinch of rock salt.',
-        voiceNote: 'That giant old tree sheltered generations of our family with love and shade.'
+        voiceNote: 'That giant old tree sheltered generations of our family with love and shade.',
+        question: 'Who used to climb the big branches with you?'
       }
     ]);
   },
@@ -484,6 +488,131 @@ const Storage = {
     list.unshift(memory);
     this.setMemories(list);
     return list;
+  },
+
+  updateMemory(id, updatedFields) {
+    const list = this.getMemories().map(m => m.id === id ? { ...m, ...updatedFields } : m);
+    this.setMemories(list);
+    return list;
+  },
+
+  deleteMemory(id) {
+    const list = this.getMemories().filter(m => m.id !== id);
+    this.setMemories(list);
+    return list;
+  },
+
+  // --- Custom Familiar Faces Uploaded by User/Family ---
+  getCustomFaces() {
+    return this.getUserData('customFaces', [
+      {
+        id: 'face_custom_1',
+        name: 'Raj',
+        relation: 'Son',
+        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+        hints: ['He is your loving son', 'His name starts with R', 'He brings you hot ginger tea'],
+        options: ['Raj (Son)', 'Amit (Neighbor)', 'Dr. Barua', 'Suresh (Friend)']
+      },
+      {
+        id: 'face_custom_2',
+        name: 'Ananya',
+        relation: 'Daughter',
+        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+        hints: ['She calls you every evening', 'Her name starts with A', 'She is your daughter'],
+        options: ['Ananya (Daughter)', 'Sunita (Nurse)', 'Riya (Granddaughter)', 'Pooja (Niece)']
+      }
+    ]);
+  },
+
+  setCustomFaces(faces) {
+    this.setUserData('customFaces', faces);
+  },
+
+  addCustomFace(face) {
+    const faces = this.getCustomFaces();
+    faces.unshift(face);
+    this.setCustomFaces(faces);
+    return faces;
+  },
+
+  deleteCustomFace(id) {
+    const faces = this.getCustomFaces().filter(f => f.id !== id);
+    this.setCustomFaces(faces);
+    return faces;
+  },
+
+  // --- Unique Username for Social & Family Connections ---
+  getUsername() {
+    const user = this.getUser();
+    if (user && user.username) return user.username;
+    const baseName = (user && user.name ? user.name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'meera') || 'senior';
+    const num = user && user.phone ? user.phone.slice(-4) : '2026';
+    const username = `@${baseName}_${num}`;
+    if (user) {
+      user.username = username;
+      this.setUser(user);
+    }
+    return username;
+  },
+
+  // --- Social Smiles & Family Messages ---
+  getSocialMessages() {
+    return this.getUserData('socialMessages', [
+      {
+        id: 'msg_1',
+        from: 'Raj (Son)',
+        fromUsername: '@raj_4321',
+        type: 'smile',
+        content: 'Sending you the warmest morning smile and a big hug! Have a gentle day Ma! 🌸❤️',
+        date: 'Today, 8:30 AM',
+        avatar: '👨'
+      },
+      {
+        id: 'msg_2',
+        from: 'Ananya (Daughter)',
+        fromUsername: '@ananya_1234',
+        type: 'voice',
+        content: '“Hi Ma! Don’t forget to drink your warm ginger tea after breakfast. Thinking of you always!”',
+        date: 'Yesterday, 6:15 PM',
+        avatar: '👩'
+      },
+      {
+        id: 'msg_3',
+        from: 'Riya (Granddaughter)',
+        fromUsername: '@riya_9988',
+        type: 'smile',
+        content: 'Dadi, I scored well in my art exam today! Thinking of your delicious coconut laddoos! 🍬🎨',
+        date: '2 days ago',
+        avatar: '👧'
+      }
+    ]);
+  },
+
+  addSocialMessage(msg) {
+    const msgs = this.getSocialMessages();
+    msgs.unshift(msg);
+    this.setUserData('socialMessages', msgs);
+    return msgs;
+  },
+
+  // --- Family Encouragement & Weekly Goals ---
+  getFamilyChallenge() {
+    return this.getUserData('familyChallenge', {
+      title: 'Family Storytelling Week',
+      description: 'Share or listen to 3 favorite family memories together with loved ones.',
+      target: 3,
+      current: 2,
+      participants: ['Meera (You)', 'Raj', 'Ananya'],
+      status: 'active',
+      badge: '🌟 Storyteller Family'
+    });
+  },
+
+  updateFamilyChallenge(progress) {
+    const challenge = this.getFamilyChallenge();
+    challenge.current = Math.min(challenge.target, challenge.current + progress);
+    this.setUserData('familyChallenge', challenge);
+    return challenge;
   },
 
   // --- Reset / Demo Data Population ---

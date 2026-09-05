@@ -402,14 +402,29 @@ export default function Home(container) {
               <div style="font-weight: 600; font-size: 0.95rem; color: #B45309;">${lang === 'hi' ? 'जीवन की यादें' : (lang === 'bn' ? 'স্মৃতিমালা' : 'Life Story')}</div>
             </div>
 
+            <div class="card card-game home-nav-card" data-route="#/entertainment" style="padding: 1rem 0.5rem; cursor: pointer;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🎭</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #9333EA;">${lang === 'hi' ? 'संगीत व मनोरंजन' : (lang === 'bn' ? 'গান ও গল্প' : 'Entertainment')}</div>
+            </div>
+
+            <div class="card card-game home-nav-card" data-route="#/social" style="padding: 1rem 0.5rem; cursor: pointer;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">👨‍👩‍👧</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #D97706;">${lang === 'hi' ? 'परिवार के साथ खेलें' : (lang === 'bn' ? 'পরিবারের সাথে খেলা' : 'Family Play')}</div>
+            </div>
+
+            <div class="card card-game home-nav-card" data-route="#/leaderboard" style="padding: 1rem 0.5rem; cursor: pointer;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌟</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #B45309;">${lang === 'hi' ? 'सप्ताह के सितारे' : (lang === 'bn' ? 'সপ্তাহের তারা' : 'Weekly Stars')}</div>
+            </div>
+
             <div class="card card-game home-nav-card" data-route="#/wellness" style="padding: 1rem 0.5rem; cursor: pointer;">
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌿</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #065F46;">${lang === 'hi' ? 'स्वास्थ्य' : (lang === 'bn' ? 'সুস্থতা' : 'Wellness')}</div>
             </div>
 
-            <div class="card card-game home-nav-card" data-route="#/improvement" style="padding: 1rem 0.5rem; cursor: pointer;">
-              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">📈</div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: var(--teal-dark);">${lang === 'hi' ? 'प्रगति' : (lang === 'bn' ? 'অগ্রগতি' : 'Progress')}</div>
+            <div class="card card-game home-nav-card" data-route="#/reminders" style="padding: 1rem 0.5rem; cursor: pointer;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">⏰</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: var(--teal-dark);">${lang === 'hi' ? 'अनुस्मारक' : (lang === 'bn' ? 'অনুস্মারক' : 'Reminders')}</div>
             </div>
 
             <div class="card card-game home-nav-card" data-route="#/medicines" style="padding: 1rem 0.5rem; cursor: pointer;">
@@ -586,6 +601,7 @@ export default function Home(container) {
     render();
   };
   window.addEventListener('userProfileUpdated', profileUpdateHandler);
+  window.addEventListener('languageChanged', profileUpdateHandler);
 
   render();
 
@@ -593,6 +609,7 @@ export default function Home(container) {
     cleanup() {
       TTS.stop();
       window.removeEventListener('userProfileUpdated', profileUpdateHandler);
+      window.removeEventListener('languageChanged', profileUpdateHandler);
     }
   };
 }

@@ -2,7 +2,7 @@
    SMRITI — Service Worker for Offline Resilience & Low Data Mode
    ============================================================ */
 
-const CACHE_NAME = 'smriti-v4';
+const CACHE_NAME = 'smriti-v5';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -38,6 +38,8 @@ const PRECACHE_URLS = [
   './js/pages/journeyPage.js',
   './js/pages/feelingLostPage.js',
   './js/pages/dailyRitualPage.js',
+  './js/pages/entertainmentPage.js',
+  './js/pages/socialPlayPage.js',
   './js/ambientAudio.js',
   './js/games/hornbillMemoryNest.js',
   './js/games/memoryMoments.js',

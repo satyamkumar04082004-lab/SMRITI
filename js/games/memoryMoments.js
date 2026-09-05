@@ -62,24 +62,56 @@ export default function MemoryMoments(container) {
         const story = activeStories[currentStoryIndex];
         const sequence = story.sequence.slice(0, numImages);
 
+        let userSequenceTime = 8;
+        let timeLeft = userSequenceTime;
+
         gameArea.innerHTML = `
-            <div class="story-display" style="text-align: center; margin-bottom: 2rem;">
-                <h3>Memorize this sequence!</h3>
+            <div class="story-display" style="text-align: center; margin-bottom: 1.5rem;">
+                <h3 style="color: var(--maroon); font-size: 1.5rem;">Memorize this sequence!</h3>
                 <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-                    ${sequence.map(emoji => `<div class="story-card card" style="font-size: 3rem; padding: 1rem;">${emoji}</div>`).join('')}
+                    ${sequence.map(emoji => `<div class="story-card card" style="font-size: 3rem; padding: 1rem; border: 2px solid #FCD34D;">${emoji}</div>`).join('')}
                 </div>
             </div>
-            <div class="countdown" style="text-align: center; font-size: 1.5rem; color: #9B2C2C; font-weight: bold;"></div>
+            <div class="pace-control-box" style="margin: 0 auto 1.5rem auto; padding: 0.85rem 1.25rem; background: #FFFDF9; border: 2px solid #FCD34D; border-radius: 16px; max-width: 380px; text-align: center;">
+                <div style="font-weight: 700; color: #78350F; font-size: 0.95rem; margin-bottom: 0.35rem;">
+                    ⏱️ Adjust Memorization Time:
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                    <button type="button" id="btn-seq-dec" class="btn" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; line-height: 1; padding: 0; background: #FFF7ED; border: 2px solid #D97706; color: #B45309;">−</button>
+                    <span id="seq-time-val" style="font-size: 1.2rem; font-weight: 800; color: #92400E; min-width: 70px;">${userSequenceTime}s</span>
+                    <button type="button" id="btn-seq-inc" class="btn" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; line-height: 1; padding: 0; background: #FFF7ED; border: 2px solid #D97706; color: #B45309;">+</button>
+                </div>
+                <div class="countdown" style="text-align: center; font-size: 1.25rem; color: #9B2C2C; font-weight: bold; margin-top: 0.5rem;">
+                    Questions start in: <span id="countdown-num">${timeLeft}</span>s
+                </div>
+            </div>
         `;
 
-        let timeLeft = 5;
-        const countdownEl = gameArea.querySelector('.countdown');
-        countdownEl.textContent = `Time left: ${timeLeft}s`;
+        const countdownNum = gameArea.querySelector('#countdown-num');
+        const seqValDisplay = gameArea.querySelector('#seq-time-val');
+
+        gameArea.querySelector('#btn-seq-dec').addEventListener('click', () => {
+            if (userSequenceTime > 4) {
+                userSequenceTime -= 2;
+                timeLeft = Math.min(timeLeft, userSequenceTime);
+                seqValDisplay.textContent = `${userSequenceTime}s`;
+                countdownNum.textContent = timeLeft;
+            }
+        });
+
+        gameArea.querySelector('#btn-seq-inc').addEventListener('click', () => {
+            if (userSequenceTime < 30) {
+                userSequenceTime += 2;
+                timeLeft += 2;
+                seqValDisplay.textContent = `${userSequenceTime}s`;
+                countdownNum.textContent = timeLeft;
+            }
+        });
 
         const timer = setInterval(() => {
             timeLeft--;
             if (timeLeft > 0) {
-                countdownEl.textContent = `Time left: ${timeLeft}s`;
+                if (countdownNum) countdownNum.textContent = timeLeft;
             } else {
                 clearInterval(timer);
                 showQuestion(gameArea, controller);

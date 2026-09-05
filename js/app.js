@@ -28,6 +28,8 @@ import MemoryGalleryPage from './pages/memoryGalleryPage.js';
 import RemindersPage from './pages/remindersPage.js';
 import FeelingLostPage from './pages/feelingLostPage.js';
 import DailyRitualPage from './pages/dailyRitualPage.js';
+import EntertainmentPage from './pages/entertainmentPage.js';
+import SocialPlayPage from './pages/socialPlayPage.js';
 import AmbientAudio from './ambientAudio.js';
 
 // --- Game imports ---
@@ -90,6 +92,8 @@ const routes = {
   '#/history': { page: HistoryPage, auth: true, nav: true },
   '#/dashboard': { page: DashboardPage, auth: true, nav: true },
   '#/reminders': { page: RemindersPage, auth: true, nav: true },
+  '#/entertainment': { page: EntertainmentPage, auth: true, nav: true },
+  '#/social': { page: SocialPlayPage, auth: true, nav: true },
   '#/ritual': { page: DailyRitualPage, auth: true, nav: true },
   '#/lost': { page: FeelingLostPage, auth: true, nav: false },
   '#/personalisation': { page: PersonalisationPage, auth: true, nav: true },
@@ -202,6 +206,8 @@ function showVoiceNavigationModal() {
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/improvement">📈 Progress</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/medicines">💊 Medicines</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/reminders">⏰ Reminders</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/entertainment">🎭 Music</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/social">👨‍👩‍👧 Family</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/emergency" style="border-color: #EF4444; color: #DC2626;">🛟 Help</button>
       </div>
 
@@ -294,6 +300,10 @@ function showVoiceNavigationModal() {
       target = '#/medicines'; name = 'Medicines';
     } else if (text.includes('reminder') || text.includes('reminders') || text.includes('alarm') || text.includes('samay') || text.includes('somoy')) {
       target = '#/reminders'; name = 'Gentle Reminders';
+    } else if (text.includes('entertainment') || text.includes('music') || text.includes('song') || text.includes('gaana') || text.includes('geet') || text.includes('bhajan') || text.includes('kahani') || text.includes('story')) {
+      target = '#/entertainment'; name = 'Entertainment & Melodies';
+    } else if (text.includes('family') || text.includes('social') || text.includes('friend') || text.includes('smile') || text.includes('parivar') || text.includes('bondhu')) {
+      target = '#/social'; name = 'Play with Family';
     } else if (text.includes('emergency') || text.includes('help') || text.includes('sos') || text.includes('madad') || text.includes('shahajjo') || text.includes('doctor')) {
       target = '#/emergency'; name = 'Emergency Help';
     } else if (text.includes('home') || text.includes('ghar') || text.includes('bari') || text.includes('start')) {
@@ -571,14 +581,9 @@ function init() {
   // Listen for hash changes
   window.addEventListener('hashchange', navigate);
 
-  // Listen for language changes to refresh UI
+  // Listen for language changes to refresh UI dynamically across full page
   window.addEventListener('languageChanged', () => {
-    renderHeader();
-    const hash = window.location.hash || '#/home';
-    const route = routes[hash];
-    if (route && route.nav) {
-      renderNav(hash);
-    }
+    navigate();
   });
 
   // Always invoke initial navigation directly

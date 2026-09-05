@@ -32,23 +32,26 @@ export default function RememberHome(container) {
 
     const shell = GameShell.create(container, config);
 
+    let userMemorizeTime = 8; // Default generous 8 seconds for elderly ease
+
     function startGame(difficulty, gameArea, controller) {
         currentController = controller;
-        let numObjects, displayTime, totalRounds;
+        let numObjects, defaultTime, totalRounds;
         
         if (difficulty === 'easy') {
             numObjects = 4;
-            displayTime = 5000;
+            defaultTime = 8;
             totalRounds = 5;
         } else if (difficulty === 'medium') {
             numObjects = 5;
-            displayTime = 4000;
+            defaultTime = 7;
             totalRounds = 6;
         } else {
             numObjects = 7;
-            displayTime = 3000;
+            defaultTime = 6;
             totalRounds = 7;
         }
+        userMemorizeTime = defaultTime;
 
         let currentRound = 0;
 
@@ -90,20 +93,59 @@ export default function RememberHome(container) {
             
             gameArea.appendChild(gridContainer);
             
-            const statusText = document.createElement('div');
-            statusText.className = 'text-center mt-4 text-lg font-medium';
-            statusText.textContent = `Memorize the room! Hiding in ${displayTime/1000} seconds...`;
-            gameArea.appendChild(statusText);
+            // Pace Control & Countdown Box
+            const paceBox = document.createElement('div');
+            paceBox.className = 'pace-control-box mt-4 p-3 bg-white rounded-xl shadow-sm border border-amber-200 max-w-sm mx-auto text-center';
+            paceBox.innerHTML = `
+                <div class="text-sm font-bold text-amber-900 mb-1">⏱️ Memorization Time Before Questions:</div>
+                <div class="flex items-center justify-center gap-3 my-1">
+                    <button type="button" id="btn-pace-dec" class="btn" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; line-height: 1; padding: 0; background: #FFF7ED; border: 2px solid #D97706; color: #B45309;">−</button>
+                    <span id="pace-val" class="font-extrabold text-lg text-amber-800" style="min-width: 80px;">${userMemorizeTime}s</span>
+                    <button type="button" id="btn-pace-inc" class="btn" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; line-height: 1; padding: 0; background: #FFF7ED; border: 2px solid #D97706; color: #B45309;">+</button>
+                </div>
+                <div id="status-countdown" class="text-base font-bold text-teal-800 mt-1">
+                    Memorize carefully! Questions start in: <span id="countdown-num" style="font-size: 1.25rem; color: #9B2C2C;">${userMemorizeTime}</span>s
+                </div>
+            `;
+            gameArea.appendChild(paceBox);
+
+            let remainingTime = userMemorizeTime;
+            const paceValEl = paceBox.querySelector('#pace-val');
+            const countdownNumEl = paceBox.querySelector('#countdown-num');
+
+            paceBox.querySelector('#btn-pace-dec').addEventListener('click', () => {
+                if (userMemorizeTime > 4) {
+                    userMemorizeTime -= 2;
+                    remainingTime = Math.min(remainingTime, userMemorizeTime);
+                    paceValEl.textContent = `${userMemorizeTime}s`;
+                    countdownNumEl.textContent = remainingTime;
+                }
+            });
+
+            paceBox.querySelector('#btn-pace-inc').addEventListener('click', () => {
+                if (userMemorizeTime < 30) {
+                    userMemorizeTime += 2;
+                    remainingTime += 2;
+                    paceValEl.textContent = `${userMemorizeTime}s`;
+                    countdownNumEl.textContent = remainingTime;
+                }
+            });
             
             if (TTS.isSupported()) {
-                const ttsBtn = TTS.createButton(`Memorize the objects in the room for ${displayTime/1000} seconds.`);
+                const ttsBtn = TTS.createButton(`Memorize the objects in the room.`);
                 ttsBtn.classList.add('mt-2', 'mx-auto', 'block');
                 gameArea.appendChild(ttsBtn);
             }
 
-            timer = setTimeout(() => {
-                hideAndAsk(selectedObjects, cells, gridContainer, gameArea, roundIndicator);
-            }, displayTime);
+            timer = setInterval(() => {
+                remainingTime--;
+                if (remainingTime > 0) {
+                    if (countdownNumEl) countdownNumEl.textContent = remainingTime;
+                } else {
+                    clearInterval(timer);
+                    hideAndAsk(selectedObjects, cells, gridContainer, gameArea, roundIndicator);
+                }
+            }, 1000);
         }
         
         function hideAndAsk(selectedObjects, cells, gridContainer, gameArea, roundIndicator) {
@@ -232,7 +274,10 @@ export default function RememberHome(container) {
     }
 
     function cleanup() {
-        if (timer) clearTimeout(timer);
+        if (timer) {
+            clearInterval(timer);
+            clearTimeout(timer);
+        }
     }
 
     return shell;

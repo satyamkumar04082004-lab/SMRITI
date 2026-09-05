@@ -13,6 +13,7 @@ export default function MemoryGalleryPage(container) {
   let viewMode = 'slideshow'; // 'slideshow' | 'grid'
   let isSpeaking = false;
   let showAddModal = false;
+  let editingMemory = null; // null or memory object being edited
 
   function render() {
     if (!memories.length) {
@@ -20,15 +21,16 @@ export default function MemoryGalleryPage(container) {
         <div class="container page-enter" style="max-width: 680px; padding: 2rem 1rem; text-align: center;">
           <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🖼️✨</div>
           <h2 style="color: var(--maroon);">Life Story & Memories</h2>
-          <p class="text-muted" style="font-size: 1.1rem; margin-bottom: 1.5rem;">No family memories added yet. Caregivers can add precious memories here.</p>
+          <p class="text-muted" style="font-size: 1.1rem; margin-bottom: 1.5rem;">No family memories added yet. Caregivers and family can add up to 30+ precious memories here.</p>
           <button id="btn-add-first-mem" class="btn btn-primary">+ Add First Memory</button>
         </div>
       `;
       const btn = container.querySelector('#btn-add-first-mem');
-      if (btn) btn.addEventListener('click', () => { showAddModal = true; render(); });
+      if (btn) btn.addEventListener('click', () => { editingMemory = null; showAddModal = true; render(); });
       return;
     }
 
+    if (currentIndex >= memories.length) currentIndex = memories.length - 1;
     const current = memories[currentIndex] || memories[0];
 
     container.innerHTML = `
@@ -44,7 +46,7 @@ export default function MemoryGalleryPage(container) {
               <h2 style="color: var(--maroon); margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
                 <span>🖼️</span> Life Story & Memories
               </h2>
-              <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.95rem;">Treasured moments with your loved ones</p>
+              <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.95rem;">Treasured moments with your loved ones (${memories.length} / 30+ saved)</p>
             </div>
           </div>
 
@@ -62,14 +64,26 @@ export default function MemoryGalleryPage(container) {
           <!-- SLIDESHOW STORY MODE (Senior-Friendly, Large Cards) -->
           <div class="card card-elevated" style="padding: 1.5rem; border-radius: 20px; background: #FFFDF9; border: 2px solid #FDE68A; margin-bottom: 1.25rem;">
             
-            <!-- Memory Tag & Date Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="background: #E6F4F1; color: var(--teal-dark); font-weight: 700; font-size: 0.9rem; padding: 4px 12px; border-radius: 20px;">
-                🏷️ ${current.tag || 'Family'}
-              </span>
-              <span style="color: var(--gray-500); font-weight: 600; font-size: 0.95rem;">
-                📅 ${current.date || 'Cherished Moment'}
-              </span>
+            <!-- Memory Tag & Action Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="background: #E6F4F1; color: var(--teal-dark); font-weight: 700; font-size: 0.9rem; padding: 4px 12px; border-radius: 20px;">
+                  🏷️ ${current.tag || 'Family'}
+                </span>
+                <span style="color: var(--gray-500); font-weight: 600; font-size: 0.95rem;">
+                  📅 ${current.date || 'Cherished Moment'}
+                </span>
+              </div>
+              
+              <!-- Edit & Remove Action Buttons -->
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-ghost btn-sm btn-edit-current-mem" style="padding: 4px 10px; font-size: 0.95rem; color: #B45309; background: #FEF3C7; border-radius: 8px; font-weight: 600;" title="Edit this memory">
+                  ✏️ Edit
+                </button>
+                <button class="btn btn-ghost btn-sm btn-delete-current-mem" style="padding: 4px 10px; font-size: 0.95rem; color: #DC2626; background: #FEE2E2; border-radius: 8px; font-weight: 600;" title="Remove this memory">
+                  🗑️ Remove
+                </button>
+              </div>
             </div>
 
             <!-- Big Memory Photo -->
@@ -126,60 +140,71 @@ export default function MemoryGalleryPage(container) {
                   <img src="${m.image}" alt="${m.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&auto=format&fit=crop&q=80'" />
                 </div>
                 <div style="padding: 1rem;">
-                  <div style="font-size: 0.8rem; color: var(--teal-dark); font-weight: 700; text-transform: uppercase;">${m.tag || 'Memory'}</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.8rem; color: var(--teal-dark); font-weight: 700; text-transform: uppercase;">${m.tag || 'Memory'}</span>
+                    <span style="font-size: 0.8rem; color: var(--gray-500);">${m.date || ''}</span>
+                  </div>
                   <h4 style="color: var(--maroon); margin: 0.25rem 0 0.4rem 0; font-size: 1.15rem;">${m.title}</h4>
-                  <p style="color: var(--gray-500); font-size: 0.9rem; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  <p style="color: var(--gray-500); font-size: 0.9rem; margin: 0 0 0.75rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                     ${m.story}
                   </p>
+                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button class="btn btn-ghost btn-sm btn-grid-edit" data-id="${m.id}" data-idx="${idx}" style="padding: 4px 8px; font-size: 0.85rem; color: #B45309; background: #FEF3C7; border-radius: 6px;">✏️ Edit</button>
+                    <button class="btn btn-ghost btn-sm btn-grid-delete" data-id="${m.id}" style="padding: 4px 8px; font-size: 0.85rem; color: #DC2626; background: #FEE2E2; border-radius: 6px;">🗑️</button>
+                  </div>
                 </div>
               </div>
             `).join('')}
           </div>
         `}
 
-        <!-- Add Memory Modal for Family / Caregivers -->
+        <!-- Add or Edit Memory Modal for Family / Caregivers -->
         ${showAddModal ? `
           <div class="modal-overlay">
             <div class="modal-content" style="max-width: 500px; padding: 1.75rem; border-radius: 18px; max-height: 90vh; overflow-y: auto;">
-              <h3 style="color: var(--maroon); margin-top: 0; font-size: 1.4rem;">📷 Add Precious Family Memory</h3>
-              <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">Upload a photo from your device or paste an image link for your loved one to cherish and listen to.</p>
+              <h3 style="color: var(--maroon); margin-top: 0; font-size: 1.4rem;">
+                ${editingMemory ? '✏️ Edit Precious Memory' : '📷 Add Precious Family Memory'}
+              </h3>
+              <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.25rem;">
+                ${editingMemory ? 'Update photo, details, or narration story.' : 'Upload a photo from your device or paste an image link for your loved one to cherish and listen to.'}
+              </p>
 
               <form id="form-add-memory" style="display: flex; flex-direction: column; gap: 0.85rem;">
                 <div class="form-group">
                   <label class="form-label" style="font-weight: 600;">Memory Title *</label>
-                  <input type="text" id="new-mem-title" class="form-input" placeholder="e.g. Grandson Aryan's 5th Birthday" required />
+                  <input type="text" id="new-mem-title" class="form-input" placeholder="e.g. Grandson Aryan's 5th Birthday" value="${editingMemory ? editingMemory.title : ''}" required />
                 </div>
 
                 <!-- Image Upload (Local File + URL Option) -->
                 <div class="form-group" style="background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1.5px dashed #CBD5E1;">
                   <label class="form-label" style="font-weight: 700; color: var(--teal-dark); margin-bottom: 6px;">
-                    🖼️ Upload Photo from Device
+                    🖼️ Photo from Device
                   </label>
                   <input type="file" id="new-mem-file" accept="image/*" class="form-input" style="padding: 6px; font-size: 0.95rem; background: white;" />
-                  <div id="file-upload-preview" style="display: none; margin-top: 8px; border-radius: 8px; overflow: hidden; max-height: 140px;">
-                    <img id="img-preview" src="" alt="Preview" style="width: 100%; height: 140px; object-fit: cover;" />
+                  <div id="file-upload-preview" style="display: ${editingMemory && editingMemory.image ? 'block' : 'none'}; margin-top: 8px; border-radius: 8px; overflow: hidden; max-height: 140px;">
+                    <img id="img-preview" src="${editingMemory ? editingMemory.image : ''}" alt="Preview" style="width: 100%; height: 140px; object-fit: cover;" />
                   </div>
                   <div style="font-size: 0.85rem; color: var(--gray-500); margin-top: 6px;">
                     Or paste an image web link below:
                   </div>
-                  <input type="url" id="new-mem-image" class="form-input" style="margin-top: 4px;" placeholder="https://example.com/photo.jpg" />
+                  <input type="url" id="new-mem-image" class="form-input" style="margin-top: 4px;" placeholder="https://example.com/photo.jpg" value="${editingMemory ? editingMemory.image : ''}" />
                 </div>
 
                 <div style="display: flex; gap: 10px;">
                   <div class="form-group" style="flex: 1;">
                     <label class="form-label" style="font-weight: 600;">Category</label>
                     <select id="new-mem-tag" class="form-select">
-                      <option value="Family">Family 👨‍👩‍👧</option>
-                      <option value="Childhood">Childhood 🧸</option>
-                      <option value="Celebration">Celebration / Festival 🪔</option>
-                      <option value="Nature">Travel & Nature 🌿</option>
-                      <option value="Wedding">Wedding / Milestone 💍</option>
+                      <option value="Family" ${editingMemory && editingMemory.tag === 'Family' ? 'selected' : ''}>Family 👨‍👩‍👧</option>
+                      <option value="Childhood" ${editingMemory && editingMemory.tag === 'Childhood' ? 'selected' : ''}>Childhood 🧸</option>
+                      <option value="Celebration" ${editingMemory && editingMemory.tag === 'Celebration' ? 'selected' : ''}>Celebration / Festival 🪔</option>
+                      <option value="Nature" ${editingMemory && editingMemory.tag === 'Nature' ? 'selected' : ''}>Travel & Nature 🌿</option>
+                      <option value="Wedding" ${editingMemory && editingMemory.tag === 'Wedding' ? 'selected' : ''}>Wedding / Milestone 💍</option>
                     </select>
                   </div>
 
                   <div class="form-group" style="flex: 1;">
                     <label class="form-label" style="font-weight: 600;">Date or Era</label>
-                    <input type="text" id="new-mem-date" class="form-input" placeholder="e.g. Diwali 2022" />
+                    <input type="text" id="new-mem-date" class="form-input" placeholder="e.g. Diwali 2022" value="${editingMemory ? (editingMemory.date || '') : ''}" />
                   </div>
                 </div>
 
@@ -188,7 +213,7 @@ export default function MemoryGalleryPage(container) {
                     <label class="form-label" style="font-weight: 600; margin: 0;">Story / Voice Narration Text *</label>
                     <span style="font-size: 0.8rem; color: var(--teal-dark); font-weight: 600;">💡 Spoken aloud</span>
                   </div>
-                  <textarea id="new-mem-story" class="form-input" rows="3" placeholder="Write the story behind this moment. Smriti will narrate it whenever listened to." required></textarea>
+                  <textarea id="new-mem-story" class="form-input" rows="3" placeholder="Write the story behind this moment. Smriti will narrate it whenever listened to." required>${editingMemory ? editingMemory.story : ''}</textarea>
                 </div>
 
                 <!-- Personalized Memory Reflection Questions -->
@@ -196,12 +221,12 @@ export default function MemoryGalleryPage(container) {
                   <div style="font-size: 0.85rem; font-weight: 700; color: #92400E; margin-bottom: 4px;">
                     💭 Suggested Reminiscence Question (Optional)
                   </div>
-                  <input type="text" id="new-mem-question" class="form-input" style="font-size: 0.95rem; background: white;" placeholder="e.g. Do you remember who made the sweets that day?" />
+                  <input type="text" id="new-mem-question" class="form-input" style="font-size: 0.95rem; background: white;" placeholder="e.g. Do you remember who made the sweets that day?" value="${editingMemory ? (editingMemory.question || '') : ''}" />
                 </div>
 
                 <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                   <button type="submit" class="btn btn-primary" style="flex: 1; min-height: 50px; font-weight: 700;">
-                    ✓ Save Memory
+                    ✓ ${editingMemory ? 'Save Changes' : 'Save Memory'}
                   </button>
                   <button type="button" id="btn-cancel-add-memory" class="btn btn-ghost" style="flex: 1; min-height: 50px;">
                     Cancel
@@ -231,6 +256,36 @@ export default function MemoryGalleryPage(container) {
       topCloseBtn.addEventListener('click', () => {
         TTS.stop();
         window.location.hash = '#/home';
+      });
+    }
+
+    // Slideshow Edit / Delete buttons
+    const editCurrBtn = container.querySelector('.btn-edit-current-mem');
+    if (editCurrBtn) {
+      editCurrBtn.addEventListener('click', () => {
+        TTS.stop();
+        isSpeaking = false;
+        editingMemory = memories[currentIndex];
+        showAddModal = true;
+        render();
+      });
+    }
+
+    const deleteCurrBtn = container.querySelector('.btn-delete-current-mem');
+    if (deleteCurrBtn) {
+      deleteCurrBtn.addEventListener('click', () => {
+        const mem = memories[currentIndex];
+        if (window.confirm(`Are you sure you want to remove "${mem.title}"?`)) {
+          TTS.stop();
+          isSpeaking = false;
+          Storage.deleteMemory(mem.id);
+          memories = Storage.getMemories();
+          if (currentIndex >= memories.length) currentIndex = Math.max(0, memories.length - 1);
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Memory removed successfully.', 'info');
+          }
+          render();
+        }
       });
     }
 
@@ -269,6 +324,7 @@ export default function MemoryGalleryPage(container) {
     const openAddBtn = container.querySelector('#btn-open-add-memory');
     if (openAddBtn) {
       openAddBtn.addEventListener('click', () => {
+        editingMemory = null;
         showAddModal = true;
         render();
       });
@@ -277,18 +333,20 @@ export default function MemoryGalleryPage(container) {
     const cancelAddBtn = container.querySelector('#btn-cancel-add-memory');
     if (cancelAddBtn) {
       cancelAddBtn.addEventListener('click', () => {
+        editingMemory = null;
         showAddModal = false;
         render();
       });
     }
 
-    // Add Memory Form submit
+    // Add or Edit Memory Form submit
     const form = container.querySelector('#form-add-memory');
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const title = container.querySelector('#new-mem-title').value.trim();
-        const image = uploadedBase64 || container.querySelector('#new-mem-image').value.trim() || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&auto=format&fit=crop&q=80';
+        const existingImg = editingMemory ? editingMemory.image : '';
+        const image = uploadedBase64 || container.querySelector('#new-mem-image').value.trim() || existingImg || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&auto=format&fit=crop&q=80';
         const tag = container.querySelector('#new-mem-tag').value;
         const date = container.querySelector('#new-mem-date').value.trim() || 'Precious Time';
         const story = container.querySelector('#new-mem-story').value.trim();
@@ -297,25 +355,39 @@ export default function MemoryGalleryPage(container) {
 
         if (!title || !story) return alert('Please enter both title and story');
 
-        const newMem = {
-          id: 'mem_' + Date.now(),
-          title,
-          image,
-          tag,
-          date,
-          story,
-          question
-        };
+        if (editingMemory) {
+          Storage.updateMemory(editingMemory.id, {
+            title,
+            image,
+            tag,
+            date,
+            story,
+            question
+          });
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Memory updated successfully! ✨', 'success');
+          }
+        } else {
+          const newMem = {
+            id: 'mem_' + Date.now(),
+            title,
+            image,
+            tag,
+            date,
+            story,
+            question
+          };
+          Storage.addMemory(newMem);
+          currentIndex = 0;
+          if (window.SmritiToast) {
+            window.SmritiToast.show('New family memory added with love! 💖', 'success');
+          }
+        }
 
-        Storage.addMemory(newMem);
         memories = Storage.getMemories();
-        currentIndex = 0;
+        editingMemory = null;
         showAddModal = false;
         viewMode = 'slideshow';
-
-        if (window.SmritiToast) {
-          window.SmritiToast.show('New family memory added with love!', 'success');
-        }
         render();
       });
     }
@@ -343,11 +415,40 @@ export default function MemoryGalleryPage(container) {
 
     // Grid card click
     container.querySelectorAll('.grid-memory-item').forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-grid-edit') || e.target.closest('.btn-grid-delete')) return;
         const idx = parseInt(item.getAttribute('data-idx'), 10);
         currentIndex = idx;
         viewMode = 'slideshow';
         render();
+      });
+    });
+
+    // Grid Edit & Delete buttons
+    container.querySelectorAll('.btn-grid-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        editingMemory = memories[idx];
+        showAddModal = true;
+        render();
+      });
+    });
+
+    container.querySelectorAll('.btn-grid-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const mem = memories.find(m => m.id === id);
+        if (window.confirm(`Are you sure you want to remove "${mem ? mem.title : 'this memory'}"?`)) {
+          Storage.deleteMemory(id);
+          memories = Storage.getMemories();
+          if (currentIndex >= memories.length) currentIndex = Math.max(0, memories.length - 1);
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Memory removed.', 'info');
+          }
+          render();
+        }
       });
     });
 
