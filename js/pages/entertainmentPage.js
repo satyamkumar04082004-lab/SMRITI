@@ -16,6 +16,60 @@ export default function EntertainmentPage(container) {
   let synthInterval = null;
   let customSongs = Storage.getUserData('customSongs', []);
 
+  // Indian Classical & Regional Instrumental Soundscapes
+  const indianInstrumentals = [
+    {
+      id: 'inst_flute',
+      title: 'Bansuri (Bamboo Flute) — Raga Yaman',
+      instrument: 'Bansuri (Flute)',
+      melodyNotes: [293.66, 329.63, 369.99, 440.00, 493.88, 554.37, 587.33],
+      waveType: 'sine',
+      tempo: 1000,
+      icon: '🪈',
+      desc: 'Serene, meditative bamboo flute notes resonating with peace and twilight clarity.'
+    },
+    {
+      id: 'inst_sitar',
+      title: 'Sitar Melody — Raga Bhairav',
+      instrument: 'Sitar',
+      melodyNotes: [261.63, 277.18, 329.63, 349.23, 392.00, 415.30, 493.88],
+      waveType: 'triangle',
+      tempo: 750,
+      icon: '🪕',
+      desc: 'Resonant acoustic sitar plucks evoking spiritual awakening and inner stillness.'
+    },
+    {
+      id: 'inst_veena',
+      title: 'Saraswati Veena — Raga Hamsadhwani',
+      instrument: 'Veena',
+      melodyNotes: [261.63, 293.66, 329.63, 392.00, 493.88, 523.25],
+      waveType: 'triangle',
+      tempo: 850,
+      icon: '🎼',
+      desc: 'Deep, rich harmonic strings celebrating wisdom, auspicious beginnings, and joy.'
+    },
+    {
+      id: 'inst_shehnai',
+      title: 'Shehnai — Mangal Dhwani',
+      instrument: 'Shehnai',
+      melodyNotes: [329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+      waveType: 'sawtooth',
+      tempo: 900,
+      icon: '🎺',
+      desc: 'Traditional auspicious wind melody bringing warmth, celebration, and fond memories.'
+    },
+    {
+      id: 'inst_tabla',
+      title: 'Tabla Rhythm — Teentaal Bols',
+      instrument: 'Tabla',
+      melodyNotes: [130.81, 146.83, 164.81, 130.81, 174.61, 146.83, 130.81],
+      waveType: 'sine',
+      tempo: 600,
+      icon: '🥁',
+      desc: 'Rhythmic, gentle percussion beats grounding the mind and cultivating focus.'
+    }
+  ];
+
   const bollywoodClassics = [
     {
       id: 'bw_1',
@@ -154,7 +208,7 @@ export default function EntertainmentPage(container) {
     currentPlayingAudio = null;
   }
 
-  function playSynthesizedMelody(notes, title) {
+  function playSynthesizedMelody(notes, title, waveType = 'sine', tempo = 900) {
     stopSynthesizer();
     TTS.stop();
 
@@ -171,24 +225,24 @@ export default function EntertainmentPage(container) {
       const osc = synthAudioCtx.createOscillator();
       const gain = synthAudioCtx.createGain();
 
-      osc.type = 'sine';
+      osc.type = waveType;
       osc.frequency.setValueAtTime(freq, synthAudioCtx.currentTime);
 
       gain.gain.setValueAtTime(0.001, synthAudioCtx.currentTime);
       gain.gain.linearRampToValueAtTime(0.2, synthAudioCtx.currentTime + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001, synthAudioCtx.currentTime + 1.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, synthAudioCtx.currentTime + (tempo / 1000) * 1.3);
 
       osc.connect(gain);
       gain.connect(synthAudioCtx.destination);
 
       osc.start();
-      osc.stop(synthAudioCtx.currentTime + 1.3);
+      osc.stop(synthAudioCtx.currentTime + (tempo / 1000) * 1.4);
 
       step++;
     };
 
     playNote();
-    synthInterval = setInterval(playNote, 900);
+    synthInterval = setInterval(playNote, tempo);
     render();
   }
 
@@ -258,6 +312,36 @@ export default function EntertainmentPage(container) {
                 <button id="btn-toggle-nature" class="btn ${AmbientAudio.isPlaying() ? 'btn-secondary' : 'btn-primary'}" style="min-height: 48px; border-radius: 12px; font-weight: 700;">
                   ${AmbientAudio.isPlaying() ? '⏸️ Pause Nature' : '▶ Play Nature'}
                 </button>
+              </div>
+            </div>
+
+            <!-- Indian Instrumental Soundscapes (Flute, Sitar, Veena, Shehnai, Tabla) -->
+            <div class="card card-elevated mb-md" style="padding: 1.25rem; border-radius: 18px; border: 2px solid #FDE68A; background: #FFFDF9;">
+              <h3 style="color: #B45309; font-size: 1.3rem; margin-top: 0; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>🪈</span> Traditional Indian Instrumental Soundscapes
+              </h3>
+              <p class="text-muted" style="margin-top: 0; margin-bottom: 1rem; font-size: 0.95rem;">
+                Authentic Indian classical & folk instruments (Bansuri, Sitar, Veena, Shehnai, Tabla) designed for deep calming, memory tranquility, and grounding.
+              </p>
+
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                ${indianInstrumentals.map(inst => `
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: #FFFFFF; border: 1.5px solid #FEF3C7; border-radius: 14px; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="font-size: 2.2rem; background: #FEF3C7; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        ${inst.icon}
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; color: #78350F; font-size: 1.1rem;">${inst.title}</div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #D97706;">Instrument: ${inst.instrument}</div>
+                        <div style="font-size: 0.85rem; color: #92400E; margin-top: 0.15rem;">${inst.desc}</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-outline btn-play-indian-inst" data-id="${inst.id}" data-title="${inst.title}" style="min-width: 90px; min-height: 48px; font-weight: 700; border-color: #D97706; color: #B45309;">
+                      ▶ Play
+                    </button>
+                  </div>
+                `).join('')}
               </div>
             </div>
 
@@ -494,6 +578,17 @@ export default function EntertainmentPage(container) {
         render();
       });
     }
+
+    // Play Indian Instrumental Soundscapes
+    container.querySelectorAll('.btn-play-indian-inst').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const inst = indianInstrumentals.find(i => i.id === id);
+        if (inst) {
+          playSynthesizedMelody(inst.melodyNotes, inst.title, inst.waveType, inst.tempo);
+        }
+      });
+    });
 
     // Play Bollywood Melody
     container.querySelectorAll('.btn-play-melody').forEach(btn => {

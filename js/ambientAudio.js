@@ -161,9 +161,15 @@ const AmbientAudio = {
         }
         this._isPlaying = false;
         window.dispatchEvent(new CustomEvent('ambientSoundChanged', { detail: { playing: false } }));
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Background Sound Stopped 🔇', 'info');
+        }
       }, 800);
     } catch {
       this._isPlaying = false;
+      if (window.SmritiToast) {
+        window.SmritiToast.show('Background Sound Stopped 🔇', 'info');
+      }
     }
   },
 

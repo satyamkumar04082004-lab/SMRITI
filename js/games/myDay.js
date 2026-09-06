@@ -45,18 +45,35 @@ export default function MyDay(container) {
         if (Storage.getRoutines && typeof Storage.getRoutines === 'function') {
             const userRoutines = Storage.getRoutines();
             if (userRoutines && userRoutines[difficulty] && userRoutines[difficulty].length > 0) {
-                routine = userRoutines[difficulty];
+                routine = [...userRoutines[difficulty]];
             }
         }
         
         if (routine.length === 0) {
             const hour = new Date().getHours();
+            const periods = ['morning', 'afternoon', 'evening'];
+            // Dynamic selection: prioritize time of day, but randomize step pool if repeated
             let period = 'morning';
             if (hour >= 12 && hour < 17) period = 'afternoon';
             else if (hour >= 17) period = 'evening';
 
+            // Random variation across periods for variety
+            if (Math.random() > 0.6) {
+                period = periods[Math.floor(Math.random() * periods.length)];
+            }
+
             const pool = defaultRoutineVariations[period] || defaultRoutineVariations.morning;
-            routine = pool[difficulty] || pool.easy;
+            routine = [...(pool[difficulty] || pool.easy)];
+
+            // If family members exist, integrate personalized interaction
+            const family = Storage.getFamilyMembers() || [];
+            if (family.length > 0 && routine.length > 3) {
+                const fam = family[Math.floor(Math.random() * family.length)];
+                const customStep = `📞 Call ${fam.name} (${fam.relation})`;
+                if (!routine.some(s => s.includes('Call'))) {
+                    routine[routine.length - 2] = customStep;
+                }
+            }
         }
 
         showCorrectOrder(routine, gameArea, controller);

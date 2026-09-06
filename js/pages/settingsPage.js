@@ -133,6 +133,69 @@ export default function SettingsPage(container) {
         </div>
       </div>
 
+      <!-- Family & Familiar Faces Management (Item 7) -->
+      <div class="card card-elevated mb-md" style="padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="color: var(--maroon); margin: 0; font-size: 1.25rem;">👨‍👩‍👧 Family & Familiar Faces</h3>
+            <p class="text-muted" style="font-size: 0.85rem; margin: 0.2rem 0 0 0;">Manage real loved ones used in the Familiar Faces game and quick calls.</p>
+          </div>
+          <button id="btn-add-family-member" class="btn btn-secondary btn-sm">+ Add Loved One</button>
+        </div>
+
+        <!-- Add/Edit Family Member Form (Toggleable) -->
+        <div id="panel-family-form" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal); border-radius: 14px; padding: 1rem; margin-bottom: 1rem;">
+          <h4 id="family-form-title" style="margin: 0 0 0.75rem 0; color: var(--teal-dark); font-size: 1.1rem;">✨ Add Family Member</h4>
+          <form id="form-family-member" style="display: flex; flex-direction: column; gap: 0.65rem;">
+            <input type="hidden" id="fam-member-id" value="" />
+            <div>
+              <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Full Name *</label>
+              <input type="text" id="fam-member-name" class="form-input" placeholder="e.g. Raj Das" required />
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <div style="flex: 1;">
+                <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Relation *</label>
+                <input type="text" id="fam-member-relation" class="form-input" placeholder="e.g. Son" required />
+              </div>
+              <div style="flex: 1;">
+                <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Phone Number</label>
+                <input type="tel" id="fam-member-phone" class="form-input" placeholder="+91..." />
+              </div>
+            </div>
+            <div>
+              <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Memory Cue / Clue</label>
+              <input type="text" id="fam-member-cue" class="form-input" placeholder="e.g. Brings hot tea on Sunday mornings" />
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.25rem;">
+              <button type="button" id="btn-cancel-family-form" class="btn btn-ghost btn-sm">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm">Save Member</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Family Members List -->
+        <div id="settings-family-list" style="display: flex; flex-direction: column; gap: 0.65rem;">
+          ${(Storage.getFamilyMembers() || []).map(fm => `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.9rem; background: #FFFDF9; border: 1px solid #E2E8F0; border-radius: 12px;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="font-size: 1.8rem; background: #F3E8DC; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  ${fm.photo ? `<img src="${fm.photo}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />` : (fm.emoji || '👤')}
+                </div>
+                <div>
+                  <div style="font-weight: 700; color: var(--maroon); font-size: 1.05rem;">${fm.name}</div>
+                  <div style="font-size: 0.85rem; color: var(--teal-dark); font-weight: 600;">${fm.relation} ${fm.phone ? `• ${fm.phone}` : ''}</div>
+                  ${fm.memoryCue ? `<div style="font-size: 0.8rem; color: var(--gray-500); margin-top: 2px;">💡 ${fm.memoryCue}</div>` : ''}
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.4rem;">
+                <button class="btn btn-outline btn-sm btn-edit-family" data-id="${fm.id}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">✏️</button>
+                <button class="btn btn-ghost btn-sm btn-delete-family" data-id="${fm.id}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; color: #DC2626;">🗑️</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
       <!-- Cultural Personalisation -->
       <div class="card card-elevated mb-md" style="padding: 1.25rem;">
         <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎨 Cultural Personalisation</h3>
@@ -221,7 +284,87 @@ export default function SettingsPage(container) {
       });
     }
 
-    // Event handlers
+    // Family Member Form Toggle & Submit
+    const btnAddFam = container.querySelector('#btn-add-family-member');
+    const panelFamForm = container.querySelector('#panel-family-form');
+    const btnCancelFam = container.querySelector('#btn-cancel-family-form');
+    const formFam = container.querySelector('#form-family-member');
+
+    if (btnAddFam && panelFamForm) {
+      btnAddFam.addEventListener('click', () => {
+        container.querySelector('#family-form-title').textContent = '✨ Add Family Member';
+        container.querySelector('#fam-member-id').value = '';
+        container.querySelector('#fam-member-name').value = '';
+        container.querySelector('#fam-member-relation').value = '';
+        container.querySelector('#fam-member-phone').value = '';
+        container.querySelector('#fam-member-cue').value = '';
+        panelFamForm.style.display = panelFamForm.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    if (btnCancelFam && panelFamForm) {
+      btnCancelFam.addEventListener('click', () => {
+        panelFamForm.style.display = 'none';
+      });
+    }
+
+    if (formFam) {
+      formFam.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = container.querySelector('#fam-member-id').value.trim();
+        const name = container.querySelector('#fam-member-name').value.trim();
+        const relation = container.querySelector('#fam-member-relation').value.trim();
+        const phone = container.querySelector('#fam-member-phone').value.trim();
+        const cue = container.querySelector('#fam-member-cue').value.trim();
+
+        if (!name || !relation) return;
+
+        if (id) {
+          Storage.updateFamilyMember(id, { name, relation, phone, memoryCue: cue });
+          if (window.SmritiToast) window.SmritiToast.show(`${name} updated successfully! 🌸`, 'success');
+        } else {
+          Storage.addFamilyMember({
+            name,
+            relation,
+            phone,
+            memoryCue: cue,
+            emoji: '👤'
+          });
+          if (window.SmritiToast) window.SmritiToast.show(`${name} added to family! 🌸`, 'success');
+        }
+        render();
+      });
+    }
+
+    // Edit Family Member
+    container.querySelectorAll('.btn-edit-family').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const member = (Storage.getFamilyMembers() || []).find(m => m.id === id);
+        if (member && panelFamForm) {
+          panelFamForm.style.display = 'block';
+          container.querySelector('#family-form-title').textContent = `✏️ Edit ${member.name}`;
+          container.querySelector('#fam-member-id').value = member.id;
+          container.querySelector('#fam-member-name').value = member.name;
+          container.querySelector('#fam-member-relation').value = member.relation;
+          container.querySelector('#fam-member-phone').value = member.phone || '';
+          container.querySelector('#fam-member-cue').value = member.memoryCue || '';
+          panelFamForm.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Delete Family Member
+    container.querySelectorAll('.btn-delete-family').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        if (confirm('Are you sure you want to remove this family member?')) {
+          Storage.deleteFamilyMember(id);
+          if (window.SmritiToast) window.SmritiToast.show('Family member removed.', 'info');
+          render();
+        }
+      });
+    });
     const voiceSettings = Storage.getVoiceSettings();
     const toggleVoiceEnabled = container.querySelector('#toggle-voice-enabled');
     const toggleVoiceInstructions = container.querySelector('#toggle-voice-instructions');

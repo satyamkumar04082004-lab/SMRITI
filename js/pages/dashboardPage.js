@@ -98,6 +98,7 @@ export default function DashboardPage(container) {
         <!-- Navigation Tabs -->
         <div class="quick-prompts-scroll" style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
           <button class="chip-btn ${activeTab === 'overview' ? 'active' : ''}" data-tab="overview">📊 Overview</button>
+          <button class="chip-btn ${activeTab === 'clinical' ? 'active' : ''}" data-tab="clinical">🩺 Clinical Remarks</button>
           <button class="chip-btn ${activeTab === 'people' ? 'active' : ''}" data-tab="people">👨‍👩‍👧 Memories & Family</button>
           <button class="chip-btn ${activeTab === 'mood' ? 'active' : ''}" data-tab="mood">🌈 Mood Trends</button>
           <button class="chip-btn ${activeTab === 'medicines' ? 'active' : ''}" data-tab="medicines">⏰ Reminders & Meds</button>
@@ -152,6 +153,50 @@ export default function DashboardPage(container) {
                 </table>
               </div>
             `}
+          </div>
+        ` : ''}
+
+        <!-- Tab: Clinical Remarks & Doctor Notes (Item 10) -->
+        ${activeTab === 'clinical' ? `
+          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <h3 style="color: var(--maroon); font-size: 1.25rem; margin: 0;">🩺 Doctor Directives & Clinical Remarks</h3>
+                <p class="text-muted" style="font-size: 0.85rem; margin: 0.2rem 0 0 0;">Medical observations, care instructions, and physician assessments.</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary btn-sm" id="btn-toggle-clinical-note">+ Add Clinical Remark</button>
+                <button class="btn btn-primary btn-sm" onclick="window.location.hash='#/doctor'">Open Clinical Portal</button>
+              </div>
+            </div>
+
+            <!-- Add Note Form (Hidden by default) -->
+            <div id="add-clinical-panel" style="display: none; background: #FFFDF9; border: 1.5px dashed #2563EB; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <h4 style="margin: 0 0 0.75rem 0; color: #1D4ED8; font-size: 1.05rem;">📝 Record Clinical Note</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <input type="text" id="clinical-doctor-name" class="form-input" placeholder="Doctor / Specialist Name (e.g. Dr. B. Barua)" value="${emergency.doctorName || 'Dr. B. Barua (Neurologist)'}" />
+                <textarea id="clinical-note-text" class="form-input" rows="3" placeholder="Clinical observation, routine change, or neurological feedback..."></textarea>
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.3rem;">
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-cancel-clinical">Cancel</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="btn-save-clinical" style="background: #2563EB; border-color: #2563EB;">Save Remark</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes List -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              ${(Storage.getDoctorNotes() || []).length === 0 ? `
+                <p class="text-muted" style="margin: 0;">No doctor notes recorded yet.</p>
+              ` : (Storage.getDoctorNotes() || []).map(dn => `
+                <div style="padding: 1rem; background: #EFF6FF; border-left: 4px solid #3B82F6; border-radius: 10px; border-top: 1px solid #DBEAFE; border-right: 1px solid #DBEAFE; border-bottom: 1px solid #DBEAFE;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+                    <div style="font-weight: 700; color: #1E3A8A; font-size: 1.05rem;">👨‍⚕️ ${dn.doctor || 'Attending Physician'}</div>
+                    <span style="font-size: 0.8rem; color: #64748B;">${new Date(dn.timestamp || dn.date || Date.now()).toLocaleDateString()}</span>
+                  </div>
+                  <p style="color: #1E40AF; margin: 0; font-size: 0.95rem; line-height: 1.5;">${dn.note || dn.content}</p>
+                </div>
+              `).join('')}
+            </div>
           </div>
         ` : ''}
 
@@ -395,6 +440,40 @@ export default function DashboardPage(container) {
       rateSelect.addEventListener('change', (e) => {
         aiSettings.speechRate = parseFloat(e.target.value);
         Storage.setAISettings(aiSettings);
+      });
+    }
+
+    // --- Clinical Note Handlers (Item 10) ---
+    const toggleClinicalBtn = container.querySelector('#btn-toggle-clinical-note');
+    const clinicalPanel = container.querySelector('#add-clinical-panel');
+    const cancelClinicalBtn = container.querySelector('#btn-cancel-clinical');
+    const saveClinicalBtn = container.querySelector('#btn-save-clinical');
+
+    if (toggleClinicalBtn && clinicalPanel) {
+      toggleClinicalBtn.addEventListener('click', () => {
+        clinicalPanel.style.display = clinicalPanel.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    if (cancelClinicalBtn && clinicalPanel) {
+      cancelClinicalBtn.addEventListener('click', () => {
+        clinicalPanel.style.display = 'none';
+      });
+    }
+
+    if (saveClinicalBtn) {
+      saveClinicalBtn.addEventListener('click', () => {
+        const doctor = container.querySelector('#clinical-doctor-name')?.value.trim() || 'Dr. B. Barua';
+        const note = container.querySelector('#clinical-note-text')?.value.trim();
+        if (!note) {
+          alert('Please enter a clinical note.');
+          return;
+        }
+        Storage.addDoctorNote({ doctor, note });
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Clinical remark recorded successfully! 🩺', 'success');
+        }
+        render();
       });
     }
 

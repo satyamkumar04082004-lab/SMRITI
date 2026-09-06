@@ -15,6 +15,16 @@ const ReminderScheduler = {
 
   init() {
     if (this._intervalId) return;
+    
+    // Request native browser notification permission if available
+    if ('Notification' in window && Notification.permission === 'default') {
+      try {
+        Notification.requestPermission();
+      } catch (e) {
+        console.warn('Notification permission request:', e);
+      }
+    }
+
     this.checkReminders();
     this._intervalId = setInterval(() => {
       this.checkReminders();
@@ -98,6 +108,25 @@ const ReminderScheduler = {
     this._lastTriggeredTime = Date.now();
 
     this.playChime();
+
+    // Native Browser Notification Popup
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        const notif = new Notification(reminder.title, {
+          body: `⏰ Scheduled for ${reminder.time}. ${reminder.notes || 'Gentle daily reminder.'}`,
+          icon: '/css/icon-192.svg',
+          badge: '/css/icon-192.svg',
+          tag: 'reminder_' + reminder.id,
+          renotify: true
+        });
+        notif.onclick = () => {
+          window.focus();
+          notif.close();
+        };
+      } catch (e) {
+        console.warn('Native notification failed:', e);
+      }
+    }
 
     const textToSpeak = 'Namaste, gentle reminder for: ' + reminder.title + '. ' + (reminder.notes || '');
     const aiSettings = Storage.getAISettings();

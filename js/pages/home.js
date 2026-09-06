@@ -156,20 +156,24 @@ export default function Home(container) {
       snoozeLabel = "⏰ ১০ মিনিট পর মনে করান";
     }
 
+    const totalTasksCount = reminders.length > 0 ? reminders.length : 3;
+    const completedTasksCount = reminders.filter(r => r.completedToday).length;
+    const progressPercent = Math.round((completedTasksCount / totalTasksCount) * 100);
+
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 680px; padding-bottom: 2.5rem;">
         
-        <!-- Top Welcome Greeting Banner -->
-        <div class="card card-elevated greeting-card mb-md" style="background: linear-gradient(135deg, #FFF9F2, #FFF2E2); border: 2px solid #F3E8DC; padding: 1.5rem; border-radius: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Top Welcome Greeting Banner with Real-Time Task Progress Bar (Items 11 & 12) -->
+        <div class="card card-elevated greeting-card mb-md" style="background: #FFF9F0; border: 2px solid #F3E8DC; padding: 1.5rem; border-radius: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <div>
-              <div style="font-size: 1.1rem; color: var(--gray-500); font-weight: 600;">
+              <div style="font-size: 1.15rem; color: #404040; font-weight: 700;">
                 ${timeGreeting}, ${timeIcon}
               </div>
-              <h1 style="color: var(--maroon); font-size: 2rem; margin: 0.15rem 0 0.35rem 0;">
+              <h1 style="color: #9B2C2C; font-size: 2.2rem; margin: 0.15rem 0 0.35rem 0; font-weight: 800;">
                 ${displayName}!
               </h1>
-              <p style="margin: 0; color: var(--gray-700); font-size: 1.05rem;">
+              <p style="margin: 0; color: #1A1A1A; font-size: 1.1rem; font-weight: 500;">
                 ${welcomeSub}
               </p>
             </div>
@@ -177,59 +181,79 @@ export default function Home(container) {
               🌸
             </div>
           </div>
+
+          <!-- Real-Time Visual Progress Bar -->
+          <div style="background: #FFFFFF; border: 1.5px solid #FDE68A; border-radius: 14px; padding: 0.85rem 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span style="font-size: 0.95rem; font-weight: 800; color: #78350F;">
+                Daily Tasks: ${completedTasksCount} of ${totalTasksCount} Completed
+              </span>
+              <span style="font-size: 0.95rem; font-weight: 800; color: #B45309;">
+                ${progressPercent}%
+              </span>
+            </div>
+            <div style="width: 100%; height: 12px; background: #F3F4F6; border-radius: 999px; overflow: hidden;">
+              <div style="width: ${progressPercent}%; height: 100%; background: linear-gradient(90deg, #F59E0B, #10B981); border-radius: 999px; transition: width 0.4s ease;"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Quick Family Call & Daily Ritual Action Cards -->
+        <!-- Quick Family Call & Daily Ritual Action Cards (High contrast & elder-accessible) -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
-          <!-- 📞 One-Tap Family Call Card -->
-          <div id="btn-home-quick-call" class="card card-elevated" style="padding: 1rem 1.1rem; border-radius: 16px; background: #FEF2F2; border: 2px solid #FECACA; cursor: pointer; display: flex; align-items: center; gap: 0.85rem;">
-            <div style="font-size: 2rem; background: #FEE2E2; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <!-- 📞 One-Tap Family Call Card (Light red #FFEBEE background, dark red text) -->
+          <div id="btn-home-quick-call" class="card card-elevated" style="padding: 1.1rem; border-radius: 16px; background: #FFEBEE; border: 2px solid #FFCDD2; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; min-height: 72px;">
+            <div style="font-size: 2.2rem; background: #FFCDD2; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               📞
             </div>
             <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">${callLovedOne}</div>
-              <div style="font-weight: 700; color: var(--maroon); font-size: 1.05rem;">${Storage.getEmergencyContacts().primaryName}</div>
+              <div style="font-size: 0.85rem; font-weight: 800; color: #B71C1C; text-transform: uppercase; letter-spacing: 0.5px;">${callLovedOne}</div>
+              <div style="font-weight: 800; color: #7F0000; font-size: 1.1rem;">${Storage.getEmergencyContacts().primaryName}</div>
             </div>
           </div>
 
-          <!-- 🌅 Daily Ritual 3-Step Mode -->
-          <div onclick="window.location.hash='#/ritual'" class="card card-elevated" style="padding: 1rem 1.1rem; border-radius: 16px; background: #F0FDF4; border: 2px solid #BBF7D0; cursor: pointer; display: flex; align-items: center; gap: 0.85rem;">
-            <div style="font-size: 2rem; background: #DCFCE7; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <!-- 🌅 Daily Ritual 3-Step Mode (Mint green #E8F5E9 background, dark green text) -->
+          <div onclick="window.location.hash='#/ritual'" class="card card-elevated" style="padding: 1.1rem; border-radius: 16px; background: #E8F5E9; border: 2px solid #C8E6C9; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; min-height: 72px;">
+            <div style="font-size: 2.2rem; background: #C8E6C9; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               🌅
             </div>
             <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: #16A34A; text-transform: uppercase;">${dailyRitualLabel}</div>
-              <div style="font-weight: 700; color: #14532D; font-size: 1.05rem;">${ritualStep}</div>
+              <div style="font-size: 0.85rem; font-weight: 800; color: #1B5E20; text-transform: uppercase; letter-spacing: 0.5px;">${dailyRitualLabel}</div>
+              <div style="font-weight: 800; color: #004D40; font-size: 1.1rem;">${ritualStep}</div>
             </div>
           </div>
         </div>
 
-        <!-- Gentle Reminder Banner (If pending) -->
+        <!-- High Visibility Medication / Reminder Card -->
         ${nextReminder ? `
-          <div class="card card-elevated mb-md" style="padding: 1.25rem 1.4rem; border-radius: 16px; border-left: 6px solid #D97706; background: #FFFBEB;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span style="font-size: 0.85rem; font-weight: 700; color: #B45309; text-transform: uppercase; letter-spacing: 0.5px;">⏰ Next Gentle Reminder</span>
-              <button class="btn btn-ghost btn-sm" onclick="window.location.hash='#/reminders'" style="color: #B45309; font-size: 0.95rem; font-weight: 600; padding: 0;">View All Reminders ➔</button>
+          <div class="card card-elevated mb-md" style="padding: 1.35rem 1.4rem; border-radius: 18px; border-left: 8px solid #D97706; background: #FFF9F0; border-top: 2px solid #FDE68A; border-right: 2px solid #FDE68A; border-bottom: 2px solid #FDE68A;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.85rem; font-weight: 800; color: #92400E; text-transform: uppercase; letter-spacing: 0.5px;">
+                ⏰ Scheduled Routine Reminder
+              </span>
+              <!-- Pill Badge -->
+              <span style="background: #F59E0B; color: #FFFFFF; font-weight: 800; font-size: 0.85rem; padding: 4px 10px; border-radius: 999px;">
+                ${nextReminder.time} (${nextReminder.period || 'Scheduled'})
+              </span>
             </div>
             
-            <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem;">
-              <div style="font-size: 2.2rem; background: #FEF3C7; width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                ${nextReminder.icon || '⏰'}
+            <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.15rem;">
+              <div style="font-size: 2.4rem; background: #FEF3C7; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                ${nextReminder.icon || '💊'}
               </div>
               <div>
-                <h4 style="margin: 0; color: var(--maroon); font-size: 1.2rem;">${nextReminder.title}</h4>
-                <p style="margin: 0.2rem 0 0 0; color: var(--gray-700); font-size: 0.95rem;">
-                  ${nextReminder.notes} • <strong style="color: #B45309;">${nextReminder.time} (${nextReminder.period})</strong>
+                <h3 style="margin: 0; color: #1A1A1A; font-size: 1.35rem; font-weight: 800;">${nextReminder.title}</h3>
+                <p style="margin: 0.25rem 0 0 0; color: #404040; font-size: 1.05rem; font-weight: 600;">
+                  ${nextReminder.notes}
                 </p>
               </div>
             </div>
 
-            <!-- Very Easy To Tap Action Buttons -->
+            <!-- Highly accessible primary green & secondary gray action buttons -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <button class="btn btn-secondary btn-home-rem-done" data-id="${nextReminder.id}" style="min-height: 52px; font-size: 1.05rem; font-weight: 700; background: #059669; justify-content: center;">
-                ✅ Mark Done
+              <button class="btn btn-home-rem-done" data-id="${nextReminder.id}" style="min-height: 52px; font-size: 1.15rem; font-weight: 800; background: #2E7D32; color: #FFFFFF; border-radius: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                ✓ Mark Done
               </button>
-              <button class="btn btn-outline btn-home-rem-snooze" data-id="${nextReminder.id}" style="min-height: 52px; font-size: 1.05rem; font-weight: 700; border-color: #D97706; color: #B45309; background: #FFFFFF; justify-content: center;">
+              <button class="btn btn-home-rem-snooze" data-id="${nextReminder.id}" style="min-height: 52px; font-size: 1.1rem; font-weight: 700; background: #E0E0E0; color: #1A1A1A; border: 1.5px solid #CCCCCC; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                 ⏰ Remind in 10 mins
               </button>
             </div>

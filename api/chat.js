@@ -91,9 +91,65 @@ module.exports = async function handler(req, res) {
       const data = body ? JSON.parse(body) : {};
       const { message, patientProfile, role } = data;
 
-      // Check for OpenAI API Key
-      const apiKey = process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-      if (apiKey && process.env.OPENAI_API_KEY) {
+      // 1. Google Gemini API Integration
+      const geminiKey = process.env.GEMINI_API_KEY;
+      if (geminiKey) {
+        try {
+          const patient = patientProfile?.patient || { name: 'Meera', state: 'Assam' };
+          const games = patientProfile?.gameHistory || [];
+          const totalGames = games.length;
+          const avgAcc = totalGames > 0 ? Math.round(games.reduce((s, g) => s + (g.accuracy || 0), 0) / totalGames) : 90;
+          const reminders = patientProfile?.reminders || [];
+          const completedTasks = reminders.filter(r => r.completedToday).length;
+          const totalTasks = reminders.length;
+          const moods = patientProfile?.moodHistory || [];
+          const latestMood = moods.length > 0 ? moods[moods.length - 1].mood : 'good';
+
+          const systemPrompt = `You are SWAI, an empathetic, respectful, and encouraging AI memory & cognitive care companion in the SMRITI platform for elderly users in India.
+Current Patient Context:
+- Name: ${patient.name} (${patient.stage || 'Mild Cognitive Impairment'})
+- State/Region: ${patientProfile?.preferences?.regionalState || patient.state || 'Assam'}
+- Cognitive Game Performance: ${totalGames} sessions played, Average Accuracy: ${avgAcc}%
+- Daily Routine Completion: ${completedTasks} of ${totalTasks} tasks completed today
+- Current Mood Check-in: ${latestMood}
+- Family Members: ${JSON.stringify(patientProfile?.familyMembers || [])}
+- Active Prescriptions: ${JSON.stringify(patientProfile?.medicines || [])}
+- Life Story Memories: ${JSON.stringify(patientProfile?.memories || [])}
+
+Instructions:
+1. Always be warm, respectful, and compassionate (use gentle Indian cultural cues like "Namaste", "Dear", or respectful terms).
+2. Answer questions about their progress, accuracy, completed tasks, and family directly using their real data.
+3. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
+4. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
+
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+          const geminiRes = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: message || 'Namaste' }] }],
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
+            })
+          });
+
+          if (geminiRes.ok) {
+            const result = await geminiRes.json();
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ reply: text, source: 'gemini' }));
+              return;
+            }
+          }
+        } catch (geminiErr) {
+          console.warn('Gemini API call error:', geminiErr.message);
+        }
+      }
+
+      // 2. OpenAI API Integration fallback
+      const openaiKey = process.env.OPENAI_API_KEY;
+      if (openaiKey) {
         try {
           const systemPrompt = `You are SWAI, an empathetic, respectful, and cheerful AI memory and cognitive companion in the SMRITI platform.
 User profile: ${JSON.stringify(patientProfile?.patient || { name: 'Meera', state: 'Assam' })}.
@@ -107,7 +163,7 @@ Safety guideline: Maintain a compassionate tone, never provide formal diagnostic
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
+              'Authorization': `Bearer ${openaiKey}`
             },
             body: JSON.stringify({
               model: 'gpt-4o-mini',
@@ -125,12 +181,12 @@ Safety guideline: Maintain a compassionate tone, never provide formal diagnostic
             const text = apiRes.choices[0]?.message?.content;
             if (text) {
               res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ reply: text, source: 'llm' }));
+              res.end(JSON.stringify({ reply: text, source: 'openai' }));
               return;
             }
           }
         } catch (llmErr) {
-          console.warn('LLM call failed, falling back to contextual generator:', llmErr.message);
+          console.warn('OpenAI call failed, falling back to contextual generator:', llmErr.message);
         }
       }
 

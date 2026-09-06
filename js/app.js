@@ -94,6 +94,8 @@ const routes = {
   '#/history': { page: HistoryPage, auth: true, nav: true },
   '#/dashboard': { page: DashboardPage, auth: true, nav: true },
   '#/doctor': { page: DoctorPage, auth: true, nav: true },
+  '#/report': { page: DoctorPage, auth: true, nav: true },
+  '#/doctor-report': { page: DoctorPage, auth: true, nav: true },
   '#/reminders': { page: RemindersPage, auth: true, nav: true },
   '#/entertainment': { page: EntertainmentPage, auth: true, nav: true },
   '#/social': { page: SocialPlayPage, auth: true, nav: true },
@@ -395,8 +397,8 @@ function renderHeader() {
           🎙️ Voice
         </button>
 
-        <!-- 🛟 Persistent Quick Help Button -->
-        <button id="btn-quick-sos" class="btn-sos-badge" title="Emergency Help">
+        <!-- 🛟 Persistent High-Visibility Dark Red SOS Button -->
+        <button id="btn-quick-sos" class="btn-sos-badge" title="Emergency Help" style="background: #D32F2F; color: #FFFFFF; font-weight: 800; border-radius: 999px; padding: 0.35rem 0.85rem; border: none; box-shadow: 0 0 10px rgba(211, 47, 47, 0.45); cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
           🛟 SOS
         </button>
 
@@ -492,18 +494,12 @@ function renderNav(activeHash) {
     return;
   }
 
-  const user = Auth.getUser();
-  const isCaregiver = user && user.role === 'caregiver';
-
+  // Streamline to exactly 4 core tabs for elderly clarity (Item 12)
   const navItems = [
     { hash: '#/home', icon: '🏠', label: I18n.t('navHome') || 'Home' },
     { hash: '#/games', icon: '🎮', label: I18n.t('navGames') || 'Games' },
-    { hash: '#/smriti', icon: '🤖', label: 'Smriti' },
     { hash: '#/wellness', icon: '🌿', label: I18n.t('wellness') || 'Wellness' },
-    { hash: '#/improvement', icon: '📈', label: I18n.t('navLeaderboard') || 'Progress' },
-    isCaregiver
-      ? { hash: '#/dashboard', icon: '📋', label: I18n.t('navDashboard') || 'Caregiver' }
-      : { hash: '#/settings', icon: '⚙️', label: I18n.t('settings') || 'Settings' },
+    { hash: '#/settings', icon: '⚙️', label: I18n.t('settings') || 'Settings' },
   ];
 
   navEl = document.createElement('nav');

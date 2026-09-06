@@ -1454,3 +1454,43 @@ body.has-nav {
     min-height: 75px;
   }
 }
+
+/* ============================================================
+   Clinical Doctor Report Print Optimization (@media print)
+   ============================================================ */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+  }
+
+  .app-header,
+  .bottom-nav,
+  .toast-container,
+  .btn-ambient-badge,
+  .btn-voice-badge,
+  .btn-sos-badge,
+  #btn-print-report,
+  .modal-overlay,
+  button:not(.btn-print-keep) {
+    display: none !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #CCCCCC !important;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+  }
+
+  h1, h2, h3, h4 {
+    color: #000000 !important;
+  }
+}
