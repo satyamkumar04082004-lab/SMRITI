@@ -18,10 +18,22 @@ export default function MyDay(container) {
     let currentController;
     let timer;
 
-    const defaultRoutines = {
-        easy: ['☀️ Wake up', '🪥 Brush teeth', '🍳 Eat breakfast', '🚶 Go for a walk'],
-        medium: ['☀️ Wake up', '🪥 Brush teeth', '🍳 Eat breakfast', '🍵 Drink tea', '🚶 Go for a walk'],
-        hard: ['☀️ Wake up', '🪥 Brush teeth', '🚿 Take a bath', '🍳 Eat breakfast', '🍵 Drink tea', '💊 Take medicine', '🚶 Go for a walk']
+    const defaultRoutineVariations = {
+        morning: {
+            easy: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🍳 Eat warm breakfast', '🚶 Gentle garden walk'],
+            medium: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🍳 Eat warm breakfast', '🍵 Drink ginger tea', '🚶 Gentle garden walk'],
+            hard: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🚿 Take warm bath', '🍳 Eat warm breakfast', '🍵 Drink ginger tea', '💊 Take morning medicine', '🚶 Gentle garden walk']
+        },
+        afternoon: {
+            easy: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '📖 Read or listen to story'],
+            medium: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '🍵 Afternoon tea & snack', '📞 Call family member'],
+            hard: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '🍵 Afternoon tea & snack', '📞 Call family member', '🌸 Water veranda plants', '🚶 Short evening stroll']
+        },
+        evening: {
+            easy: ['🌅 Watch the sunset', '🍲 Eat light dinner', '🥛 Drink warm milk', '😴 Sleep peacefully'],
+            medium: ['🌅 Watch the sunset', '🍲 Eat light dinner', '💊 Take night medicine', '🥛 Drink warm milk', '😴 Sleep peacefully'],
+            hard: ['🌅 Watch the sunset', '🧘 4-4 Guided breathing', '🍲 Eat light dinner', '💊 Take night medicine', '🥛 Drink warm milk', '📻 Listen to soft melody', '😴 Sleep peacefully']
+        }
     };
 
     const shell = GameShell.create(container, config);
@@ -38,7 +50,13 @@ export default function MyDay(container) {
         }
         
         if (routine.length === 0) {
-            routine = defaultRoutines[difficulty] || defaultRoutines.easy;
+            const hour = new Date().getHours();
+            let period = 'morning';
+            if (hour >= 12 && hour < 17) period = 'afternoon';
+            else if (hour >= 17) period = 'evening';
+
+            const pool = defaultRoutineVariations[period] || defaultRoutineVariations.morning;
+            routine = pool[difficulty] || pool.easy;
         }
 
         showCorrectOrder(routine, gameArea, controller);

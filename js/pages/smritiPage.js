@@ -221,7 +221,7 @@ export default function SmritiPage(container) {
     }
   }
 
-  function handleUserMessage(text) {
+  async function handleUserMessage(text) {
     if (!text) return;
 
     // Add user message
@@ -229,9 +229,9 @@ export default function SmritiPage(container) {
     companionState = 'THINKING...';
     render();
 
-    // Generate AI response
-    setTimeout(() => {
-      const reply = AIService.chatWithSmriti(text, conversation);
+    // Generate context-aware AI response from server / local engine
+    try {
+      const reply = await AIService.chatWithSmritiAsync(text, conversation);
       conversation.push({ sender: 'smriti', text: reply });
       companionState = 'SPEAKING...';
       render();
@@ -240,12 +240,24 @@ export default function SmritiPage(container) {
         TTS.speak(reply);
       }
 
-      // Return to ready state after short delay
+      // Return to ready state after spoken delay
+      setTimeout(() => {
+        companionState = 'READY';
+        updateUI();
+      }, 3500);
+    } catch (err) {
+      const reply = AIService.chatWithSmriti(text, conversation);
+      conversation.push({ sender: 'smriti', text: reply });
+      companionState = 'SPEAKING...';
+      render();
+      if (aiSettings.autoSpeak !== false) {
+        TTS.speak(reply);
+      }
       setTimeout(() => {
         companionState = 'READY';
         updateUI();
       }, 3000);
-    }, 600);
+    }
   }
 
   function scrollChatToBottom() {

@@ -30,7 +30,9 @@ import FeelingLostPage from './pages/feelingLostPage.js';
 import DailyRitualPage from './pages/dailyRitualPage.js';
 import EntertainmentPage from './pages/entertainmentPage.js';
 import SocialPlayPage from './pages/socialPlayPage.js';
+import DoctorPage from './pages/doctorPage.js';
 import AmbientAudio from './ambientAudio.js';
+import ReminderScheduler from './reminders.js';
 
 // --- Game imports ---
 import HornbillMemoryNest from './games/hornbillMemoryNest.js';
@@ -91,6 +93,7 @@ const routes = {
   '#/leaderboard': { page: LeaderboardPage, auth: true, nav: true },
   '#/history': { page: HistoryPage, auth: true, nav: true },
   '#/dashboard': { page: DashboardPage, auth: true, nav: true },
+  '#/doctor': { page: DoctorPage, auth: true, nav: true },
   '#/reminders': { page: RemindersPage, auth: true, nav: true },
   '#/entertainment': { page: EntertainmentPage, auth: true, nav: true },
   '#/social': { page: SocialPlayPage, auth: true, nav: true },
@@ -364,6 +367,24 @@ function renderHeader() {
         <span class="header-title">${I18n.t('appName')}</span>
       </div>
       <div class="header-actions">
+        <!-- 🟢 Offline / Online Sync Badge -->
+        <div id="header-sync-status" class="sync-badge" title="Data Synchronization Status" style="background: ${navigator.onLine ? '#ECFDF5' : '#FFFBEB'}; color: ${navigator.onLine ? '#047857' : '#B45309'}; border: 1.5px solid ${navigator.onLine ? '#6EE7B7' : '#FDE68A'}; border-radius: 999px; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${navigator.onLine ? '#10B981' : '#F59E0B'};"></span>
+          <span id="sync-text">${navigator.onLine ? 'Online' : 'Offline Mode'}</span>
+        </div>
+
+        <!-- 🏔️ NER Regional Selector -->
+        <select id="header-region-select" style="background: #FFFDF9; border: 1.5px solid #FDE68A; border-radius: 999px; padding: 0.3rem 0.6rem; font-size: 0.85rem; font-weight: 700; color: #92400E; cursor: pointer;">
+          <option value="Assam">🌺 Assam</option>
+          <option value="Meghalaya">🌧️ Meghalaya</option>
+          <option value="Manipur">🪷 Manipur</option>
+          <option value="Nagaland">🦅 Nagaland</option>
+          <option value="Mizoram">🎋 Mizoram</option>
+          <option value="Tripura">🏛️ Tripura</option>
+          <option value="Arunachal Pradesh">🏔️ Arunachal</option>
+          <option value="Sikkim">🌸 Sikkim</option>
+        </select>
+
         <!-- 🎵 Ambient Audio Toggle Button -->
         <button id="btn-ambient-sound" class="btn-ambient-badge" title="Ambient Nature Sounds" style="background: ${AmbientAudio.isPlaying() ? '#ECFDF5' : '#F8FAFC'}; color: ${AmbientAudio.isPlaying() ? '#047857' : '#64748B'}; border: 1.5px solid ${AmbientAudio.isPlaying() ? '#6EE7B7' : '#CBD5E1'}; border-radius: 999px; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
           ${AmbientAudio.isPlaying() ? '🌿 Sound: On' : '🎵 Sound'}
@@ -392,6 +413,44 @@ function renderHeader() {
     </div>
   `;
   document.getElementById('root').prepend(headerEl);
+
+  // Region selector initialization and change listener
+  const regionSelect = headerEl.querySelector('#header-region-select');
+  if (regionSelect) {
+    const prefs = Storage.getPreferences();
+    regionSelect.value = prefs.regionalState || 'Assam';
+    regionSelect.addEventListener('change', (e) => {
+      const state = e.target.value;
+      Storage.setPreferences({ regionalState: state });
+      if (window.SmritiToast) {
+        window.SmritiToast.show(`Regional theme changed to ${state} 🌺`, 'success');
+      }
+    });
+  }
+
+  // Network sync status update
+  const syncBadge = headerEl.querySelector('#header-sync-status');
+  const syncText = headerEl.querySelector('#sync-text');
+  const updateSyncUI = () => {
+    if (!syncBadge || !syncText) return;
+    const online = navigator.onLine;
+    syncBadge.style.background = online ? '#ECFDF5' : '#FFFBEB';
+    syncBadge.style.borderColor = online ? '#6EE7B7' : '#FDE68A';
+    syncBadge.style.color = online ? '#047857' : '#B45309';
+    syncBadge.querySelector('span').style.background = online ? '#10B981' : '#F59E0B';
+    syncText.textContent = online ? 'Online' : 'Offline Mode';
+  };
+  window.addEventListener('online', () => { updateSyncUI(); Storage.flushSyncQueue(); });
+  window.addEventListener('offline', updateSyncUI);
+  window.addEventListener('smritiSyncStatus', (e) => {
+    if (syncText && e.detail) {
+      if (e.detail.pendingItems > 0) {
+        syncText.textContent = `${e.detail.pendingItems} Pending`;
+      } else {
+        syncText.textContent = e.detail.isOnline ? 'Online' : 'Offline Mode';
+      }
+    }
+  });
 
   headerEl.querySelector('#header-lang').addEventListener('click', () => {
     window.location.hash = '#/settings';
@@ -577,6 +636,7 @@ function init() {
   // Initialize modules
   I18n.init();
   Toast.init();
+  ReminderScheduler.init();
 
   // Listen for hash changes
   window.addEventListener('hashchange', navigate);

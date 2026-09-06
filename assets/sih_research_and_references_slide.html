@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMRITI - Research and References (SIH Slide 6)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* 16:9 Presentation Canvas */
+    .slide-canvas {
+      width: 1280px;
+      height: 720px;
+      background: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      padding: 26px 40px 18px 40px;
+    }
+
+    /* Header Bar */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      font-size: 2.2rem;
+      background: #FFF5F5;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid #FED7D7;
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #9B2C2C;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: #718096;
+      font-weight: 600;
+    }
+
+    .slide-main-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .sih-badge-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: right;
+    }
+
+    .sih-tag {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 1.2;
+    }
+
+    .sih-sub {
+      font-size: 0.75rem;
+      color: #EA580C;
+      font-weight: 700;
+    }
+
+    /* Main Content Sections */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Top Section: Research Box */
+    .research-card {
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      border-radius: 14px;
+      padding: 14px 22px;
+      box-shadow: 0 2px 5px rgba(37, 99, 235, 0.04);
+    }
+
+    .research-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .research-list li {
+      position: relative;
+      padding-left: 18px;
+      font-size: 0.88rem;
+      color: #1E293B;
+      line-height: 1.4;
+    }
+
+    .research-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #2563EB;
+      font-size: 1.2rem;
+      line-height: 1;
+      top: 0px;
+      font-weight: bold;
+    }
+
+    .research-list strong {
+      color: #0F172A;
+      font-weight: 700;
+    }
+
+    .links-row {
+      margin-top: 4px;
+      font-size: 0.84rem;
+      color: #334155;
+    }
+
+    .link-tag {
+      color: #2563EB;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Middle Section: Comparison Boxes */
+    .comparison-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 60px 1.2fr;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comp-box {
+      border-radius: 12px;
+      padding: 14px 18px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .comp-box-left {
+      background: #F8FAFC;
+      border: 2px solid #CBD5E1;
+    }
+
+    .comp-box-right {
+      background: #F0FDF4;
+      border: 2px solid #86EFAC;
+    }
+
+    .comp-header {
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .comp-box-left .comp-header {
+      color: #0284C7;
+    }
+
+    .comp-box-right .comp-header {
+      color: #15803D;
+    }
+
+    .comp-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.82rem;
+    }
+
+    .comp-box-left .comp-list {
+      color: #475569;
+    }
+
+    .comp-box-right .comp-list {
+      color: #166534;
+    }
+
+    .comp-list li {
+      position: relative;
+      padding-left: 16px;
+      line-height: 1.35;
+    }
+
+    .comp-list li::before {
+      content: "•";
+      position: absolute;
+      left: 2px;
+      font-size: 1.1rem;
+      line-height: 1;
+      top: 0;
+      font-weight: bold;
+    }
+
+    .comp-box-left li::before { color: #64748B; }
+    .comp-box-right li::before { color: #16A34A; }
+
+    .comp-apps-footer {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748B;
+      padding-top: 4px;
+      border-top: 1px dashed #CBD5E1;
+    }
+
+    .comp-apps-footer span {
+      color: #0284C7;
+      text-decoration: underline;
+    }
+
+    .arrow-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .black-arrow {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: #0F172A;
+      font-weight: 900;
+    }
+
+    /* Bottom Section: Project Resources */
+    .resources-card {
+      background: #F0F9FF;
+      border: 1.5px solid #BAE6FD;
+      border-radius: 14px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .resources-left {
+      flex: 1;
+    }
+
+    .resources-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #0284C7;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .resources-links {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.85rem;
+      color: #1E293B;
+    }
+
+    .resources-links a {
+      color: #0284C7;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    /* UI Screenshots preview right */
+    .resources-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .ui-phone-mock {
+      width: 140px;
+      height: 86px;
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 8px;
+      padding: 6px 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .mock-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.6rem;
+      font-weight: 800;
+      color: #9B2C2C;
+      border-bottom: 1px solid #F1F5F9;
+      padding-bottom: 2px;
+    }
+
+    .mock-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      margin: 3px 0;
+    }
+
+    .mock-tile {
+      background: #FFF5F5;
+      border: 1px solid #FED7D7;
+      border-radius: 4px;
+      padding: 3px;
+      font-size: 0.5rem;
+      text-align: center;
+      color: #9B2C2C;
+      font-weight: bold;
+    }
+
+    .mock-tile.blue {
+      background: #EFF6FF;
+      border-color: #BFDBFE;
+      color: #1E40AF;
+    }
+
+    .mock-tile.green {
+      background: #F0FDF4;
+      border-color: #BBF7D0;
+      color: #166534;
+    }
+
+    .mock-badge {
+      font-size: 0.55rem;
+      font-weight: 800;
+      text-align: center;
+      background: #9B2C2C;
+      color: #FFF;
+      border-radius: 4px;
+      padding: 2px;
+    }
+
+    /* Footer Meta */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      color: #64748B;
+      font-weight: 600;
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px solid #E2E8F0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="slide-canvas">
+    
+    <!-- Header -->
+    <div class="slide-header">
+      <div class="brand-left">
+        <span class="brand-icon">🧠</span>
+        <div>
+          <div class="brand-title">SMRITI</div>
+          <div class="brand-sub">Cognitive Care & Memory Companion</div>
+        </div>
+      </div>
+
+      <div class="slide-main-title">
+        RESEARCH AND REFERENCES
+      </div>
+
+      <div class="sih-badge-right">
+        <div>
+          <div class="sih-tag">SMART INDIA HACKATHON</div>
+          <div class="sih-sub">SIH 2026 Presentation</div>
+        </div>
+        <span style="font-size: 2rem;">💡</span>
+      </div>
+    </div>
+
+    <!-- Main Slide Body -->
+    <div class="slide-body">
+
+      <!-- 1. Top Research Notes Box -->
+      <div class="research-card">
+        <ul class="research-list">
+          <li>
+            <strong>Cognitive Decline & Dementia in India:</strong> Over 8.8 million Indians aged 60+ live with dementia (projected to reach 16.9 million by 2036, Lancet / LASI Report). Early non-pharmacological digital intervention slows cognitive decline and preserves independence.
+          </li>
+          <li>
+            <strong>Clinical Evidence for Memory Training:</strong> Active recall exercises, spatial sequencing, and autobiographical memory cues stimulate neuroplasticity and improve delayed recall by up to 28% (WHO Guidelines on Risk Reduction of Cognitive Decline).
+          </li>
+          <li>
+            <strong>Digital Accessibility & Elder-Tech Gap:</strong> NITI Aayog's Senior Care Economy Report (2024) highlights an acute lack of regional vernacular UI, voice-guided interfaces, and offline resilience in existing digital healthcare tools.
+          </li>
+        </ul>
+        <div class="links-row">
+          <strong>Full Details & Literature:</strong> 
+          <span class="link-tag">WHO Guidelines (2023)</span> &bull; 
+          <span class="link-tag">Alzheimer’s Association</span> &bull; 
+          <span class="link-tag">NITI Aayog Senior Care Report</span> &bull; 
+          <span class="link-tag">Lancet Neurology (LASI Study)</span>
+        </div>
+      </div>
+
+      <!-- 2. Middle Comparison Section -->
+      <div class="comparison-wrapper">
+        
+        <!-- Left: Solutions Already Exist -->
+        <div class="comp-box comp-box-left">
+          <div class="comp-header">
+            <span>⚠️</span> SOLUTIONS ALREADY EXIST
+          </div>
+          <ul class="comp-list">
+            <li><strong>Complex & Overwhelming:</strong> Cluttered UI, tiny text, and rapid timers unsuited for elderly seniors.</li>
+            <li><strong>Impersonal Brain Puzzles:</strong> Generic abstract math/speed drills, zero connection to personal family memories or life story.</li>
+            <li><strong>Isolated Experience:</strong> No caregiver involvement, emotional monitoring, or emergency safety fallback.</li>
+            <li><strong>Language Barrier:</strong> English-only with no regional vernacular speech or Indian cultural context.</li>
+          </ul>
+          <div class="comp-apps-footer">
+            AVAILABLE APPS : <span>Lumosity</span> / <span>Elevate</span> / <span>Peak</span> / <span>BrainHQ</span>
+          </div>
+        </div>
+
+        <!-- Center Arrow -->
+        <div class="arrow-container">
+          <div class="black-arrow">➔</div>
+        </div>
+
+        <!-- Right: Our Solution Stands Out -->
+        <div class="comp-box comp-box-right">
+          <div class="comp-header">
+            <span>✨</span> OUR SOLUTION STANDS OUT
+          </div>
+          <ul class="comp-list">
+            <li><strong>Elder-Centric Accessibility:</strong> Large touch buttons (&ge;48px), high contrast, calm peach/cream palette, and zero time pressure.</li>
+            <li><strong>Autobiographical Memory Cues:</strong> Integrates personal family photos, voice memories, and familiar loved ones recognition.</li>
+            <li><strong>Multilingual Voice Guidance:</strong> Hands-free voice navigation and text-to-speech in English, Hindi, and Bengali.</li>
+            <li><strong>Caregiver Ecosystem:</strong> Automated emotional trend tracking, shared weekly goals, and remote medication alerts.</li>
+            <li><strong>100% Offline PWA Resilience:</strong> Works seamlessly in rural areas without continuous high-speed internet.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- 3. Bottom Project Resources Section -->
+      <div class="resources-card">
+        <div class="resources-left">
+          <div class="resources-title">
+            <span>📂</span> PROJECT RESOURCES
+          </div>
+          <div class="resources-links">
+            <div>&bull; <strong>Demo Video :</strong> <a href="#" target="_blank">Click Here (Full Walkthrough Video)</a></div>
+            <div>&bull; <strong>Live Prototype :</strong> <a href="https://smriti-pied.vercel.app/" target="_blank">https://smriti-pied.vercel.app/</a></div>
+            <div>&bull; <strong>Business Model Canvas :</strong> <a href="#" target="_blank">Click Here (Social Impact & Scalability BMC)</a></div>
+          </div>
+        </div>
+
+        <!-- 2 UI Mockup Preview Cards on Right -->
+        <div class="resources-right">
+          <!-- Mockup 1: Home Hub -->
+          <div class="ui-phone-mock">
+            <div class="mock-header">
+              <span>🧠 SMRITI</span>
+              <span>🌻 9:41 AM</span>
+            </div>
+            <div class="mock-content">
+              <div class="mock-tile">🎮 Games</div>
+              <div class="mock-tile blue">🖼️ Memories</div>
+              <div class="mock-tile green">🌿 Wellness</div>
+              <div class="mock-tile">⏰ Remind</div>
+            </div>
+            <div class="mock-badge">Patient Home Hub</div>
+          </div>
+
+          <!-- Mockup 2: Caregiver / Game -->
+          <div class="ui-phone-mock">
+            <div class="mock-header">
+              <span>👨‍👩‍👧 Caregiver</span>
+              <span>📈 95% Acc</span>
+            </div>
+            <div class="mock-content">
+              <div class="mock-tile green">😊 Great Mood</div>
+              <div class="mock-tile blue">🌸 Nest 90pts</div>
+              <div class="mock-tile">💊 Meds Done</div>
+              <div class="mock-tile green">❤️ 6d Streak</div>
+            </div>
+            <div class="mock-badge" style="background: #0D9488;">Caregiver View</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Slide Footer -->
+    <div class="slide-footer">
+      <div>@Team SMRITI &bull; Problem Statement: AI Cognitive Care Companion for Elderly</div>
+      <div>Page 6 of 6 &bull; Smart India Hackathon 2026</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

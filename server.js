@@ -24,6 +24,30 @@ const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   let parsedUrl = req.url.split('?')[0];
+
+  // Serverless API routing for local development
+  if (parsedUrl === '/api/chat') {
+    const chatHandler = require('./api/chat.js');
+    chatHandler(req, res);
+    return;
+  }
+
+  if (parsedUrl === '/api/sync') {
+    res.setHeader('Content-Type', 'application/json');
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        res.writeHead(200);
+        res.end(JSON.stringify({ success: true, syncedAt: new Date().toISOString() }));
+      });
+    } else {
+      res.writeHead(200);
+      res.end(JSON.stringify({ status: 'online' }));
+    }
+    return;
+  }
+
   if (parsedUrl === '/' || parsedUrl === '') {
     parsedUrl = '/index.html';
   }
@@ -48,3 +72,4 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`SMRITI Server running at http://localhost:${PORT}`);
 });
+

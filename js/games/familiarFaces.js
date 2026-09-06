@@ -166,18 +166,66 @@ export default function FamiliarFaces(container) {
     function startGame(difficulty, gameArea, controller) {
         let numFaces = 4;
         if (difficulty === 'easy') {
-            numFaces = 4;
+            numFaces = 3;
         } else if (difficulty === 'medium') {
-            numFaces = 6;
+            numFaces = 4;
         } else {
-            numFaces = 8;
+            numFaces = 6;
         }
 
-        const customFaces = Storage.getCustomFaces() || [];
-        // Combine custom uploaded faces first, then default faces
-        const combinedPool = [...customFaces, ...defaultFaces];
+        const family = Storage.getFamilyMembers() || [];
 
-        activeFaces = [...combinedPool].sort(() => Math.random() - 0.5).slice(0, numFaces);
+        // If family list is empty or has only 1, display prompt to add family
+        if (family.length === 0) {
+            gameArea.innerHTML = `
+                <div class="card question-box text-center" style="max-width: 540px; margin: 0 auto; padding: 2rem;">
+                    <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">👨‍👩‍👧</div>
+                    <h3 style="color: var(--maroon); margin-bottom: 0.5rem;">No Family Members Added Yet</h3>
+                    <p class="text-muted" style="font-size: 1.05rem; margin-bottom: 1.5rem;">
+                        This game is designed to help you recognize and remember your real loved ones and caregivers. Please add your first family member to begin!
+                    </p>
+                    <button id="btn-add-first-family" class="btn btn-primary" style="min-height: 52px; font-weight: 700;">
+                        📷 Add Loved One Now
+                    </button>
+                </div>
+            `;
+            const addBtn = gameArea.querySelector('#btn-add-first-family');
+            if (addBtn) {
+                addBtn.addEventListener('click', () => {
+                    renderUploadFaceModal();
+                });
+            }
+            return;
+        }
+
+        // Format family members into game face structure
+        const formattedFamily = family.map(f => {
+            const hints = f.hints && f.hints.length > 0 ? f.hints : [
+                f.memoryCue || `This is your loving ${f.relation}.`,
+                `Relation: ${f.relation}`,
+                `Name starts with ${f.name.charAt(0)}`
+            ];
+
+            let options = f.options && f.options.length >= 3 ? f.options : [];
+            if (options.length < 3) {
+                const otherNames = family.filter(o => o.id !== f.id).map(o => `${o.name} (${o.relation})`);
+                const pool = [`${f.name} (${f.relation})`, ...otherNames, 'Neighbor Amit', 'Dr. Barua', 'Friend Suresh'];
+                const set = Array.from(new Set(pool)).slice(0, 4);
+                options = set;
+            }
+
+            return {
+                id: f.id,
+                name: `${f.name} (${f.relation})`,
+                relation: f.relation,
+                image: f.photo || f.image,
+                emoji: f.emoji || '👤',
+                hints,
+                options
+            };
+        });
+
+        activeFaces = [...formattedFamily].sort(() => Math.random() - 0.5).slice(0, Math.min(numFaces, formattedFamily.length));
         currentFaceIndex = 0;
 
         showFace(gameArea, controller);

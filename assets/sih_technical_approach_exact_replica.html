@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMRITI - Technical Approach (Exact SIH Replica)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    body {
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* 16:9 Slide Canvas */
+    .slide-canvas {
+      width: 1334px;
+      height: 750px;
+      background: #FFFFFF;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Top Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 24px 6px 24px;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-left .name {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #0b3954;
+      font-family: Arial, sans-serif;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-left .tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #0284c7;
+      display: block;
+      margin-top: -3px;
+    }
+
+    .header-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: 'Arial Black', Impact, sans-serif;
+    }
+
+    .sih-logo-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sih-logo-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    .sih-text {
+      text-align: right;
+      line-height: 1.15;
+    }
+
+    .sih-text .main {
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: 0.5px;
+    }
+
+    .sih-text .sub {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #ea580c;
+    }
+
+    /* Decision Anchor Bar */
+    .decision-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-bottom: 8px;
+      margin-top: 2px;
+    }
+
+    .start-badge {
+      background: #475569;
+      color: #FFF;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .decision-box {
+      background: #475569;
+      color: #FFFFFF;
+      font-size: 0.92rem;
+      font-weight: 800;
+      padding: 6px 18px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    /* Branch Labels on Connector lines */
+    .branch-lines {
+      position: relative;
+      height: 20px;
+      margin-bottom: 2px;
+    }
+
+    .branch-line-offline {
+      position: absolute;
+      left: 180px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #d97706;
+    }
+
+    .branch-line-online {
+      position: absolute;
+      left: 770px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #0284c7;
+    }
+
+    .branch-line-caregiver {
+      position: absolute;
+      right: 140px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #16a34a;
+    }
+
+    /* Main Flow Grid Layout */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 750px 260px 260px;
+      gap: 16px;
+      padding: 0 24px;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Containers */
+    .mode-container {
+      border-radius: 8px;
+      padding: 8px 10px;
+      position: relative;
+    }
+
+    .container-orange {
+      border: 1.5px dashed #f59e0b;
+      background: #fffdfa;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .container-blue {
+      border: 1.5px dashed #0284c7;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .container-green {
+      border: 1.5px dashed #16a34a;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Pill Badges */
+    .pill-title {
+      padding: 5px 18px;
+      border-radius: 20px;
+      font-size: 0.84rem;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .pill-orange {
+      background: #f97316;
+      color: #FFF;
+      border: 1px solid #ea580c;
+    }
+
+    .pill-blue {
+      background: #0284c7;
+      color: #FFF;
+      border: 1px solid #0369a1;
+      width: 90%;
+      justify-content: center;
+    }
+
+    .pill-green {
+      background: #16a34a;
+      color: #FFF;
+      border: 1px solid #15803d;
+      width: 90%;
+      justify-content: center;
+    }
+
+    .pill-end-orange {
+      background: #ea580c;
+      color: #FFF;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 0.78rem;
+      padding: 6px 14px;
+      text-align: center;
+    }
+
+    .pill-end-blue {
+      background: #0284c7;
+      color: #FFF;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 0.78rem;
+      padding: 6px 14px;
+      text-align: center;
+      width: 90%;
+    }
+
+    .pill-end-green {
+      background: #16a34a;
+      color: #FFF;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 0.78rem;
+      padding: 6px 14px;
+      text-align: center;
+      width: 90%;
+    }
+
+    /* Flow Step Boxes */
+    .step-box {
+      border-radius: 5px;
+      padding: 5px 8px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      line-height: 1.2;
+    }
+
+    .step-orange {
+      background: #ffedd5;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+    }
+
+    .step-blue {
+      background: #e0f2fe;
+      border: 1px solid #7dd3fc;
+      color: #0369a1;
+      width: 92%;
+    }
+
+    .step-green {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #14532d;
+      width: 92%;
+    }
+
+    /* Snake Flow for Orange Section */
+    .snake-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin: 3px 0;
+    }
+
+    .arrow-horiz {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #f97316;
+    }
+
+    .arrow-down {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #f97316;
+      text-align: right;
+      padding-right: 30px;
+    }
+
+    .arrow-down-left {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #f97316;
+      text-align: left;
+      padding-left: 30px;
+    }
+
+    .arrow-vert-blue {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #0284c7;
+    }
+
+    .arrow-vert-green {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #16a34a;
+    }
+
+    /* Orange bottom area split into Tech Stack (left) and Session Completed (right) */
+    .orange-bottom-split {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    /* Exact SafeSecure Style TECH STACK Box */
+    .tech-stack-container {
+      width: 480px;
+      background: #FFFFFF;
+      border: 1.5px solid #0f172a;
+      border-radius: 6px;
+      padding: 6px 10px 8px 10px;
+      box-shadow: 2px 2px 0px #0f172a;
+    }
+
+    .tech-stack-title {
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tech-icons-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tech-item svg, .tech-item img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .tech-item span {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #1e293b;
+    }
+
+    /* Bottom Blue Banner (SafeSecure style) */
+    .bottom-bar {
+      background: #0284c7;
+      color: #FFFFFF;
+      height: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .bottom-bar .tag {
+      letter-spacing: 0.5px;
+    }
+
+    .bottom-bar .page-num {
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="slide-canvas">
+    
+    <!-- Header -->
+    <div class="slide-header">
+      <div class="brand-left">
+        <span style="font-size: 1.8rem;">🧠</span>
+        <div>
+          <div class="name">SMRITI</div>
+          <span class="tag">Cognitive Care</span>
+        </div>
+      </div>
+
+      <div class="header-title">TECHNICAL APPROACH</div>
+
+      <div class="sih-logo-right">
+        <div class="sih-text">
+          <div class="main">SMART INDIA</div>
+          <div class="main">HACKATHON</div>
+          <div class="sub">2026</div>
+        </div>
+        <svg class="sih-logo-icon" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="46" fill="#FFF" stroke="#EA580C" stroke-width="4"/>
+          <path d="M50 15 C30 15 20 32 20 50 C20 62 28 72 38 78 L38 86 L62 86 L62 78 C72 72 80 62 80 50 C80 32 70 15 50 15 Z" fill="#F97316"/>
+          <circle cx="50" cy="45" r="16" fill="#FFF"/>
+          <path d="M44 38 L56 38 L50 52 Z" fill="#0284C7"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Decision Row -->
+    <div class="decision-row">
+      <div class="start-badge">➔ Start Here</div>
+      <div class="decision-box">User / Patient State & Network Connectivity?</div>
+    </div>
+
+    <!-- Connector Branch Labels -->
+    <div class="branch-lines">
+      <div class="branch-line-offline">
+        <span>┌─── Offline / Low-Connectivity Device</span>
+      </div>
+      <div class="branch-line-online">
+        <span>├── Working + Internet Device</span>
+      </div>
+      <div class="branch-line-caregiver">
+        <span>└── Caregiver / Family Portal ──┐</span>
+      </div>
+    </div>
+
+    <!-- 3 Flow Columns -->
+    <div class="flow-grid">
+      
+      <!-- 1. Orange Container (Snake Flow + Tech Stack Notch) -->
+      <div class="mode-container container-orange">
+        
+        <!-- Row 1 (Left to Right) -->
+        <div class="snake-row">
+          <div class="pill-title pill-orange">
+            <span>📶</span> Offline Mode
+          </div>
+          <div class="arrow-horiz">➔</div>
+          <div class="step-box step-orange">
+            <span>📱</span> Open App / Voice
+          </div>
+          <div class="arrow-horiz">➔</div>
+          <div class="step-box step-orange">
+            <span>👤</span> Senior Login (OTP)
+          </div>
+          <div class="arrow-horiz">➔</div>
+          <div class="step-box step-orange">
+            <span>🌸</span> Mood & Ritual Check
+          </div>
+        </div>
+
+        <div class="arrow-down">↓</div>
+
+        <!-- Row 2 (Right to Left) -->
+        <div class="snake-row">
+          <div class="step-box step-orange">
+            <span>⏰</span> Audio Med Reminders
+          </div>
+          <div class="arrow-horiz">⬅</div>
+          <div class="step-box step-orange">
+            <span>🎯</span> Adaptive Difficulty
+          </div>
+          <div class="arrow-horiz">⬅</div>
+          <div class="step-box step-orange">
+            <span>🎮</span> Cognitive Games (4 Suites)
+          </div>
+        </div>
+
+        <div class="arrow-down-left">↓</div>
+
+        <!-- Row 3 (Left to Right) -->
+        <div class="snake-row">
+          <div class="step-box step-orange">
+            <span>💾</span> IndexedDB & Cache API
+          </div>
+          <div class="arrow-horiz">➔</div>
+          <div class="step-box step-orange">
+            <span>🎙️</span> Web Speech API (TTS)
+          </div>
+          <div class="arrow-horiz">➔</div>
+          <div class="step-box step-orange">
+            <span>🌟</span> Mind Streaks & XP Saved
+          </div>
+        </div>
+
+        <!-- Bottom Split: Tech Stack on Left, Completed Badge on Right -->
+        <div class="orange-bottom-split">
+          
+          <!-- Exact SafeSecure Tech Stack Box with Logos -->
+          <div class="tech-stack-container">
+            <div class="tech-stack-title">
+              <span>⚡</span> TECH STACK USED (FIGURES & TOOLS)
+            </div>
+            <div class="tech-icons-row">
+              <!-- HTML5 -->
+              <div class="tech-item">
+                <svg viewBox="0 0 512 512"><path fill="#E34F26" d="M71 460L30 0h452l-41 460-185 52z"/><path fill="#EF652A" d="M256 472l149-41 35-391H256z"/><path fill="#FFF" d="M256 176h74l-7 77h-67v52h63l-6 66-57 16v55l104-29 14-159h-124zm0-78h138l-4 44H256z"/></svg>
+                <span>HTML5</span>
+              </div>
+              <!-- CSS3 -->
+              <div class="tech-item">
+                <svg viewBox="0 0 512 512"><path fill="#1572B6" d="M71 460L30 0h452l-41 460-185 52z"/><path fill="#33A9DC" d="M256 472l149-41 35-391H256z"/><path fill="#FFF" d="M256 176h74l-7 77h-67v52h63l-6 66-57 16v55l104-29 14-159h-124zm0-78h138l-4 44H256z"/></svg>
+                <span>CSS3</span>
+              </div>
+              <!-- JS -->
+              <div class="tech-item">
+                <svg viewBox="0 0 512 512"><path fill="#F7DF1E" d="M0 0h512v512H0z"/><path d="M274 394c0 42-25 64-62 64-32 0-52-17-62-37l35-21c7 12 14 20 27 20 14 0 23-6 23-28V244h39zm126-5c12 20 28 35 55 35 23 0 38-12 38-28 0-20-16-27-44-39-40-17-66-38-66-83 0-41 31-72 79-72 34 0 58 14 73 40l-33 21c-8-14-18-22-40-22-19 0-30 11-30 24 0 17 12 24 39 35 44 19 72 38 72 87 0 50-39 77-87 77-49 0-77-24-91-53z"/></svg>
+                <span>JavaScript</span>
+              </div>
+              <!-- Web Speech API -->
+              <div class="tech-item">
+                <span style="font-size: 14px;">🎙️</span>
+                <span>Web Speech</span>
+              </div>
+              <!-- PWA -->
+              <div class="tech-item">
+                <span style="font-size: 14px;">📲</span>
+                <span>PWA Cache</span>
+              </div>
+              <!-- Web Audio -->
+              <div class="tech-item">
+                <span style="font-size: 14px;">🎵</span>
+                <span>Web Audio</span>
+              </div>
+              <!-- Node.js -->
+              <div class="tech-item">
+                <svg viewBox="0 0 256 256"><path fill="#339933" d="M128 0L241 65v130L128 256 15 195V65z"/></svg>
+                <span>Node.js</span>
+              </div>
+              <!-- MongoDB -->
+              <div class="tech-item">
+                <svg viewBox="0 0 256 512"><path fill="#47A248" d="M128 0C108 80 40 180 40 280c0 80 40 160 88 232 48-72 88-152 88-232 0-100-68-200-88-280z"/></svg>
+                <span>MongoDB</span>
+              </div>
+              <!-- Vercel -->
+              <div class="tech-item">
+                <svg viewBox="0 0 512 512"><path fill="#000" d="M256 64L512 448H0z"/></svg>
+                <span>Vercel</span>
+              </div>
+              <!-- GitHub -->
+              <div class="tech-item">
+                <svg viewBox="0 0 512 512"><path fill="#181717" d="M256 0C114.6 0 0 114.6 0 256c0 113.1 73.3 209 175 242.9 12.8 2.4 17.5-5.6 17.5-12.3v-43.2c-71.2 15.5-86.2-34.3-86.2-34.3-11.6-29.6-28.4-37.5-28.4-37.5-23.2-15.9 1.8-15.5 1.8-15.5 25.7 1.8 39.2 26.4 39.2 26.4 22.8 39.1 59.9 27.8 74.5 21.3 2.3-16.5 8.9-27.8 16.2-34.2-56.8-6.5-116.6-28.4-116.6-126.5 0-28 10-50.8 26.3-68.7-2.6-6.5-11.4-32.5 2.5-67.8 0 0 21.5-6.9 70.4 26.3 20.4-5.7 42.3-8.5 64.1-8.6 21.8.1 43.7 2.9 64.1 8.6 48.8-33.2 70.3-26.3 70.3-26.3 14 35.3 5.2 61.3 2.6 67.8 16.4 17.9 26.3 40.7 26.3 68.7 0 98.4-59.9 119.9-117 126.3 9.2 7.9 17.4 23.5 17.4 47.4v70.3c0 6.8 4.6 14.8 17.6 12.3C438.8 464.9 512 369.1 512 256 512 114.6 397.4 0 256 0z"/></svg>
+                <span>GitHub</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Offline Mode Completed Pill -->
+          <div class="pill-end-orange">
+            <span>✔</span> Offline Mode<br>Completed
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. Blue Container (Online Mode) -->
+      <div class="mode-container container-blue">
+        <div class="pill-title pill-blue">
+          <span>🌐</span> Online Mode
+        </div>
+        <div class="arrow-vert-blue">↓</div>
+        <div class="step-box step-blue">
+          <span>👤</span> User Login
+        </div>
+        <div class="arrow-vert-blue">↓</div>
+        <div class="step-box step-blue" style="background:#bae6fd; font-weight:900;">
+          <span>⚡</span> Cloud Sync & Backup
+        </div>
+        <div class="arrow-vert-blue">↓</div>
+        <div class="step-box step-blue">
+          <span>🤖</span> AI Voice Companion
+        </div>
+        <div class="arrow-vert-blue">↓</div>
+        <div class="step-box step-blue">
+          <span>📊</span> Emotional Analytics
+        </div>
+        <div class="arrow-vert-blue">↓</div>
+        <div class="step-box step-blue">
+          <span>🚨</span> Emergency SOS Dispatch
+        </div>
+        <div class="arrow-vert-blue">↓</div>
+        <div class="pill-end-blue">
+          <span>✔</span> Online Mode<br>Completed
+        </div>
+      </div>
+
+      <!-- 3. Green Container (Caregiver Portal) -->
+      <div class="mode-container container-green">
+        <div class="pill-title pill-green">
+          <span>👨‍👩‍👧</span> Caregiver Mode
+        </div>
+        <div class="arrow-vert-green">↓</div>
+        <div class="step-box step-green">
+          <span>🔐</span> Caregiver Login
+        </div>
+        <div class="arrow-vert-green">↓</div>
+        <div class="step-box step-green">
+          <span>📝</span> Patient Medical Profile
+        </div>
+        <div class="arrow-vert-green">↓</div>
+        <div class="step-box step-green">
+          <span>📷</span> Upload Memories & Audio
+        </div>
+        <div class="arrow-vert-green">↓</div>
+        <div class="step-box step-green">
+          <span>⏰</span> Set Remote Reminders
+        </div>
+        <div class="arrow-vert-green">↓</div>
+        <div class="step-box step-green">
+          <span>📈</span> Live Care Dashboard
+        </div>
+        <div class="arrow-vert-green">↓</div>
+        <div class="pill-end-green">
+          <span>✔</span> Caregiver Mode<br>Completed
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Blue Bar (Exact SafeSecure style) -->
+    <div class="bottom-bar">
+      <div class="tag">@SMRITI - Cognitive Care & Memory Companion</div>
+      <div class="page-num">3</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -59,25 +59,83 @@ const AIService = {
   },
 
   // ------------------------------------------------------------
-  // 2. SMRITI AI COMPANION (EMPATHETIC, CHEERFUL, PLAYFUL)
+  // 2. SMRITI AI COMPANION (EMPATHETIC, CONTEXT-AWARE, PATIENT DATA CONNECTED)
   // ------------------------------------------------------------
+  async chatWithSmritiAsync(userMessage, history = []) {
+    const profile = Storage.getPatientProfile();
+    const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
+
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessage,
+          patientProfile: profile,
+          role: user.role || 'patient'
+        })
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.reply) {
+          return data.reply;
+        }
+      }
+    } catch (e) {
+      // Endpoint unavailable, fall back to synchronous context generator
+    }
+
+    return this.chatWithSmriti(userMessage, history);
+  },
+
   chatWithSmriti(userMessage, history = []) {
-    const user = Storage.getUser() || { name: 'friend' };
-    const firstName = user.name.split(' ')[0] || 'friend';
+    const profile = Storage.getPatientProfile();
+    const patient = profile.patient || { name: 'Meera', state: 'Assam' };
+    const firstName = (patient.preferredName || patient.name || 'Friend').split(' ')[0];
     const text = (userMessage || '').trim().toLowerCase();
+
+    const games = profile.gameHistory || [];
+    const totalGames = games.length;
+    const avgAcc = totalGames > 0 ? Math.round(games.reduce((s, g) => s + (g.accuracy || 0), 0) / totalGames) : 90;
+    const memories = profile.memories || [];
+    const family = profile.familyMembers || [];
+    const medicines = profile.medicines || [];
+    const state = profile.preferences?.regionalState || patient.state || 'Assam';
 
     // 1. Sadness / Low Mood
     if (text.includes('sad') || text.includes('lonely') || text.includes('low') || text.includes('upset') || text.includes('crying') || text.includes('worried')) {
       const responses = [
-        `I'm really glad you told me, ${firstName}. It's completely okay to feel this way sometimes. Would you like to hear a gentle story, or shall we just chat about a comforting memory?`,
-        `Thank you for sharing your heart with me, ${firstName}. Please remember you are valued and loved. Would hearing something cheerful or taking a few calm breaths together help right now?`,
-        `I am right here with you, ${firstName}. Take a slow, deep breath with me. Would you like me to tell you an uplifting tale from Assam's rolling tea hills?`
+        `I'm really glad you told me, ${firstName}. It's completely okay to feel this way sometimes. Would you like to hear a gentle story from ${state}, or shall we chat about a comforting memory? 🌸`,
+        `Thank you for sharing your heart with me, ${firstName}. Please remember you are cherished and never alone. Would taking a few calm 4-4 breaths together help right now? 🕊️`,
+        `I am right here with you, ${firstName}. Your loved ones like Raj and Ananya care for you deeply. Let's take a slow, peaceful breath together.`
       ];
       return responses[Math.floor(Math.random() * responses.length)];
     }
 
-    // 2. Stories
-    if (text.includes('story') || text.includes('tell me a tale') || text.includes('katha')) {
+    // 2. Family
+    if (text.includes('family') || text.includes('who is') || text.includes('children') || text.includes('son') || text.includes('daughter')) {
+      if (family.length > 0) {
+        const famList = family.map(f => `${f.name} (${f.relation})`).join(', ');
+        return `Your loving family includes ${famList}. Raj visits on weekends with tea, and Ananya calls from Shillong! You are surrounded by so much warmth. 🌸👨‍👩‍👧`;
+      }
+    }
+
+    // 3. Medicines & Reminders
+    if (text.includes('medicine') || text.includes('pill') || text.includes('doctor') || text.includes('prescription')) {
+      if (medicines.length > 0) {
+        const medNames = medicines.map(m => m.name).join(', ');
+        return `You have ${medicines.length} prescribed medicines in your schedule: ${medNames}. Your morning dose is scheduled with warm water. Always take them gently as Dr. Barua advised! 💊`;
+      }
+      return `You can view and manage all your medicines and reminder schedules in the **Medicines** section. Remember to always follow your doctor's instructions! Would you like me to guide you there? 💊`;
+    }
+
+    // 4. Stories & Memories
+    if (text.includes('memory') || text.includes('remember') || text.includes('photo') || text.includes('story') || text.includes('katha')) {
+      if (memories.length > 0) {
+        const m = memories[Math.floor(Math.random() * memories.length)];
+        return `Here is a sweet memory from your Life Story: "${m.title}". ${m.story.slice(0, 160)}... Cherishing these moments keeps our hearts so bright! 🖼️✨`;
+      }
       const stories = [
         `Here is a sweet story for you: In a quiet village near Kaziranga, an elderly grandmother planted a small jasmine bush by her porch. Birds and butterflies visited her every morning, and she would hum old folk tunes while watering it. Soon, neighbors began gathering on her veranda just to share tea and stories. That small jasmine bush blossomed into the warmest meeting place in the entire village! 🌸`,
         `Once upon a time, high in the hills of Shillong, there was a playful puppy who loved watching the clouds. Every time rain clouds gathered, he would chase the raindrops and bring fresh pine cones to his family. It reminded everyone that even on rainy days, joy is always waiting to be discovered! 🌧️🐾`,
@@ -86,7 +144,7 @@ const AIService = {
       return stories[Math.floor(Math.random() * stories.length)];
     }
 
-    // 3. Jokes / Humor
+    // 5. Jokes / Humor
     if (text.includes('joke') || text.includes('laugh') || text.includes('funny')) {
       const jokes = [
         `Why did the teapot whistle in the morning? Because it was so excited to start a brand new day with you! ☕😄`,
@@ -96,33 +154,28 @@ const AIService = {
       return jokes[Math.floor(Math.random() * jokes.length)];
     }
 
-    // 4. Motivation / Good thought
+    // 6. Motivation / Good thought
     if (text.includes('motivat') || text.includes('thought') || text.includes('quote') || text.includes('inspire') || text.includes('wisdom')) {
       const thought = this.generateGoodThought();
       return `Here is a special thought for you today, ${firstName}: "${thought.text}" 🌻`;
     }
 
-    // 5. Game recommendations & Activity requests
-    if (text.includes('game') || text.includes('play') || text.includes('activity') || text.includes('exercise')) {
-      return `I would love for you to play a game, ${firstName}! How about testing your memory with **Hornbill Memory Nest** 🦅, or exploring **Memory Moments** 📖? You can click the Games tab below anytime to start!`;
+    // 7. Game recommendations & Activity requests
+    if (text.includes('game') || text.includes('play') || text.includes('activity') || text.includes('score') || text.includes('progress')) {
+      return `You have completed ${totalGames} cognitive sessions with ${avgAcc}% overall accuracy! I recommend playing **Hornbill Memory Nest** 🦅 or exploring **Familiar Faces** 👨‍👩‍👧 today!`;
     }
 
-    // 6. Greetings
+    // 8. Greetings
     if (text.includes('hello') || text.includes('hi') || text.includes('hey') || text.includes('namaste') || text.includes('morning') || text.includes('evening')) {
       return `Namaste and hello, ${firstName}! 😊 It's wonderful to talk with you. How is your day going? Would you like to hear an inspiring story, play a fun game, or just chat?`;
     }
 
-    // 7. How are you / About Smriti
+    // 9. How are you / About Smriti
     if (text.includes('how are you') || text.includes('who are you') || text.includes('what can you do')) {
-      return `I'm feeling cheerful and delighted to be with you, ${firstName}! I am Smriti, your personal memory and wellness companion. I can tell stories, share good thoughts, play games with you, or help you track medicines and routines. What's on your mind?`;
+      return `I'm feeling cheerful and delighted to be with you, ${firstName}! I am Smriti, your personal memory and wellness companion connected to your Life Story and health routines. What's on your mind?`;
     }
 
-    // 8. Medicines & Reminders
-    if (text.includes('medicine') || text.includes('pill') || text.includes('doctor') || text.includes('prescription')) {
-      return `You can view and manage all your medicines and reminder schedules in the **Medicines** section. Remember to always follow your doctor's instructions! Would you like me to guide you there? 💊`;
-    }
-
-    // 9. Emergency / Help
+    // 10. Emergency / Help
     if (text.includes('help') || text.includes('emergency') || text.includes('doctor') || text.includes('call')) {
       return `If you need assistance or want to call your saved family contact, tap the 🆘 button at the top right or open the **Emergency Help** section. I can also help you navigate there! ❤️`;
     }

@@ -43,6 +43,33 @@ export default function EntertainmentPage(container) {
     }
   ];
 
+  const nerFolkMelodies = [
+    {
+      id: 'ner_1',
+      title: 'Majuli Bihu Flute Tune',
+      theme: 'Assam Brahmaputra Folk',
+      melodyNotes: [329.63, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00],
+      icon: '🎋',
+      desc: 'Gentle bamboo flute melodies reminiscent of springtime river breezes in Majuli.'
+    },
+    {
+      id: 'ner_2',
+      title: 'Shillong Pine Hills Lullaby',
+      theme: 'Meghalaya Acoustic Chimes',
+      melodyNotes: [261.63, 329.63, 392.00, 440.00, 392.00, 329.63, 261.63],
+      icon: '🌲',
+      desc: 'Soft acoustic chimes echoing through cool Shillong pine valleys.'
+    },
+    {
+      id: 'ner_3',
+      title: 'Loktak Lake Water Song',
+      theme: 'Manipur Folk Melody',
+      melodyNotes: [293.66, 369.99, 440.00, 493.88, 440.00, 369.99, 293.66],
+      icon: '🪷',
+      desc: 'Peaceful ripples on floating islands of Loktak Lake at dawn.'
+    }
+  ];
+
   const devotionalBhajans = [
     {
       id: 'dv_1',
@@ -261,6 +288,35 @@ export default function EntertainmentPage(container) {
                     </button>
                   </div>
                 `).join('')}
+            </div>
+
+            <!-- North Eastern Folk Melodies -->
+            <div class="card card-elevated mb-md" style="padding: 1.25rem; border-radius: 18px; border: 1.5px solid #BBF7D0;">
+              <h3 style="color: #166534; font-size: 1.25rem; margin-top: 0; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+                <span>🎋</span> North Eastern Folk & Heritage Melodies
+              </h3>
+              <p class="text-muted" style="margin-top: 0; margin-bottom: 1rem; font-size: 0.95rem;">
+                Soothing traditional folk melodies celebrating the hills, rivers, and cultural warmth of the North East.
+              </p>
+
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                ${nerFolkMelodies.map(s => `
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: #F0FDF4; border: 1.5px solid #DCFCE7; border-radius: 14px; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="font-size: 2rem; background: #DCFCE7; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        ${s.icon}
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; color: #166534; font-size: 1.1rem;">${s.title}</div>
+                        <div style="font-size: 0.85rem; color: #047857;">${s.theme}</div>
+                        <div style="font-size: 0.85rem; color: #15803D; margin-top: 0.15rem;">${s.desc}</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-outline btn-play-ner-melody" data-id="${s.id}" data-title="${s.title}" style="min-width: 90px; min-height: 48px; font-weight: 700; border-color: #10B981; color: #065F46;">
+                      ▶ Play
+                    </button>
+                  </div>
+                `).join('')}
               </div>
             </div>
 
@@ -444,6 +500,17 @@ export default function EntertainmentPage(container) {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
         const song = bollywoodClassics.find(s => s.id === id);
+        if (song) {
+          playSynthesizedMelody(song.melodyNotes, song.title);
+        }
+      });
+    });
+
+    // Play North Eastern Folk Melody
+    container.querySelectorAll('.btn-play-ner-melody').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const song = nerFolkMelodies.find(s => s.id === id);
         if (song) {
           playSynthesizedMelody(song.melodyNotes, song.title);
         }
