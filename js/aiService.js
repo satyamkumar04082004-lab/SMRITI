@@ -103,6 +103,19 @@ const AIService = {
     const medicines = profile.medicines || [];
     const state = profile.preferences?.regionalState || patient.state || 'Assam';
 
+    // 0. Specialized Memory & Dementia Knowledge Base
+    if (text.includes('dementia') || text.includes('what is dementia')) {
+      return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks. It is not a personal failing—it is simply changes in brain connections over time. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
+    }
+
+    if (text.includes('memory reduction') || text.includes('memory loss') || text.includes('why memory fades') || text.includes('forgetting') || text.includes('memory reduce')) {
+      return `Memory reduction happens when the delicate pathways (synapses) between brain neurons slow down or become less active due to aging, natural protein changes, or stress. Just like gentle morning exercise keeps our legs agile, engaging your mind through games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`;
+    }
+
+    if (text.includes('daily exercise') || text.includes('memory retention') || text.includes('brain exercise') || text.includes('retention exercise') || text.includes('exercises for memory')) {
+      return `Here are 4 proven daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing to oxygenate brain tissue; 3) Reminisce over one Life Story photo daily with a loved one; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
+    }
+
     // 1. Sadness / Low Mood
     if (text.includes('sad') || text.includes('lonely') || text.includes('low') || text.includes('upset') || text.includes('crying') || text.includes('worried')) {
       const responses = [

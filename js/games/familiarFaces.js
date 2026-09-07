@@ -81,27 +81,44 @@ export default function FamiliarFaces(container) {
                         <input type="text" id="face-relation" class="form-input" placeholder="e.g. Eldest Son" required />
                     </div>
 
-                    <div style="background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1.5px dashed #CBD5E1;">
-                        <label class="form-label" style="font-weight: 700; color: var(--teal-dark); margin-bottom: 6px;">Select Photo from Device</label>
-                        <input type="file" id="face-file" accept="image/*" class="form-input" style="padding: 6px; font-size: 0.9rem;" />
-
-                        <!-- Interactive Canvas Crop & Zoom Interface -->
-                        <div id="crop-controls-box" style="display: none; margin-top: 12px; text-align: center;">
-                            <div style="font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
-                                🔍 Drag to position • Adjust zoom slider:
+                    <div style="background: #F8FAFC; padding: 14px; border-radius: 14px; border: 1.5px dashed #CBD5E1; text-align: center;">
+                        <label class="form-label" style="font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; font-size: 1rem; display: block; text-align: left;">
+                            📸 Add Profile Picture
+                        </label>
+                        
+                        <!-- Circular Avatar Placeholder / Preview -->
+                        <div id="avatar-preview-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 12px;">
+                            <div id="avatar-placeholder-circle" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--teal, #0D9488); background: #E6F4F1; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin: 0 auto;">
+                                <span id="avatar-default-icon">👤</span>
+                                <img id="avatar-preview-img" src="" alt="Avatar Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;" />
                             </div>
-                            <div style="position: relative; width: 180px; height: 180px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--teal, #0D9488); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; cursor: grab;">
-                                <canvas id="crop-canvas" width="180" height="180" style="display: block; width: 100%; height: 100%;"></canvas>
-                            </div>
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;">
-                                <span style="font-size: 0.85rem; font-weight: 600;">Zoom:</span>
-                                <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1" style="width: 140px; cursor: pointer;">
-                                <button type="button" id="btn-reset-crop" class="btn btn-ghost btn-sm" style="font-size: 0.8rem; padding: 2px 8px;">Reset</button>
-                            </div>
+                            <span style="font-size: 0.8rem; color: var(--gray-500); margin-top: 6px;">Profile Photo Preview</span>
                         </div>
 
-                        <div style="font-size: 0.8rem; color: var(--gray-500); margin-top: 10px;">Or paste image link:</div>
-                        <input type="url" id="face-img-url" class="form-input" style="margin-top: 2px;" placeholder="https://..." />
+                        <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                            <label for="face-file" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 8px 14px; font-weight: 700; border-radius: 10px; font-size: 0.95rem; width: 100%;">
+                                📁 Choose Photo from Device
+                            </label>
+                            <input type="file" id="face-file" accept="image/*" style="display: none;" />
+
+                            <!-- Interactive Canvas Crop & Zoom Interface -->
+                            <div id="crop-controls-box" style="display: none; margin-top: 10px; text-align: center;">
+                                <div style="font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                    🔍 Drag to position • Adjust zoom slider:
+                                </div>
+                                <div style="position: relative; width: 160px; height: 160px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 3px solid var(--teal, #0D9488); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; cursor: grab;">
+                                    <canvas id="crop-canvas" width="160" height="160" style="display: block; width: 100%; height: 100%;"></canvas>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px;">
+                                    <span style="font-size: 0.85rem; font-weight: 600;">Zoom:</span>
+                                    <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1" style="width: 130px; cursor: pointer;">
+                                    <button type="button" id="btn-reset-crop" class="btn btn-ghost btn-sm" style="font-size: 0.8rem; padding: 2px 8px;">Reset</button>
+                                </div>
+                            </div>
+
+                            <div style="font-size: 0.8rem; color: var(--gray-500); margin-top: 4px;">Or paste image URL (never displayed as text):</div>
+                            <input type="url" id="face-img-url" class="form-input" style="font-size: 0.85rem;" placeholder="https://example.com/photo.jpg" />
+                        </div>
                     </div>
 
                     <div>
@@ -157,6 +174,13 @@ export default function FamiliarFaces(container) {
                 offsetY = 0;
                 cropBox.style.display = 'block';
                 drawCanvas();
+                const prevImg = modal.querySelector('#avatar-preview-img');
+                const defIcon = modal.querySelector('#avatar-default-icon');
+                if (prevImg && defIcon) {
+                    prevImg.src = imgSrc;
+                    prevImg.style.display = 'block';
+                    defIcon.style.display = 'none';
+                }
             };
             activeImg.src = imgSrc;
         }

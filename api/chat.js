@@ -28,7 +28,20 @@ function generateContextualResponse(message, profile, role) {
     return `Caregiver Summary: ${patient.name} has played ${totalGames} sessions recently. Best consistency in ${recentGame ? recentGame.gameName : 'Visual Memory'}. ${reminders.filter(r => r.active).length} daily reminders are active.`;
   }
 
-  // 2. Patient conversational intent
+  // 2. Specialized Clinical & Memory Knowledge Base
+  if (text.includes('dementia') || text.includes('what is dementia')) {
+    return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks. It is not a personal failing—it is simply changes in brain connections over time. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
+  }
+
+  if (text.includes('memory reduction') || text.includes('memory loss') || text.includes('why memory fades') || text.includes('forgetting') || text.includes('memory reduce')) {
+    return `Memory reduction happens when the delicate pathways (synapses) between brain neurons slow down or become less active due to aging, natural protein changes, or stress. Just like gentle morning exercise keeps our legs agile, engaging your mind through games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`;
+  }
+
+  if (text.includes('daily exercise') || text.includes('memory retention') || text.includes('brain exercise') || text.includes('retention exercise') || text.includes('exercises for memory')) {
+    return `Here are 4 proven daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing to oxygenate brain tissue; 3) Reminisce over one Life Story photo daily with a loved one; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
+  }
+
+  // 3. Patient conversational intent
   if (text.includes('medicine') || text.includes('pill') || text.includes('tablet')) {
     const medNames = medicines.map(m => m.name).join(', ');
     return `Dear ${firstName}, according to your routine, you have ${medicines.length} prescribed items (${medNames}). Your morning medicine is scheduled with a warm glass of water. Remember to take it gently as Dr. Barua advised! 💊`;
@@ -119,8 +132,12 @@ Current Patient Context:
 Instructions:
 1. Always be warm, respectful, and compassionate (use gentle Indian cultural cues like "Namaste", "Dear", or respectful terms).
 2. Answer questions about their progress, accuracy, completed tasks, and family directly using their real data.
-3. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
-4. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
+3. Answer medical/cognitive care questions accurately and empathetically:
+   - "What is Dementia?": Explain that it is an umbrella medical term for changes in brain pathways affecting memory and daily tasks, manageable with routine, cognitive stimulation, and warmth.
+   - "How does memory reduction happen?": Explain neuronal communication changes, aging, and reduced synaptic connections, noting that mental exercises help preserve paths.
+   - "Daily exercises for memory retention?": Recommend 10 mins of SMRITI memory games, 4-4 calm breathing, photo reminiscence, and morning hydration/walks.
+4. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
+5. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
 
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
           const geminiRes = await fetch(geminiUrl, {

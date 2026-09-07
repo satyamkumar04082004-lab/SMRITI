@@ -1,3 +1,8 @@
+/* ============================================================
+   SMRITI — Game 4: Remember Home
+   Spatial & object memory recall with reactive multilingual question generation
+   ============================================================ */
+
 import GameShell from '../gameShell.js';
 import I18n from '../i18n.js';
 import TTS from '../tts.js';
@@ -16,19 +21,43 @@ export default function RememberHome(container) {
 
     let currentController;
     let timer;
+    let langChangeHandler = null;
+    let rerenderCurrentRound = null;
     
-    const objectPool = [
-        { emoji: '🕐', name: 'Clock' },
-        { emoji: '🪑', name: 'Chair' },
-        { emoji: '🌱', name: 'Plant' },
-        { emoji: '📚', name: 'Books' },
-        { emoji: '🖼️', name: 'Picture' },
-        { emoji: '🛋️', name: 'Sofa' },
-        { emoji: '💡', name: 'Lamp' },
-        { emoji: '🏺', name: 'Vase' },
-        { emoji: '📺', name: 'TV' },
-        { emoji: '🧸', name: 'Teddy Bear' }
-    ];
+    const objectDict = {
+        en: {
+            clock: 'Clock', chair: 'Chair', plant: 'Plant', books: 'Books',
+            picture: 'Picture', sofa: 'Sofa', lamp: 'Lamp', vase: 'Vase',
+            tv: 'TV', bear: 'Teddy Bear'
+        },
+        hi: {
+            clock: 'घड़ी', chair: 'कुर्सी', plant: 'पौधा', books: 'किताबें',
+            picture: 'तस्वीर', sofa: 'सोफा', lamp: 'दीपक/लैंप', vase: 'फूलदान',
+            tv: 'टीवी', bear: 'खिलौना भालू'
+        },
+        as: {
+            clock: 'ঘড়ী', chair: 'চকী', plant: 'গছপুলি', books: 'কিতাপসমূহ',
+            picture: 'ছবি', sofa: 'চোফা', lamp: 'চাকি/লেম্প', vase: 'ফুলদানী',
+            tv: 'টিভি', bear: 'পুতলা ভালুক'
+        }
+    };
+
+    function getObjectPool() {
+        const lang = I18n.lang;
+        const dict = objectDict[lang] || objectDict.en;
+        return [
+            { id: 'clock', emoji: '🕐', name: dict.clock },
+            { id: 'chair', emoji: '🪑', name: dict.chair },
+            { id: 'plant', emoji: '🌱', name: dict.plant },
+            { id: 'books', emoji: '📚', name: dict.books },
+            { id: 'picture', emoji: '🖼️', name: dict.picture },
+            { id: 'sofa', emoji: '🛋️', name: dict.sofa },
+            { id: 'lamp', emoji: '💡', name: dict.lamp },
+            { id: 'vase', emoji: '🏺', name: dict.vase },
+            { id: 'tv', emoji: '📺', name: dict.tv },
+            { id: 'bear', emoji: '🧸', name: dict.bear }
+        ];
+    }
 
     const shell = GameShell.create(container, config);
 
@@ -64,15 +93,23 @@ export default function RememberHome(container) {
             
             gameArea.innerHTML = '';
             
+            const isHindi = I18n.lang === 'hi';
+            const isAssamese = I18n.lang === 'as';
+
+            const roundLabel = isHindi ? `दौर ${currentRound} / ${totalRounds}` : (isAssamese ? `পৰ্যায় ${currentRound} / ${totalRounds}` : `Round ${currentRound} of ${totalRounds}`);
+            const paceTitle = isHindi ? '⏱️ प्रश्नों से पहले याद रखने का समय:' : (isAssamese ? '⏱️ প্ৰশ্ন আৰম্ভ হোৱাৰ আগৰ সময়:' : '⏱️ Memorization Time Before Questions:');
+            const countdownPrefix = isHindi ? 'ध्यान से याद रखें! प्रश्न शुरू होंगे:' : (isAssamese ? 'মনত ৰাখক! প্ৰশ্ন আৰম্ভ হবলৈ বাকী:' : 'Memorize carefully! Questions start in:');
+
             const roundIndicator = document.createElement('div');
             roundIndicator.className = 'round-indicator text-center mb-4 text-xl font-bold';
-            roundIndicator.textContent = `Round ${currentRound} of ${totalRounds}`;
+            roundIndicator.textContent = roundLabel;
             gameArea.appendChild(roundIndicator);
             
             const gridContainer = document.createElement('div');
             gridContainer.className = 'room-grid grid grid-cols-3 gap-4 max-w-md mx-auto p-4 bg-cream rounded-xl shadow-md';
             
-            const shuffledPool = [...objectPool].sort(() => Math.random() - 0.5);
+            const pool = getObjectPool();
+            const shuffledPool = [...pool].sort(() => Math.random() - 0.5);
             const selectedObjects = shuffledPool.slice(0, numObjects);
             
             const cells = Array(9).fill(null);
@@ -82,7 +119,7 @@ export default function RememberHome(container) {
                 cells[availableIndices[i]] = obj;
             });
             
-            cells.forEach((obj, index) => {
+            cells.forEach((obj) => {
                 const cell = document.createElement('div');
                 cell.className = 'room-cell aspect-square flex flex-col items-center justify-center bg-white border-2 border-gray-200 rounded-lg text-4xl shadow-sm transition-all';
                 if (obj) {
@@ -97,14 +134,14 @@ export default function RememberHome(container) {
             const paceBox = document.createElement('div');
             paceBox.className = 'pace-control-box mt-4 p-3 bg-white rounded-xl shadow-sm border border-amber-200 max-w-sm mx-auto text-center';
             paceBox.innerHTML = `
-                <div class="text-sm font-bold text-amber-900 mb-1">⏱️ Memorization Time Before Questions:</div>
+                <div class="text-sm font-bold text-amber-900 mb-1">${paceTitle}</div>
                 <div class="flex items-center justify-center gap-3 my-1">
                     <button type="button" id="btn-pace-dec" class="btn" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; line-height: 1; padding: 0; background: #FFF7ED; border: 2px solid #D97706; color: #B45309;">−</button>
                     <span id="pace-val" class="font-extrabold text-lg text-amber-800" style="min-width: 80px;">${userMemorizeTime}s</span>
                     <button type="button" id="btn-pace-inc" class="btn" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; line-height: 1; padding: 0; background: #FFF7ED; border: 2px solid #D97706; color: #B45309;">+</button>
                 </div>
                 <div id="status-countdown" class="text-base font-bold text-teal-800 mt-1">
-                    Memorize carefully! Questions start in: <span id="countdown-num" style="font-size: 1.25rem; color: #9B2C2C;">${userMemorizeTime}</span>s
+                    ${countdownPrefix} <span id="countdown-num" style="font-size: 1.25rem; color: #9B2C2C;">${userMemorizeTime}</span>s
                 </div>
             `;
             gameArea.appendChild(paceBox);
@@ -132,7 +169,8 @@ export default function RememberHome(container) {
             });
             
             if (TTS.isSupported()) {
-                const ttsBtn = TTS.createButton(`Memorize the objects in the room.`);
+                const ttsVoicePrompt = isHindi ? 'कमरे में रखी वस्तुओं को ध्यान से याद रखें।' : (isAssamese ? 'কোঠাটোৰ বস্তুবোৰ মনত ৰাখক।' : 'Memorize the objects in the room.');
+                const ttsBtn = TTS.createButton(ttsVoicePrompt);
                 ttsBtn.classList.add('mt-2', 'mx-auto', 'block');
                 gameArea.appendChild(ttsBtn);
             }
@@ -165,6 +203,9 @@ export default function RememberHome(container) {
             const questionBox = document.createElement('div');
             questionBox.className = 'question-box mt-6 text-center';
             
+            const isHindi = I18n.lang === 'hi';
+            const isAssamese = I18n.lang === 'as';
+
             const questionType = Math.random() > 0.5 ? 'location' : 'presence';
             const targetObject = selectedObjects[Math.floor(Math.random() * selectedObjects.length)];
             
@@ -172,11 +213,17 @@ export default function RememberHome(container) {
             questionText.className = 'question-text text-xl font-bold mb-4';
             
             if (questionType === 'location') {
-                questionText.textContent = `Where was the ${targetObject.name} ${targetObject.emoji}? (Tap the grid)`;
+                const qPrompt = isHindi
+                    ? `${targetObject.name} ${targetObject.emoji} कहाँ रखा था? (ग्रिड पर स्पर्श करें)`
+                    : (isAssamese
+                        ? `${targetObject.name} ${targetObject.emoji} ক'ত আছিল? (স্পৰ্শ কৰক)`
+                        : `Where was the ${targetObject.name} ${targetObject.emoji}? (Tap the grid)`);
+
+                questionText.textContent = qPrompt;
                 questionBox.appendChild(questionText);
                 
                 if (TTS.isSupported()) {
-                    const ttsBtn = TTS.createButton(`Where was the ${targetObject.name}? Tap the grid.`);
+                    const ttsBtn = TTS.createButton(qPrompt);
                     ttsBtn.classList.add('mb-4', 'mx-auto', 'block');
                     questionBox.appendChild(ttsBtn);
                 }
@@ -184,7 +231,7 @@ export default function RememberHome(container) {
                 gameArea.appendChild(questionBox);
                 
                 gridContainer.querySelectorAll('.room-cell').forEach(cell => {
-                    cell.addEventListener('click', function handler(e) {
+                    cell.addEventListener('click', function handler() {
                         gridContainer.querySelectorAll('.room-cell').forEach(c => {
                             c.style.pointerEvents = 'none';
                             const idx = parseInt(c.dataset.index);
@@ -205,16 +252,21 @@ export default function RememberHome(container) {
                             this.classList.add('bg-red-100', 'border-red-500');
                             gridContainer.children[targetIndex].classList.add('bg-green-100', 'border-green-500');
                             controller.recordWrong();
-                            showFeedback(false, gameArea, startRound, `The ${targetObject.name} was there.`);
+                            const wrongMsg = isHindi ? `${targetObject.name} यहाँ था।` : (isAssamese ? `${targetObject.name} ইয়াত আছিল।` : `The ${targetObject.name} was there.`);
+                            showFeedback(false, gameArea, startRound, wrongMsg);
                         }
                     });
                 });
             } else {
-                questionText.textContent = `Which object was in the room?`;
+                const presencePrompt = isHindi
+                    ? 'कमरे में कौन सी वस्तु रखी थी?'
+                    : (isAssamese ? 'কোঠাটোত কোনটো বস্তু আছিল?' : 'Which object was in the room?');
+
+                questionText.textContent = presencePrompt;
                 questionBox.appendChild(questionText);
                 
                 if (TTS.isSupported()) {
-                    const ttsBtn = TTS.createButton(`Which object was in the room?`);
+                    const ttsBtn = TTS.createButton(presencePrompt);
                     ttsBtn.classList.add('mb-4', 'mx-auto', 'block');
                     questionBox.appendChild(ttsBtn);
                 }
@@ -222,7 +274,8 @@ export default function RememberHome(container) {
                 const optionsList = document.createElement('div');
                 optionsList.className = 'options-list grid grid-cols-2 gap-4 max-w-sm mx-auto';
                 
-                const unselectedPool = objectPool.filter(obj => !selectedObjects.includes(obj));
+                const pool = getObjectPool();
+                const unselectedPool = pool.filter(obj => !selectedObjects.some(s => s.id === obj.id));
                 const wrongOptions = [...unselectedPool].sort(() => Math.random() - 0.5).slice(0, 3);
                 
                 const allOptions = [targetObject, ...wrongOptions].sort(() => Math.random() - 0.5);
@@ -235,7 +288,7 @@ export default function RememberHome(container) {
                     btn.addEventListener('click', function handler() {
                         optionsList.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
                         
-                        if (opt === targetObject) {
+                        if (opt.id === targetObject.id) {
                             btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
                             controller.addScore(15);
                             controller.recordCorrect();
@@ -243,7 +296,8 @@ export default function RememberHome(container) {
                         } else {
                             btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
                             controller.recordWrong();
-                            showFeedback(false, gameArea, startRound, `The ${targetObject.name} was in the room.`);
+                            const wrongMsg = isHindi ? `${targetObject.name} कमरे में था।` : (isAssamese ? `${targetObject.name} কোঠাটোত আছিল।` : `The ${targetObject.name} was in the room.`);
+                            showFeedback(false, gameArea, startRound, wrongMsg);
                         }
                     });
                     
@@ -258,13 +312,19 @@ export default function RememberHome(container) {
         }
         
         function showFeedback(isCorrect, gameArea, nextCallback, message = '') {
+            const isHindi = I18n.lang === 'hi';
+            const isAssamese = I18n.lang === 'as';
+
+            const correctText = isHindi ? 'बिल्कुल सही! बहुत बढ़िया 🌟' : (isAssamese ? 'একেবাৰে সঠিক! বৰ সুন্দৰ 🌟' : 'Correct! Well done 🌟');
+            const wrongText = isHindi ? `प्रयास अच्छा था! ${message}` : (isAssamese ? `চেষ্টা ভাল আছিল! ${message}` : `Not quite. ${message}`);
+
             const feedback = document.createElement('div');
             feedback.className = `text-center mt-6 text-xl font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}`;
-            feedback.textContent = isCorrect ? 'Correct! Well done.' : `Not quite. ${message}`;
+            feedback.textContent = isCorrect ? correctText : wrongText;
             gameArea.appendChild(feedback);
             
             if (TTS.isSupported()) {
-                 TTS.speak(isCorrect ? 'Correct!' : `Not quite. ${message}`);
+                 TTS.speak(isCorrect ? correctText : wrongText);
             }
             
             timer = setTimeout(nextCallback, 2500);
@@ -278,6 +338,10 @@ export default function RememberHome(container) {
             clearInterval(timer);
             clearTimeout(timer);
         }
+        if (langChangeHandler) {
+            window.removeEventListener('languageChanged', langChangeHandler);
+        }
+        TTS.stop();
     }
 
     return shell;

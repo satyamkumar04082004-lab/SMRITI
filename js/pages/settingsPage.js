@@ -147,8 +147,29 @@ export default function SettingsPage(container) {
         <!-- Add/Edit Family Member Form (Toggleable) -->
         <div id="panel-family-form" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal); border-radius: 14px; padding: 1rem; margin-bottom: 1rem;">
           <h4 id="family-form-title" style="margin: 0 0 0.75rem 0; color: var(--teal-dark); font-size: 1.1rem;">✨ Add Family Member</h4>
-          <form id="form-family-member" style="display: flex; flex-direction: column; gap: 0.65rem;">
+          <form id="form-family-member" style="display: flex; flex-direction: column; gap: 0.75rem;">
             <input type="hidden" id="fam-member-id" value="" />
+            <input type="hidden" id="fam-member-photo-data" value="" />
+
+            <!-- Profile Picture Section with Circular Avatar Placeholder -->
+            <div style="background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 12px; padding: 12px; text-align: center;">
+              <label class="form-label" style="font-size: 0.95rem; font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; display: block; text-align: left;">
+                📸 Add Profile Picture
+              </label>
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <div id="fam-avatar-preview-box" style="width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--teal, #0D9488); background: #E6F4F1; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <span id="fam-avatar-default-icon">👤</span>
+                  <img id="fam-avatar-preview-img" src="" alt="Avatar" style="display: none; width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <span style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">Photo Preview</span>
+              </div>
+              <label for="fam-member-photo-input" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 0.85rem; width: 100%;">
+                📁 Upload Profile Photo
+              </label>
+              <input type="file" id="fam-member-photo-input" accept="image/*" style="display: none;" />
+              <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">Images remain safely on device (never displayed as raw URLs)</div>
+            </div>
+
             <div>
               <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Full Name *</label>
               <input type="text" id="fam-member-name" class="form-input" placeholder="e.g. Raj Das" required />
@@ -297,6 +318,14 @@ export default function SettingsPage(container) {
         container.querySelector('#fam-member-relation').value = '';
         container.querySelector('#fam-member-phone').value = '';
         container.querySelector('#fam-member-cue').value = '';
+        container.querySelector('#fam-member-photo-data').value = '';
+        const prevImg = container.querySelector('#fam-avatar-preview-img');
+        const defIcon = container.querySelector('#fam-avatar-default-icon');
+        if (prevImg && defIcon) {
+          prevImg.src = '';
+          prevImg.style.display = 'none';
+          defIcon.style.display = 'block';
+        }
         panelFamForm.style.display = panelFamForm.style.display === 'none' ? 'block' : 'none';
       });
     }
@@ -318,8 +347,9 @@ export default function SettingsPage(container) {
 
         if (!name || !relation) return;
 
+        const photo = container.querySelector('#fam-member-photo-data').value.trim();
         if (id) {
-          Storage.updateFamilyMember(id, { name, relation, phone, memoryCue: cue });
+          Storage.updateFamilyMember(id, { name, relation, phone, memoryCue: cue, ...(photo ? { photo } : {}) });
           if (window.SmritiToast) window.SmritiToast.show(`${name} updated successfully! 🌸`, 'success');
         } else {
           Storage.addFamilyMember({
@@ -327,6 +357,7 @@ export default function SettingsPage(container) {
             relation,
             phone,
             memoryCue: cue,
+            photo: photo || null,
             emoji: '👤'
           });
           if (window.SmritiToast) window.SmritiToast.show(`${name} added to family! 🌸`, 'success');
@@ -348,10 +379,49 @@ export default function SettingsPage(container) {
           container.querySelector('#fam-member-relation').value = member.relation;
           container.querySelector('#fam-member-phone').value = member.phone || '';
           container.querySelector('#fam-member-cue').value = member.memoryCue || '';
+          const photoData = container.querySelector('#fam-member-photo-data');
+          const prevImg = container.querySelector('#fam-avatar-preview-img');
+          const defIcon = container.querySelector('#fam-avatar-default-icon');
+          if (photoData) photoData.value = member.photo || '';
+          if (prevImg && defIcon) {
+            if (member.photo) {
+              prevImg.src = member.photo;
+              prevImg.style.display = 'block';
+              defIcon.style.display = 'none';
+            } else {
+              prevImg.src = '';
+              prevImg.style.display = 'none';
+              defIcon.style.display = 'block';
+            }
+          }
           panelFamForm.scrollIntoView({ behavior: 'smooth' });
         }
       });
     });
+
+
+    const photoFileInput = container.querySelector('#fam-member-photo-input');
+    if (photoFileInput) {
+      photoFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            const dataUrl = evt.target.result;
+            const photoHidden = container.querySelector('#fam-member-photo-data');
+            const prevImg = container.querySelector('#fam-avatar-preview-img');
+            const defIcon = container.querySelector('#fam-avatar-default-icon');
+            if (photoHidden) photoHidden.value = dataUrl;
+            if (prevImg && defIcon) {
+              prevImg.src = dataUrl;
+              prevImg.style.display = 'block';
+              defIcon.style.display = 'none';
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
 
     // Delete Family Member
     container.querySelectorAll('.btn-delete-family').forEach(btn => {
