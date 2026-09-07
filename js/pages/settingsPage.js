@@ -7,9 +7,10 @@ import Storage from '../storage.js';
 import I18n from '../i18n.js';
 import Auth from '../auth.js';
 import TTS from '../tts.js';
+import UserState from '../userState.js';
 
 export default function SettingsPage(container) {
-  let user = Storage.getUser() || { name: 'Meera Das', phone: '9876543210', role: 'patient', age: 72 };
+  let user = UserState.getUser() || { name: 'Meera Das', phone: '9876543210', role: 'patient', age: 72 };
   let emergency = Storage.getEmergencyContacts();
   const languages = I18n.getAvailableLanguages();
   const currentLang = I18n.lang;
@@ -259,10 +260,8 @@ export default function SettingsPage(container) {
         user = { ...user, name, age, role, phone };
         Storage.setUser(user);
 
-        // Also update preferredName in preferences so home greeting always reflects the new name
-        const prefs = Storage.getPreferences();
-        prefs.preferredName = name.split(' ')[0] || name;
-        Storage.setPreferences(prefs);
+        // Update reactive global UserState so name changes instantly update across all components
+        UserState.updateName(name, name.split(' ')[0] || name);
 
         emergency = {
           ...emergency,
@@ -274,7 +273,7 @@ export default function SettingsPage(container) {
         Storage.setEmergencyContacts(emergency);
 
         // Dispatch profile update event so any open screens/headers refresh immediately
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', { detail: { user, prefs } }));
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', { detail: { user, prefs: Storage.getPreferences() } }));
 
         isEditingProfile = false;
         if (window.SmritiToast) {

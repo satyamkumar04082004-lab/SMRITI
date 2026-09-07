@@ -1,22 +1,28 @@
 /* ============================================================
    SMRITI — Modernized Wellness & Memory Home Page
    Warm, consumer-friendly daily companion hub
+   Reactive: subscribes to UserState for name updates
    ============================================================ */
 
 import Storage from '../storage.js';
 import AIService from '../aiService.js';
 import TTS from '../tts.js';
 import I18n from '../i18n.js';
+import UserState from '../userState.js';
 
 export default function Home(container) {
-  const user = Storage.getUser() || { name: 'Friend' };
-  const prefs = Storage.getPreferences();
-  const displayName = prefs.preferredName || user.name.split(' ')[0] || 'Friend';
-
   let currentThought = AIService.generateGoodThought();
   let todayMood = Storage.getTodayMood();
   const journey = Storage.getJourneyStats();
   const recommendedGame = AIService.recommendActivity();
+
+  // Reactive display name — updates across all renders without reload
+  let displayName = UserState.getDisplayName() || 'Friend';
+
+  // Subscribe to name changes from UserState (e.g. after Settings, Login wizard)
+  const unsubscribeHome = UserState.subscribe(() => {
+    displayName = UserState.getDisplayName() || 'Friend';
+  });
 
   // Determine time of day greeting
   const hour = new Date().getHours();
@@ -634,6 +640,7 @@ export default function Home(container) {
       TTS.stop();
       window.removeEventListener('userProfileUpdated', profileUpdateHandler);
       window.removeEventListener('languageChanged', profileUpdateHandler);
+      if (typeof unsubscribeHome === 'function') unsubscribeHome();
     }
   };
 }

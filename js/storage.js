@@ -60,7 +60,31 @@ function createDefaultPatientProfile(patientId = 'patient_meera_01') {
       doctorPhone: '+919876543212',
       diagnosisNotes: 'Early-stage mild cognitive impairment (MCI). Independent in daily routines with gentle prompts.',
       stage: 'Mild MCI',
-      createdAt: '2026-01-10T08:00:00.000Z'
+      createdAt: '2026-01-10T08:00:00.000Z',
+      demographics: {
+        education: 'Graduate / Teacher',
+        occupation: 'Retired School Educator',
+        primaryLanguage: 'Assamese',
+        secondaryLanguages: ['English', 'Bengali', 'Hindi'],
+        livingArrangement: 'With Family (Son & Grandchildren)'
+      },
+      medicalHistory: {
+        conditions: ['Mild Cognitive Impairment (MCI)', 'Mild Hypertension'],
+        allergies: ['Penicillin', 'Dust'],
+        mobilityLevel: 'Independent with gentle walking support',
+        visionHearing: 'Wears reading glasses; normal hearing'
+      },
+      culturalBackground: {
+        tradition: 'Assamese / North Eastern',
+        festivals: ['Bohag Bihu', 'Magh Bihu', 'Diwali'],
+        spiritualPractice: 'Morning prayers and Naam Ghosa listening'
+      },
+      dietaryPreferences: {
+        dietType: 'Vegetarian with light freshwater fish curry',
+        favoriteBeverage: 'Warm Assam ginger tea (no sugar)',
+        comfortFoods: ['Coconut Pitha', 'Khar', 'Soft Khichdi'],
+        restrictions: ['Low sodium', 'Low spice']
+      }
     },
     familyMembers: [
       {

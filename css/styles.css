@@ -37,6 +37,64 @@
   --transition: 0.25s ease;
 }
 
+
+/* --- Dynamic Cultural & Regional NER Themes --- */
+body[data-region="Assam"], body[data-lang="as"] {
+  --cream: #FAF7F2;
+  --cream-dark: #F2EBE1;
+  --maroon: #881337;
+  --maroon-light: #9F1239;
+  --maroon-dark: #4C0519;
+  --gold: #D97706;
+  --gold-light: #FDE68A;
+  --teal: #0D9488;
+  --teal-light: #14B8A6;
+  --teal-dark: #0F766E;
+  --region-motif: "🌺 Assam";
+}
+
+body[data-region="Meghalaya"], body[data-lang="kha"] {
+  --cream: #F0F9FF;
+  --cream-dark: #E0F2FE;
+  --maroon: #1E3A8A;
+  --maroon-light: #2563EB;
+  --maroon-dark: #172554;
+  --gold: #0284C7;
+  --gold-light: #BAE6FD;
+  --teal: #0284C7;
+  --teal-light: #38BDF8;
+  --teal-dark: #0369A1;
+  --region-motif: "🌧️ Meghalaya";
+}
+
+body[data-region="Manipur"], body[data-lang="mni"] {
+  --cream: #FDF4FF;
+  --cream-dark: #FAE8FF;
+  --maroon: #701A75;
+  --maroon-light: #86198F;
+  --maroon-dark: #4A044E;
+  --gold: #C026D3;
+  --gold-light: #F5D0FE;
+  --teal: #9333EA;
+  --teal-light: #A855F7;
+  --teal-dark: #6B21A8;
+  --region-motif: "🪷 Manipur";
+}
+
+body[data-region="Mizoram"], body[data-lang="lus"] {
+  --cream: #F7FEE7;
+  --cream-dark: #ECFCCB;
+  --maroon: #365314;
+  --maroon-light: #4D7C0F;
+  --maroon-dark: #1A2E05;
+  --gold: #65A30D;
+  --gold-light: #D9F99D;
+  --teal: #15803D;
+  --teal-light: #22C55E;
+  --teal-dark: #14532D;
+  --region-motif: "🎋 Mizoram";
+}
+
 /* --- Reset & Base --- */
 *, *::before, *::after {
   box-sizing: border-box;

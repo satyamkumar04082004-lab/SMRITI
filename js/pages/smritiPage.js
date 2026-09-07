@@ -1,17 +1,25 @@
 /* ============================================================
    SMRITI — AI Voice & Memory Companion Page
    Interactive conversational companion with Voice/TTS support
+   Reactive: subscribes to UserState so name always reflects
+   the currently logged-in patient.
    ============================================================ */
 
 import AIService from '../aiService.js';
 import Storage from '../storage.js';
 import TTS from '../tts.js';
 import I18n from '../i18n.js';
+import UserState from '../userState.js';
 
 export default function SmritiPage(container) {
-  const user = Storage.getUser() || { name: 'Friend' };
-  const firstName = user.name.split(' ')[0] || 'Friend';
+  // Use reactive UserState so name persists & updates instantly
+  let firstName = UserState.getDisplayName() || 'Friend';
   const aiSettings = Storage.getAISettings();
+
+  // Subscribe to live user-state changes (name update from Settings or wizard)
+  const unsubscribeUser = UserState.subscribe(() => {
+    firstName = UserState.getDisplayName() || 'Friend';
+  });
 
   let conversation = [
     { sender: 'smriti', text: `Hello ${firstName}! 😊 I'm Smriti. Would you like to talk about your day, hear an inspiring story, or start a fun game together?` }
@@ -275,6 +283,7 @@ export default function SmritiPage(container) {
         recognition.stop();
       }
       TTS.stop();
+      if (typeof unsubscribeUser === 'function') unsubscribeUser();
     }
   };
 }
