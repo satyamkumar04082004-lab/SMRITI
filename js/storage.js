@@ -523,8 +523,11 @@ const Storage = {
 
   clearUser() {
     try {
+      // Clear all active user session keys and active patient pointer to prevent session bleed
       localStorage.removeItem(this._key('currentUser'));
+      localStorage.removeItem(this._key('active_patient_id'));
       localStorage.setItem(this._key('loggedOut'), 'true');
+      // Dispatch event
       window.dispatchEvent(new CustomEvent('smritiUserChanged', { detail: { user: null } }));
     } catch {}
   },
@@ -1188,19 +1191,55 @@ const Storage = {
 
   getAllUsers() {
     return this.get('allUsers', [
-      { name: 'Meera Das', phone: '9876543210', role: 'patient' },
-      { name: 'Raj Das (Caregiver)', phone: '9876543210', role: 'caregiver' },
-      { name: 'Dr. A. K. Barua', phone: '9876543212', role: 'doctor' }
+      { username: 'meera_das', name: 'Meera Das', phone: '9876543210', role: 'patient', patientId: 'patient_meera_01' },
+      { username: 'raj_caregiver', name: 'Raj Das', phone: '9876543211', role: 'caregiver', linkedPatientUsername: 'meera_das', patientId: 'patient_meera_01' },
+      { username: 'dr_barua', name: 'Dr. A. K. Barua', phone: '9876543212', role: 'doctor', patientId: 'patient_meera_01' }
     ]);
+  },
+
+  findUserByUsername(username) {
+    if (!username) return null;
+    const clean = username.trim().toLowerCase().replace(/^@/, '');
+    const users = this.getAllUsers();
+    return users.find(u => (u.username || '').toLowerCase() === clean) || null;
+  },
+
+  findPatientByUsername(username) {
+    if (!username) return null;
+    const clean = username.trim().toLowerCase().replace(/^@/, '');
+    const users = this.getAllUsers();
+    return users.find(u => u.role === 'patient' && (u.username || '').toLowerCase() === clean) || null;
+  },
+
+  isUsernameTaken(username, excludePhone = null) {
+    if (!username) return false;
+    const clean = username.trim().toLowerCase().replace(/^@/, '');
+    const users = this.getAllUsers();
+    return users.some(u => (u.username || '').toLowerCase() === clean && (!excludePhone || u.phone !== excludePhone));
   },
 
   registerUser(user) {
     const users = this.getAllUsers();
-    const existing = users.find(u => u.phone === user.phone && u.role === user.role);
-    if (!existing) {
-      users.push({ name: user.name, phone: user.phone, role: user.role });
-      this.set('allUsers', users);
+    const cleanUsername = (user.username || user.name.toLowerCase().replace(/[^a-z0-9]/g, '_')).toLowerCase().replace(/^@/, '');
+    const existingIndex = users.findIndex(u => u.phone === user.phone && u.role === user.role);
+    const record = {
+      username: cleanUsername,
+      name: user.name,
+      preferredName: user.preferredName || user.name.split(' ')[0],
+      phone: user.phone,
+      role: user.role,
+      patientId: user.patientId || ('patient_' + cleanUsername),
+      linkedPatientUsername: user.linkedPatientUsername || null,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (existingIndex >= 0) {
+      users[existingIndex] = Object.assign(users[existingIndex], record);
+    } else {
+      users.push(record);
     }
+    this.set('allUsers', users);
+    return record;
   }
 };
 

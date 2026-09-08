@@ -230,16 +230,7 @@ export default function SettingsPage(container) {
         </button>
       </div>
 
-      <!-- Hackathon Demo Preset Button -->
-      <div class="card card-elevated mb-md" style="padding: 1.25rem; background: #F0FDF4; border: 2px solid #86EFAC;">
-        <h3 style="color: #065F46; margin-top: 0; margin-bottom: 6px; font-size: 1.25rem;">🌟 Hackathon Demo Preset</h3>
-        <p style="color: #166534; font-size: 0.9rem; margin-bottom: 12px;">
-          Instantly populates realistic demo records (sample games, mood checks, medicines, emergency contacts, reminders) for testing.
-        </p>
-        <button id="btn-reset-demo" class="btn btn-secondary btn-block" style="background: #059669;">
-          🔄 Load Full Demo Preset
-        </button>
-      </div>
+
 
       <!-- Logout -->
       <button id="btn-logout" class="btn btn-outline btn-block" style="border-color: var(--maroon); color: var(--maroon);">
@@ -483,24 +474,14 @@ export default function SettingsPage(container) {
       });
     }
 
-    const demoBtn = container.querySelector('#btn-reset-demo');
-    if (demoBtn) {
-      demoBtn.addEventListener('click', () => {
-        Storage.resetDemoData();
-        if (window.SmritiToast) {
-          window.SmritiToast.show('Full Demo Preset Loaded! Explore all features.', 'success');
-        }
-        setTimeout(() => {
-          window.location.hash = '#/home';
-        }, 700);
-      });
-    }
+
 
     const logoutBtn = container.querySelector('#btn-logout');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         Auth.logout();
         window.location.hash = '#/login';
+        window.location.reload();
       });
     }
   }

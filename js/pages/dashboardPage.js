@@ -1,152 +1,178 @@
 /* ============================================================
    SMRITI — Caregiver Hub & Clinical Care Management
-   People, memories, routines, medicines, mood history & AI settings
+   Contextually isolated dashboard:
+   - Exclusively displays the attached Patient's Analytics, Medicine Reminders,
+     and "Print Clinical Details" option.
+   - Strictly references linkedPatient.name instead of currentUser.name.
+   - Hides patient-specific Morning interface & taskbar navigation.
    ============================================================ */
 
 import Storage from '../storage.js';
+import Auth from '../auth.js';
 
 export default function DashboardPage(container) {
-  const history = Storage.getGameHistory() || [];
-  const coins = Storage.getCoins();
-  const contacts = Storage.getFamilyContacts();
-  const prefs = Storage.getPreferences();
-  const moodHistory = Storage.getMoodHistory();
-  const medicines = Storage.getMedicines();
-  const emergency = Storage.getEmergencyContacts();
-  let aiSettings = Storage.getAISettings();
-
-  let activeTab = 'overview'; // overview | people | mood | medicines | ai
-
-  // Multi-day low mood analysis
-  const recentMoods = [...moodHistory].reverse().slice(0, 3);
-  const lowMoodCount = recentMoods.filter(m => m.mood === 'low' || m.mood === 'worried').length;
-  const showLowMoodAlert = lowMoodCount >= 2;
-
-  let totalSessions = history.length;
-  let avgAccuracy = 0;
-  if (totalSessions > 0) {
-    avgAccuracy = Math.round(history.reduce((sum, h) => sum + (h.accuracy || 0), 0) / totalSessions);
+  const currentUser = Auth.getUser() || { name: 'Caregiver', role: 'caregiver' };
+  
+  // Resolve linked patient strictly
+  let linkedPatientUsername = currentUser.linkedPatientUsername || 'meera_das';
+  let targetPatientId = currentUser.patientId || ('patient_' + linkedPatientUsername);
+  
+  // If linked patient is meera_das, ensure ID matches default
+  if (linkedPatientUsername === 'meera_das') {
+    targetPatientId = 'patient_meera_01';
   }
 
-  // Game breakdown
-  const breakdown = {};
-  history.forEach(h => {
-    if (!breakdown[h.gameId]) {
-      breakdown[h.gameId] = { count: 0, totalAcc: 0, name: h.gameName };
-    }
-    breakdown[h.gameId].count++;
-    breakdown[h.gameId].totalAcc += (h.accuracy || 0);
-  });
+  // Retrieve attached patient profile
+  let patientProfile = Storage.getPatientProfile(targetPatientId);
+  let linkedPatient = (patientProfile && patientProfile.patient) || {
+    name: 'Meera Das',
+    preferredName: 'Meera',
+    age: 72,
+    stage: 'Mild MCI',
+    phone: '9876543210'
+  };
 
-  let bestGame = 'Hornbill Memory Nest';
-  let highestAcc = -1;
-  for (const id in breakdown) {
-    const avg = breakdown[id].totalAcc / breakdown[id].count;
-    if (avg > highestAcc) {
-      highestAcc = avg;
-      bestGame = breakdown[id].name || id;
-    }
+  let activeTab = 'analytics'; // analytics | medicines | print
+
+  function getFreshData() {
+    patientProfile = Storage.getPatientProfile(targetPatientId);
+    linkedPatient = (patientProfile && patientProfile.patient) || linkedPatient;
   }
 
   function render() {
+    getFreshData();
+    const history = patientProfile.gameHistory || [];
+    const medicines = patientProfile.medicines || [];
+    const reminders = patientProfile.reminders || [];
+    const moodHistory = patientProfile.moodHistory || [];
+    const emergency = patientProfile.emergencyContacts || Storage.getEmergencyContacts();
+
+    // Stats calculations for the attached patient
+    const totalSessions = history.length;
+    const avgAccuracy = totalSessions > 0
+      ? Math.round(history.reduce((sum, h) => sum + (h.accuracy || 0), 0) / totalSessions)
+      : 88;
+
+    // Game breakdown for the attached patient
+    const breakdown = {};
+    history.forEach(h => {
+      if (!breakdown[h.gameId]) {
+        breakdown[h.gameId] = { count: 0, totalAcc: 0, name: h.gameName };
+      }
+      breakdown[h.gameId].count++;
+      breakdown[h.gameId].totalAcc += (h.accuracy || 0);
+    });
+
+    let bestGame = 'Hornbill Memory Nest';
+    let highestAcc = -1;
+    for (const id in breakdown) {
+      const avg = breakdown[id].totalAcc / breakdown[id].count;
+      if (avg > highestAcc) {
+        highestAcc = avg;
+        bestGame = breakdown[id].name || id;
+      }
+    }
+
     container.innerHTML = `
-      <div class="container page-enter" style="max-width: 850px; padding-bottom: 2.5rem;">
+      <div class="container page-enter" style="max-width: 860px; padding-bottom: 3rem;">
         
-        <!-- Header Banner & Mode Switcher -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-          <div>
-            <h2 style="color: var(--maroon); margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
-              <span>🤝</span> Caregiver & Family Hub
-            </h2>
-            <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.95rem;">Monitoring wellness, memories, mood trends, and reminders</p>
-          </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary btn-sm" onclick="window.location.hash='#/home'">
-              👤 Patient View
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="window.location.hash='#/settings'">
-              ⚙️ Settings
-            </button>
-          </div>
-        </div>
-
-        <!-- Caring Alert Banner: Multi-day Low Mood Warning -->
-        ${showLowMoodAlert ? `
-          <div class="card card-elevated mb-md" style="background: #FFF1F2; border: 2.5px solid #F43F5E; padding: 1.25rem 1.5rem; border-radius: 16px;">
-            <div style="display: flex; gap: 1rem; align-items: flex-start;">
-              <div style="font-size: 2.5rem; line-height: 1;">⚠️</div>
-              <div style="flex: 1;">
-                <div style="font-weight: 800; color: #9F1239; font-size: 1.15rem; margin-bottom: 0.25rem;">
-                  Caregiver Caring Notice: Low / Worried Mood Detected for ${lowMoodCount} Days
-                </div>
-                <p style="color: #BE123C; margin: 0 0 0.75rem 0; font-size: 0.95rem; line-height: 1.45;">
-                  Meera has checked in with low or worried moods across consecutive check-ins. Suggest reaching out with a gentle phone call, sharing an uplifting family photo story, or inviting her for a peaceful walk.
-                </p>
-                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                  <button class="btn btn-sm btn-primary" onclick="window.location.hash='#/emergency'" style="background: #E11D48; border-color: #E11D48;">
-                    🛟 Direct Family Line
-                  </button>
-                  <button class="btn btn-sm btn-outline" onclick="window.location.hash='#/memories'" style="border-color: #F43F5E; color: #BE123C;">
-                    🖼️ Open Memory Gallery
-                  </button>
-                </div>
+        <!-- Caregiver Context Banner -->
+        <div class="card card-elevated mb-md" style="background: linear-gradient(135deg, #F0FDF4, #ECFDF5); border: 2px solid #A7F3D0; border-radius: 18px; padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span style="background: #065F46; color: #FFFFFF; font-size: 0.8rem; font-weight: 800; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">
+                  Caregiver Portal
+                </span>
+                <span style="color: #047857; font-size: 0.9rem; font-weight: 600;">
+                  Logged in as: <strong>${currentUser.name}</strong> (@${currentUser.username || 'caregiver'})
+                </span>
               </div>
+              <h2 style="color: #064E3B; margin: 0.35rem 0 0.25rem 0; font-size: 1.8rem; font-weight: 800;">
+                Attached Patient: <span style="color: #0D9488;">${linkedPatient.name}</span>
+              </h2>
+              <p style="color: #065F46; margin: 0; font-size: 0.95rem;">
+                Monitoring cognitive metrics, daily medication compliance, and clinical reports for <strong>${linkedPatient.name}</strong> (@${linkedPatientUsername})
+              </p>
+            </div>
+
+            <!-- Patient Switcher / Link Input -->
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 220px;">
+              <div style="display: flex; gap: 6px;">
+                <input type="text" id="inp-switch-patient" class="form-input" placeholder="Search Patient @username" value="${linkedPatientUsername}" style="font-size: 0.88rem; padding: 6px 10px; height: 38px;" />
+                <button id="btn-switch-patient" class="btn btn-sm btn-primary" style="background: #0D9488; border-color: #0D9488; height: 38px; white-space: nowrap;">
+                  Link
+                </button>
+              </div>
+              <button id="btn-caregiver-logout" class="btn btn-sm btn-outline" style="border-color: #EF4444; color: #DC2626; align-self: flex-end;">
+                🚪 Sign Out
+              </button>
             </div>
           </div>
-        ` : ''}
-
-        <!-- Navigation Tabs -->
-        <div class="quick-prompts-scroll" style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
-          <button class="chip-btn ${activeTab === 'overview' ? 'active' : ''}" data-tab="overview">📊 Overview</button>
-          <button class="chip-btn ${activeTab === 'clinical' ? 'active' : ''}" data-tab="clinical">🩺 Clinical Remarks</button>
-          <button class="chip-btn ${activeTab === 'people' ? 'active' : ''}" data-tab="people">👨‍👩‍👧 Memories & Family</button>
-          <button class="chip-btn ${activeTab === 'mood' ? 'active' : ''}" data-tab="mood">🌈 Mood Trends</button>
-          <button class="chip-btn ${activeTab === 'medicines' ? 'active' : ''}" data-tab="medicines">⏰ Reminders & Meds</button>
-          <button class="chip-btn ${activeTab === 'ai' ? 'active' : ''}" data-tab="ai">🤖 AI & Emergency</button>
         </div>
 
-        <!-- Tab 1: Overview -->
-        ${activeTab === 'overview' ? `
-          <div class="stat-grid mb-md" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
-            <div class="stat-card">
-              <div class="stat-label">Total Sessions</div>
-              <div class="stat-value" style="color: var(--teal);">${totalSessions}</div>
+        <!-- Caregiver Scope Tabs: 1. Patient Analytics | 2. Medicine Reminders | 3. Print Clinical Details -->
+        <div style="display: flex; gap: 0.6rem; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+          <button class="chip-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" style="font-size: 1rem; font-weight: 700;">
+            📊 Patient Analytics
+          </button>
+          <button class="chip-btn ${activeTab === 'medicines' ? 'active' : ''}" data-tab="medicines" style="font-size: 1rem; font-weight: 700;">
+            ⏰ Medicine Reminders
+          </button>
+          <button class="chip-btn ${activeTab === 'print' ? 'active' : ''}" data-tab="print" style="font-size: 1rem; font-weight: 700;">
+            🖨️ Print Clinical Details
+          </button>
+        </div>
+
+        <!-- 1. PATIENT ANALYTICS DASHBOARD -->
+        ${activeTab === 'analytics' ? `
+          <!-- High-Level Stat Cards for Attached Patient -->
+          <div class="stat-grid mb-md" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">
+            <div class="stat-card" style="border-top: 4px solid #0D9488;">
+              <div class="stat-label">${linkedPatient.name}'s Sessions</div>
+              <div class="stat-value" style="color: #0D9488;">${totalSessions}</div>
+              <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Completed cognitive trials</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-label">Avg Accuracy</div>
-              <div class="stat-value" style="color: var(--maroon);">${avgAccuracy}%</div>
+            <div class="stat-card" style="border-top: 4px solid #9B2C2C;">
+              <div class="stat-label">Average Accuracy</div>
+              <div class="stat-value" style="color: #9B2C2C;">${avgAccuracy}%</div>
+              <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Overall performance</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-label">Total Coins</div>
-              <div class="stat-value" style="color: #B45309;">🪙 ${coins}</div>
+            <div class="stat-card" style="border-top: 4px solid #D97706;">
+              <div class="stat-label">Active Prescriptions</div>
+              <div class="stat-value" style="color: #D97706;">${medicines.length}</div>
+              <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Tracked medications</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-label">Best Game</div>
-              <div style="font-size: 1.1rem; font-weight: 700; color: var(--maroon); margin-top: 0.25rem;">${bestGame}</div>
+            <div class="stat-card" style="border-top: 4px solid #2563EB;">
+              <div class="stat-label">Strongest Domain</div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: #1D4ED8; margin-top: 0.35rem;">${bestGame}</div>
+              <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Best adherence & accuracy</div>
             </div>
           </div>
 
-          <!-- Game Breakdown Table -->
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <h3 style="color: var(--maroon); margin-bottom: 1rem; font-size: 1.25rem;">🎮 Game Performance Breakdown</h3>
+          <!-- Game Performance Breakdown -->
+          <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 16px;">
+            <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 1rem; font-size: 1.3rem;">
+              🎮 ${linkedPatient.name}'s Cognitive Domain Breakdown
+            </h3>
             ${Object.keys(breakdown).length === 0 ? `
-              <p class="text-muted" style="margin: 0;">No game data available yet.</p>
+              <p class="text-muted" style="margin: 0;">No game trials recorded yet for this patient profile.</p>
             ` : `
               <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
                   <thead>
-                    <tr style="border-bottom: 2px solid #E2E8F0; color: var(--gray-700);">
-                      <th style="padding: 0.6rem 0.5rem;">Game</th>
-                      <th style="padding: 0.6rem 0.5rem; text-align: center;">Sessions</th>
-                      <th style="padding: 0.6rem 0.5rem; text-align: right;">Avg Accuracy</th>
+                    <tr style="border-bottom: 2px solid #E2E8F0; color: #475569;">
+                      <th style="padding: 0.75rem 0.5rem;">Cognitive Game</th>
+                      <th style="padding: 0.75rem 0.5rem; text-align: center;">Trials</th>
+                      <th style="padding: 0.75rem 0.5rem; text-align: right;">Average Accuracy</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${Object.keys(breakdown).map(id => `
                       <tr style="border-bottom: 1px solid #F1F5F9;">
-                        <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--maroon);">${breakdown[id].name || id}</td>
-                        <td style="padding: 0.75rem 0.5rem; text-align: center;">${breakdown[id].count}</td>
-                        <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: var(--teal);">${Math.round(breakdown[id].totalAcc / breakdown[id].count)}%</td>
+                        <td style="padding: 0.85rem 0.5rem; font-weight: 700; color: #1E293B;">${breakdown[id].name || id}</td>
+                        <td style="padding: 0.85rem 0.5rem; text-align: center;">${breakdown[id].count}</td>
+                        <td style="padding: 0.85rem 0.5rem; text-align: right; font-weight: 800; color: #0D9488;">${Math.round(breakdown[id].totalAcc / breakdown[id].count)}%</td>
                       </tr>
                     `).join('')}
                   </tbody>
@@ -154,261 +180,187 @@ export default function DashboardPage(container) {
               </div>
             `}
           </div>
-        ` : ''}
 
-        <!-- Tab: Clinical Remarks & Doctor Notes (Item 10) -->
-        ${activeTab === 'clinical' ? `
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-              <div>
-                <h3 style="color: var(--maroon); font-size: 1.25rem; margin: 0;">🩺 Doctor Directives & Clinical Remarks</h3>
-                <p class="text-muted" style="font-size: 0.85rem; margin: 0.2rem 0 0 0;">Medical observations, care instructions, and physician assessments.</p>
-              </div>
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-secondary btn-sm" id="btn-toggle-clinical-note">+ Add Clinical Remark</button>
-                <button class="btn btn-primary btn-sm" onclick="window.location.hash='#/doctor'">Open Clinical Portal</button>
-              </div>
-            </div>
-
-            <!-- Add Note Form (Hidden by default) -->
-            <div id="add-clinical-panel" style="display: none; background: #FFFDF9; border: 1.5px dashed #2563EB; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
-              <h4 style="margin: 0 0 0.75rem 0; color: #1D4ED8; font-size: 1.05rem;">📝 Record Clinical Note</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                <input type="text" id="clinical-doctor-name" class="form-input" placeholder="Doctor / Specialist Name (e.g. Dr. B. Barua)" value="${emergency.doctorName || 'Dr. B. Barua (Neurologist)'}" />
-                <textarea id="clinical-note-text" class="form-input" rows="3" placeholder="Clinical observation, routine change, or neurological feedback..."></textarea>
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.3rem;">
-                  <button type="button" class="btn btn-outline btn-sm" id="btn-cancel-clinical">Cancel</button>
-                  <button type="button" class="btn btn-primary btn-sm" id="btn-save-clinical" style="background: #2563EB; border-color: #2563EB;">Save Remark</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Notes List -->
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              ${(Storage.getDoctorNotes() || []).length === 0 ? `
-                <p class="text-muted" style="margin: 0;">No doctor notes recorded yet.</p>
-              ` : (Storage.getDoctorNotes() || []).map(dn => `
-                <div style="padding: 1rem; background: #EFF6FF; border-left: 4px solid #3B82F6; border-radius: 10px; border-top: 1px solid #DBEAFE; border-right: 1px solid #DBEAFE; border-bottom: 1px solid #DBEAFE;">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
-                    <div style="font-weight: 700; color: #1E3A8A; font-size: 1.05rem;">👨‍⚕️ ${dn.doctor || 'Attending Physician'}</div>
-                    <span style="font-size: 0.8rem; color: #64748B;">${new Date(dn.timestamp || dn.date || Date.now()).toLocaleDateString()}</span>
-                  </div>
-                  <p style="color: #1E40AF; margin: 0; font-size: 0.95rem; line-height: 1.5;">${dn.note || dn.content}</p>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
-
-        <!-- Tab 2: Family & Memories -->
-        ${activeTab === 'people' ? `
-          <!-- Family Memory Archive -->
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-              <div>
-                <h3 style="color: var(--maroon); font-size: 1.25rem; margin: 0;">📸 Family Memory Stories</h3>
-                <p style="font-size: 0.85rem; color: var(--gray-600); margin: 0.2rem 0 0 0;">Add photos and notes to help your elder reminisce.</p>
-              </div>
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-secondary btn-sm" id="btn-toggle-add-memory">+ Add Memory</button>
-                <button class="btn btn-primary btn-sm" onclick="window.location.hash='#/memories'">View Slideshow</button>
-              </div>
-            </div>
-
-            <!-- New Memory Form (Hidden by default) -->
-            <div id="add-memory-panel" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
-              <h4 style="margin: 0 0 0.75rem 0; color: var(--teal); font-size: 1.05rem;">✨ Upload New Family Memory</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                <input type="text" id="dash-mem-title" class="form-input" placeholder="Title (e.g. Picnic at Shillong Peak)" />
-                <div style="display: flex; gap: 0.5rem;">
-                  <input type="text" id="dash-mem-tag" class="form-input" style="flex: 1;" placeholder="Tag (Family, Nature, Celebration)" />
-                  <input type="text" id="dash-mem-date" class="form-input" style="flex: 1;" placeholder="Approx Date / Year" />
-                </div>
-                <input type="url" id="dash-mem-img" class="form-input" placeholder="Photo URL (optional image link)" />
-                <textarea id="dash-mem-story" class="form-input" rows="2" placeholder="Gentle story description..."></textarea>
-                <input type="text" id="dash-mem-voice" class="form-input" placeholder="Voice note spoken message (optional)" />
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.3rem;">
-                  <button class="btn btn-outline btn-sm" id="btn-cancel-memory">Cancel</button>
-                  <button class="btn btn-primary btn-sm" id="btn-save-memory">Save to Gallery</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- List of Existing Memories -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem;">
-              ${Storage.getMemories().map(m => `
-                <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                  <div style="height: 110px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                    ${m.image ? `<img src="${m.image}" alt="${m.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.outerHTML='<span style=\\'font-size: 2.5rem;\\'>🖼️</span>'">` : `<span style="font-size: 2.5rem;">📖</span>`}
-                  </div>
-                  <div style="padding: 0.75rem;">
-                    <span style="display: inline-block; font-size: 0.75rem; background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 12px; font-weight: 600; margin-bottom: 0.3rem;">${m.tag || 'Memory'}</span>
-                    <h5 style="margin: 0 0 0.3rem 0; font-size: 0.95rem; color: var(--maroon);">${m.title}</h5>
-                    <p style="font-size: 0.8rem; color: var(--gray-600); margin: 0; line-clamp: 2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${m.story}</p>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h3 style="color: var(--maroon); font-size: 1.25rem; margin: 0;">👨‍👩‍👧 Saved Family Contacts</h3>
-              <button class="btn btn-secondary btn-sm" onclick="window.location.hash='#/personalisation'">Edit Cultural Notes</button>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              ${contacts.map(c => `
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: #FDF8F3; border-radius: 12px; border: 1px solid #E2E8F0;">
-                  <div style="font-size: 2.2rem; background: #FFF; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                    ${c.photo || '👤'}
-                  </div>
-                  <div style="flex: 1;">
-                    <div style="font-weight: 700; color: var(--maroon); font-size: 1.05rem;">${c.name} (${c.relation})</div>
-                    <div style="font-size: 0.9rem; color: var(--gray-700);">${c.phone}</div>
-                    <div style="font-size: 0.85rem; color: var(--gray-500); margin-top: 0.15rem;">📝 ${c.notes}</div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="card card-elevated" style="padding: 1.25rem;">
-            <h3 style="color: var(--teal); font-size: 1.2rem; margin-bottom: 0.75rem;">📖 Cultural Personalisation Profile</h3>
-            <div style="font-size: 0.95rem; color: var(--gray-700); display: flex; flex-direction: column; gap: 0.4rem;">
-              <div><strong>Preferred Name:</strong> ${prefs.preferredName || 'Not set'}</div>
-              <div><strong>Native Place:</strong> ${prefs.nativePlace || 'Not set'}</div>
-              <div><strong>Festivals:</strong> ${prefs.festivals || 'Not set'}</div>
-              <div><strong>Food Preferences:</strong> ${prefs.foodPreferences || 'Not set'}</div>
-              <div><strong>Memory Notes:</strong> ${prefs.memoryNotes || 'Not set'}</div>
-            </div>
-          </div>
-        ` : ''}
-
-        <!-- Tab 3: Mood History -->
-        ${activeTab === 'mood' ? `
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <h3 style="color: var(--maroon); font-size: 1.25rem; margin-bottom: 1rem;">🌈 Daily Mood Check-In History</h3>
-
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              ${moodHistory.map(m => `
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: #F8FAFC; border-radius: 12px; border: 1px solid #E2E8F0;">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="font-size: 2rem;">${m.emoji}</div>
+          <!-- Recent Mood Check-Ins for Attached Patient -->
+          <div class="card card-elevated" style="padding: 1.5rem; border-radius: 16px;">
+            <h3 style="color: #1E293B; margin-top: 0; margin-bottom: 0.75rem; font-size: 1.25rem;">
+              🌈 Recent Mood & Wellness Check-Ins
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              ${moodHistory.slice(-4).reverse().map(m => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #F8FAFC; border-radius: 10px; border: 1px solid #E2E8F0;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">${m.emoji || '🙂'}</span>
                     <div>
-                      <div style="font-weight: 700; color: var(--gray-700); font-size: 1.05rem;">${m.label}</div>
-                      <div style="font-size: 0.85rem; color: var(--gray-500);">${m.note || 'Regular daily check-in'}</div>
+                      <strong style="color: #1E293B; text-transform: capitalize;">${m.label || m.mood}</strong>
+                      <div style="font-size: 0.82rem; color: #64748B;">${m.note || 'Regular daily check-in'}</div>
                     </div>
                   </div>
-                  <div style="font-weight: 600; color: var(--teal); font-size: 0.9rem;">
-                    ${m.date}
-                  </div>
+                  <span style="font-size: 0.85rem; color: #0D9488; font-weight: 600;">${m.date}</span>
                 </div>
               `).join('')}
             </div>
           </div>
         ` : ''}
 
-        <!-- Tab 4: Medicines & Gentle Reminders -->
+        <!-- 2. MEDICINE REMINDERS FOR ATTACHED PATIENT -->
         ${activeTab === 'medicines' ? `
-          <!-- Reminder Schedule Manager -->
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <h3 style="color: var(--maroon); font-size: 1.25rem; margin: 0;">⏰ Daily Gentle Reminders</h3>
-                <p style="font-size: 0.85rem; color: var(--gray-600); margin: 0.2rem 0 0 0;">Reminders for medication, hydration, morning walk & family calls.</p>
+                <h3 style="color: #065F46; margin: 0; font-size: 1.35rem;">⏰ ${linkedPatient.name}'s Medication & Care Reminders</h3>
+                <p style="font-size: 0.9rem; color: #64748B; margin: 0.2rem 0 0 0;">Schedule daily reminders for medicine, hydration, and exercise.</p>
               </div>
-              <button class="btn btn-primary btn-sm" id="btn-toggle-add-reminder">+ Add Reminder</button>
+              <button class="btn btn-primary btn-sm" id="btn-open-rem-form" style="background: #0D9488; border-color: #0D9488;">
+                + Add New Reminder
+              </button>
             </div>
 
-            <!-- New Reminder Form (Hidden by default) -->
-            <div id="add-reminder-panel" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
-              <h4 style="margin: 0 0 0.75rem 0; color: var(--teal); font-size: 1.05rem;">⏰ Schedule New Reminder</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                <input type="text" id="dash-rem-name" class="form-input" placeholder="Reminder title (e.g. Drink Warm Water, Evening Walk, BP Medicine)" />
+            <!-- Add Reminder Panel (Hidden by default) -->
+            <div id="panel-add-rem" style="display: none; background: #F0FDF4; border: 2px dashed #059669; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;">
+              <h4 style="margin: 0 0 0.75rem 0; color: #065F46;">Schedule Reminder for ${linkedPatient.name}</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <input type="text" id="inp-rem-name" class="form-input" placeholder="Title (e.g. Morning Blood Pressure Tablet, Drink Warm Water)" />
                 <div style="display: flex; gap: 0.5rem;">
-                  <input type="text" id="dash-rem-time" class="form-input" style="flex: 1;" placeholder="Time (e.g. 09:00 AM)" />
-                  <select id="dash-rem-period" class="form-select" style="flex: 1;">
+                  <input type="text" id="inp-rem-time" class="form-input" style="flex: 1;" placeholder="Time (e.g. 08:30 AM)" />
+                  <select id="inp-rem-period" class="form-select" style="flex: 1;">
                     <option value="Morning">Morning ☀️</option>
                     <option value="Afternoon">Afternoon 🌤️</option>
                     <option value="Evening">Evening 🌆</option>
                     <option value="Night">Night 🌙</option>
                   </select>
                 </div>
-                <input type="text" id="dash-rem-dose" class="form-input" placeholder="Instruction/Dose (e.g. 1 glass water, 1 tablet with warm milk)" />
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.3rem;">
-                  <button class="btn btn-outline btn-sm" id="btn-cancel-reminder">Cancel</button>
-                  <button class="btn btn-primary btn-sm" id="btn-save-reminder">Add Reminder</button>
+                <input type="text" id="inp-rem-dose" class="form-input" placeholder="Dose / Instructions (e.g. 1 tablet with warm glass of water)" />
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.35rem;">
+                  <button type="button" id="btn-cancel-rem" class="btn btn-outline btn-sm">Cancel</button>
+                  <button type="button" id="btn-save-rem" class="btn btn-primary btn-sm" style="background: #059669; border-color: #059669;">Save Reminder</button>
                 </div>
               </div>
             </div>
 
+            <!-- Reminders List -->
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              ${Storage.getMedicineReminders().map(r => `
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: #F8FAFC; border-radius: 12px; border: 1px solid #E2E8F0;">
-                  <div style="display: flex; align-items: center; gap: 0.85rem;">
-                    <div style="font-size: 1.7rem; background: #E0F2FE; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+              ${reminders.length === 0 ? `
+                <p class="text-muted" style="margin: 0;">No active reminders found for this patient.</p>
+              ` : reminders.map(r => `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: #FFFFFF; border-radius: 12px; border: 1.5px solid #E2E8F0;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 1.6rem; background: #E6F4F1; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
                       ${r.period === 'Morning' ? '☀️' : r.period === 'Night' ? '🌙' : '🌤️'}
                     </div>
                     <div>
-                      <div style="font-weight: 700; color: var(--maroon); font-size: 1.05rem;">${r.medName}</div>
-                      <div style="font-size: 0.85rem; color: var(--gray-600);">${r.dose} • <strong style="color: var(--teal);">${r.time} (${r.period})</strong></div>
+                      <div style="font-weight: 700; color: #1E293B; font-size: 1.05rem;">${r.title || r.medName}</div>
+                      <div style="font-size: 0.85rem; color: #64748B;">${r.notes || r.dose || 'Scheduled'} • <strong style="color: #0D9488;">${r.time} (${r.period || 'Daily'})</strong></div>
                     </div>
                   </div>
-                  <button class="btn btn-outline btn-sm btn-del-rem" data-id="${r.id}" style="color: #DC2626; border-color: #FCA5A5; padding: 0.3rem 0.6rem; font-size: 0.8rem;">Remove</button>
+                  <button class="btn btn-outline btn-sm btn-delete-rem" data-id="${r.id}" style="color: #DC2626; border-color: #FCA5A5; padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                    Remove
+                  </button>
                 </div>
               `).join('')}
             </div>
           </div>
 
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h3 style="color: var(--maroon); font-size: 1.25rem; margin: 0;">💊 Current Medicines</h3>
-              <button class="btn btn-primary btn-sm" onclick="window.location.hash='#/medicines'">Open Scanner</button>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Prescriptions Overview -->
+          <div class="card card-elevated" style="padding: 1.5rem; border-radius: 16px;">
+            <h3 style="color: #1E40AF; margin-top: 0; margin-bottom: 0.75rem; font-size: 1.25rem;">💊 Active Prescriptions</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
               ${medicines.map(m => `
                 <div style="padding: 0.85rem 1rem; background: #EFF6FF; border-radius: 10px; border: 1px solid #BFDBFE;">
-                  <div style="font-weight: 700; color: #1E40AF; font-size: 1.05rem;">${m.name} (${m.strength})</div>
-                  <div style="font-size: 0.9rem; color: #1E3A8A; margin-top: 0.2rem;">${m.instructions} • ${m.frequency}</div>
+                  <div style="font-weight: 700; color: #1E40AF; font-size: 1.05rem;">${m.name} (${m.strength || 'Standard'})</div>
+                  <div style="font-size: 0.88rem; color: #1E3A8A; margin-top: 2px;">${m.instructions || ''} • ${m.frequency || ''}</div>
                 </div>
               `).join('')}
             </div>
           </div>
         ` : ''}
 
-        <!-- Tab 5: AI & Emergency -->
-        ${activeTab === 'ai' ? `
-          <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-            <h3 style="color: var(--maroon); font-size: 1.25rem; margin-bottom: 1rem;">🤖 Smriti AI Companion Settings</h3>
-
-            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+        <!-- 3. PRINT CLINICAL DETAILS OPTION -->
+        ${activeTab === 'print' ? `
+          <div class="card card-elevated mb-md" style="padding: 1.75rem; border-radius: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
               <div>
-                <strong style="color: var(--gray-700);">Voice Spoken Responses</strong>
-                <p class="text-muted" style="margin: 0; font-size: 0.85rem;">Smriti speaks companion messages aloud</p>
+                <h3 style="color: #0F172A; margin: 0; font-size: 1.4rem;">🖨️ Printable Clinical & Patient Summary</h3>
+                <p style="color: #64748B; font-size: 0.95rem; margin: 0.2rem 0 0 0;">Official clinical handover document for physicians, clinics, and family records.</p>
               </div>
-              <input type="checkbox" id="toggle-ai-voice" ${aiSettings.autoSpeak !== false ? 'checked' : ''} style="width: 24px; height: 24px;" />
+              <button id="btn-trigger-print" class="btn btn-primary" style="background: #2563EB; border-color: #2563EB; font-size: 1.05rem; font-weight: 700; padding: 0.6rem 1.4rem; border-radius: 10px;">
+                🖨️ Print Clinical Details
+              </button>
             </div>
 
-            <div class="form-group mt-sm">
-              <label class="form-label">Speech Rate (Elderly Comfort Speed)</label>
-              <select id="select-ai-rate" class="form-select">
-                <option value="0.75" ${aiSettings.speechRate === 0.75 ? 'selected' : ''}>Gentle & Slow (0.75x)</option>
-                <option value="0.85" ${aiSettings.speechRate === 0.85 ? 'selected' : ''}>Comfortable Standard (0.85x)</option>
-                <option value="1.0" ${aiSettings.speechRate === 1.0 ? 'selected' : ''}>Normal (1.0x)</option>
-              </select>
-            </div>
-          </div>
+            <!-- Print Preview Sheet -->
+            <div id="clinical-print-sheet" style="background: #FFFFFF; border: 2px solid #CBD5E1; border-radius: 14px; padding: 2rem; color: #0F172A;">
+              <div style="border-bottom: 2px solid #0F172A; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                  <h2 style="margin: 0; font-size: 1.8rem; color: #1E1B4B; font-weight: 800;">SMRITI CLINICAL HANDOVER SUMMARY</h2>
+                  <div style="font-size: 0.95rem; color: #475569; margin-top: 4px;">Standardized Cognitive Health & Adherence Baseline</div>
+                </div>
+                <div style="text-align: right; font-size: 0.88rem; color: #64748B;">
+                  Generated: ${new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
+              </div>
 
-          <div class="card card-elevated" style="padding: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <h3 style="color: #DC2626; font-size: 1.2rem; margin: 0;">🚨 Emergency Direct Line</h3>
-              <button class="btn btn-outline btn-sm" onclick="window.location.hash='#/emergency'">Edit Help Hub</button>
-            </div>
-            <div style="font-size: 0.95rem; color: var(--gray-700);">
-              <div><strong>Primary Contact:</strong> ${emergency.primaryName} (${emergency.primaryPhone})</div>
-              <div><strong>Doctor:</strong> ${emergency.doctorName} (${emergency.doctorPhone})</div>
+              <!-- Patient Demographics Section -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; background: #F8FAFC; padding: 1rem; border-radius: 10px;">
+                <div>
+                  <div><strong>Patient Full Name:</strong> ${linkedPatient.name}</div>
+                  <div><strong>Username:</strong> @${linkedPatientUsername}</div>
+                  <div><strong>Age / Gender:</strong> ${linkedPatient.age || 72} y/o (${linkedPatient.gender || 'Female'})</div>
+                  <div><strong>State / Region:</strong> ${patientProfile.preferences?.regionalState || linkedPatient.state || 'Assam'}</div>
+                </div>
+                <div>
+                  <div><strong>Cognitive Stage:</strong> ${linkedPatient.stage || 'Mild Cognitive Impairment (MCI)'}</div>
+                  <div><strong>Assigned Caregiver:</strong> ${currentUser.name} (@${currentUser.username || 'caregiver'})</div>
+                  <div><strong>Primary Contact:</strong> ${emergency.primaryPhone || '+919876543210'}</div>
+                  <div><strong>Attending Physician:</strong> ${emergency.doctorName || 'Dr. A. K. Barua'}</div>
+                </div>
+              </div>
+
+              <!-- Prescriptions Table -->
+              <div style="margin-bottom: 1.5rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #1E40AF; border-bottom: 1.5px solid #DBEAFE; padding-bottom: 4px;">Active Prescriptions & Schedule</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                  <thead>
+                    <tr style="background: #EFF6FF; text-align: left;">
+                      <th style="padding: 6px 8px;">Medicine</th>
+                      <th style="padding: 6px 8px;">Strength</th>
+                      <th style="padding: 6px 8px;">Schedule / Instructions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${medicines.map(m => `
+                      <tr style="border-bottom: 1px solid #E2E8F0;">
+                        <td style="padding: 6px 8px; font-weight: 600;">${m.name}</td>
+                        <td style="padding: 6px 8px;">${m.strength || '—'}</td>
+                        <td style="padding: 6px 8px;">${m.instructions || ''} (${m.frequency || ''})</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Cognitive Performance Summary -->
+              <div style="margin-bottom: 1.5rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #065F46; border-bottom: 1.5px solid #A7F3D0; padding-bottom: 4px;">Longitudinal Cognitive Task Performance</h4>
+                <div style="display: flex; gap: 1.5rem; margin-top: 8px;">
+                  <div style="padding: 10px 16px; background: #F0FDF4; border-radius: 8px; border: 1px solid #BBF7D0;">
+                    <div style="font-size: 0.85rem; color: #166534;">Total Recorded Sessions</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #065F46;">${totalSessions}</div>
+                  </div>
+                  <div style="padding: 10px 16px; background: #F0FDF4; border-radius: 8px; border: 1px solid #BBF7D0;">
+                    <div style="font-size: 0.85rem; color: #166534;">Average Task Accuracy</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #065F46;">${avgAccuracy}%</div>
+                  </div>
+                  <div style="padding: 10px 16px; background: #F0FDF4; border-radius: 8px; border: 1px solid #BBF7D0;">
+                    <div style="font-size: 0.85rem; color: #166534;">Clinical Impression</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #065F46;">Stable</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size: 0.82rem; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 0.75rem; text-align: center;">
+                SMRITI Cognitive Care Platform • Verified Digital Health Record • Confidential Medical Handover
+              </div>
             </div>
           </div>
         ` : ''}
@@ -420,6 +372,7 @@ export default function DashboardPage(container) {
   }
 
   function attachEvents() {
+    // Tab switcher
     container.querySelectorAll('.chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         activeTab = btn.getAttribute('data-tab');
@@ -427,157 +380,97 @@ export default function DashboardPage(container) {
       });
     });
 
-    const voiceToggle = container.querySelector('#toggle-ai-voice');
-    if (voiceToggle) {
-      voiceToggle.addEventListener('change', (e) => {
-        aiSettings.autoSpeak = e.target.checked;
-        Storage.setAISettings(aiSettings);
-      });
-    }
-
-    const rateSelect = container.querySelector('#select-ai-rate');
-    if (rateSelect) {
-      rateSelect.addEventListener('change', (e) => {
-        aiSettings.speechRate = parseFloat(e.target.value);
-        Storage.setAISettings(aiSettings);
-      });
-    }
-
-    // --- Clinical Note Handlers (Item 10) ---
-    const toggleClinicalBtn = container.querySelector('#btn-toggle-clinical-note');
-    const clinicalPanel = container.querySelector('#add-clinical-panel');
-    const cancelClinicalBtn = container.querySelector('#btn-cancel-clinical');
-    const saveClinicalBtn = container.querySelector('#btn-save-clinical');
-
-    if (toggleClinicalBtn && clinicalPanel) {
-      toggleClinicalBtn.addEventListener('click', () => {
-        clinicalPanel.style.display = clinicalPanel.style.display === 'none' ? 'block' : 'none';
-      });
-    }
-
-    if (cancelClinicalBtn && clinicalPanel) {
-      cancelClinicalBtn.addEventListener('click', () => {
-        clinicalPanel.style.display = 'none';
-      });
-    }
-
-    if (saveClinicalBtn) {
-      saveClinicalBtn.addEventListener('click', () => {
-        const doctor = container.querySelector('#clinical-doctor-name')?.value.trim() || 'Dr. B. Barua';
-        const note = container.querySelector('#clinical-note-text')?.value.trim();
-        if (!note) {
-          alert('Please enter a clinical note.');
-          return;
-        }
-        Storage.addDoctorNote({ doctor, note });
-        if (window.SmritiToast) {
-          window.SmritiToast.show('Clinical remark recorded successfully! 🩺', 'success');
-        }
+    // Patient switcher
+    const switchBtn = container.querySelector('#btn-switch-patient');
+    const switchInp = container.querySelector('#inp-switch-patient');
+    if (switchBtn && switchInp) {
+      switchBtn.addEventListener('click', () => {
+        const queryUsername = switchInp.value.trim().toLowerCase().replace(/^@/, '');
+        if (!queryUsername) return alert('Enter a patient username to link');
+        
+        currentUser.linkedPatientUsername = queryUsername;
+        currentUser.patientId = 'patient_' + queryUsername;
+        Storage.setUser(currentUser);
+        linkedPatientUsername = queryUsername;
+        targetPatientId = currentUser.patientId;
         render();
       });
     }
 
-    // --- Tab 2: Memory Story Handlers ---
-    const toggleAddMem = container.querySelector('#btn-toggle-add-memory');
-    const addMemPanel = container.querySelector('#add-memory-panel');
-    const cancelMem = container.querySelector('#btn-cancel-memory');
-    const saveMem = container.querySelector('#btn-save-memory');
-
-    if (toggleAddMem && addMemPanel) {
-      toggleAddMem.addEventListener('click', () => {
-        addMemPanel.style.display = addMemPanel.style.display === 'none' ? 'block' : 'none';
+    // Caregiver Logout
+    const logoutBtn = container.querySelector('#btn-caregiver-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        Auth.logout();
+        window.location.hash = '#/login';
       });
     }
 
-    if (cancelMem && addMemPanel) {
-      cancelMem.addEventListener('click', () => {
-        addMemPanel.style.display = 'none';
+    // Medicine Reminders
+    const openRemForm = container.querySelector('#btn-open-rem-form');
+    const panelAddRem = container.querySelector('#panel-add-rem');
+    const cancelRem = container.querySelector('#btn-cancel-rem');
+    const saveRem = container.querySelector('#btn-save-rem');
+
+    if (openRemForm && panelAddRem) {
+      openRemForm.addEventListener('click', () => {
+        panelAddRem.style.display = panelAddRem.style.display === 'none' ? 'block' : 'none';
       });
     }
 
-    if (saveMem) {
-      saveMem.addEventListener('click', () => {
-        const title = container.querySelector('#dash-mem-title')?.value.trim();
-        const tag = container.querySelector('#dash-mem-tag')?.value.trim() || 'Family';
-        const date = container.querySelector('#dash-mem-date')?.value.trim() || 'Cherished Memory';
-        const image = container.querySelector('#dash-mem-img')?.value.trim();
-        const story = container.querySelector('#dash-mem-story')?.value.trim();
-        const voiceNote = container.querySelector('#dash-mem-voice')?.value.trim();
-
-        if (!title || !story) {
-          alert('Please provide at least a title and a story description.');
-          return;
-        }
-
-        Storage.addMemory({
-          id: 'mem_' + Date.now(),
-          title,
-          tag,
-          date,
-          image: image || null,
-          story,
-          voiceNote: voiceNote || story
-        });
-
-        render();
-      });
-    }
-
-    // --- Tab 4: Reminder Handlers ---
-    const toggleAddRem = container.querySelector('#btn-toggle-add-reminder');
-    const addRemPanel = container.querySelector('#add-reminder-panel');
-    const cancelRem = container.querySelector('#btn-cancel-reminder');
-    const saveRem = container.querySelector('#btn-save-reminder');
-
-    if (toggleAddRem && addRemPanel) {
-      toggleAddRem.addEventListener('click', () => {
-        addRemPanel.style.display = addRemPanel.style.display === 'none' ? 'block' : 'none';
-      });
-    }
-
-    if (cancelRem && addRemPanel) {
+    if (cancelRem && panelAddRem) {
       cancelRem.addEventListener('click', () => {
-        addRemPanel.style.display = 'none';
+        panelAddRem.style.display = 'none';
       });
     }
 
     if (saveRem) {
       saveRem.addEventListener('click', () => {
-        const name = container.querySelector('#dash-rem-name')?.value.trim();
-        const time = container.querySelector('#dash-rem-time')?.value.trim() || '09:00 AM';
-        const period = container.querySelector('#dash-rem-period')?.value || 'Morning';
-        const dose = container.querySelector('#dash-rem-dose')?.value.trim() || 'Take with water';
+        const title = container.querySelector('#inp-rem-name')?.value.trim();
+        const time = container.querySelector('#inp-rem-time')?.value.trim() || '08:30 AM';
+        const period = container.querySelector('#inp-rem-period')?.value || 'Morning';
+        const notes = container.querySelector('#inp-rem-dose')?.value.trim() || '1 tablet';
 
-        if (!name) {
-          alert('Please enter a reminder title or medicine name.');
-          return;
-        }
+        if (!title) return alert('Please enter reminder title');
 
-        Storage.addMedicineReminder({
+        const newReminder = {
           id: 'rem_' + Date.now(),
-          medName: name,
+          title,
           time,
           period,
-          dose,
-          active: true
-        });
+          notes,
+          active: true,
+          completedToday: false
+        };
 
+        patientProfile.reminders = patientProfile.reminders || [];
+        patientProfile.reminders.unshift(newReminder);
+        Storage.savePatientProfile(patientProfile);
         render();
       });
     }
 
-    container.querySelectorAll('.btn-del-rem').forEach(btn => {
+    // Delete Reminder
+    container.querySelectorAll('.btn-delete-rem').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        if (id) {
-          Storage.deleteMedicineReminder(id);
+        const remId = e.currentTarget.getAttribute('data-id');
+        if (remId && patientProfile.reminders) {
+          patientProfile.reminders = patientProfile.reminders.filter(r => r.id !== remId);
+          Storage.savePatientProfile(patientProfile);
           render();
         }
       });
     });
+
+    // Trigger Print
+    const printBtn = container.querySelector('#btn-trigger-print');
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
   }
 
   render();
-
   return { cleanup() {} };
 }

@@ -34,7 +34,7 @@ export default function SmritiPage(container) {
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = I18n.lang === 'hi' ? 'hi-IN' : 'en-IN';
+    recognition.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
 
     recognition.onstart = () => {
       isListening = true;

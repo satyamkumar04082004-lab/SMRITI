@@ -4,7 +4,7 @@
    Dynamically injects date, time, medical context, and real patient profile.
    ============================================================ */
 
-function generateContextualResponse(message, profile, role) {
+function generateContextualResponse(message, profile, role, lang = 'en') {
   const patient = (profile && profile.patient) || { name: 'Meera', state: 'Assam' };
   const firstName = (patient.preferredName || patient.name || 'Friend').split(' ')[0];
   const text = (message || '').trim().toLowerCase();
@@ -88,7 +88,17 @@ function generateContextualResponse(message, profile, role) {
     return jokes[Math.floor(Math.random() * jokes.length)];
   }
 
-  // General warm, context-aware personalized fallback
+  // General warm, context-aware personalized fallback strictly in selected language
+  if (lang === 'hi') {
+    return `नमस्ते ${firstName}! इस समय ${todayTimeStr} बजा है। आपकी स्मृति अभ्यास यात्रा बहुत अच्छी चल रही है। आज मैं आपकी क्या सहायता करूँ? 🌸`;
+  }
+  if (lang === 'as') {
+    return `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr}। আপোনাৰ স্মৃতিৰ অনুশীলন অতি সুন্দৰকৈ চলি আছে। আজি আপোনাক কেনেকৈ সহায় কৰিব পাৰোঁ? 🌸`;
+  }
+  if (lang === 'bn') {
+    return `নমস্কার ${firstName}! এখন সময় ${todayTimeStr}। আপনার স্মৃতি অনুশীলন দারুণ চলছে। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি? 🌸`;
+  }
+
   const generalGreetings = [
     `Namaste ${firstName}! It is ${todayTimeStr} on ${todayDateStr}. You have completed ${totalGames} memory sessions so far. How can I brighten your day right now? 🌻`,
     `Hello ${firstName}! I am right here with you. Your wellness journey in ${state} is going so well. Would you like to hear an inspiring story or revisit family photos? 🕊️`,
@@ -119,7 +129,18 @@ module.exports = async function handler(req, res) {
   req.on('end', async () => {
     try {
       const data = body ? JSON.parse(body) : {};
-      const { message, patientProfile, role, stream } = data;
+      const { message, patientProfile, role, stream, currentLanguage, language } = data;
+      const activeLang = currentLanguage || language || 'en';
+      const langNames = {
+        'en': 'English',
+        'hi': 'Hindi (हिन्दी)',
+        'as': 'Assamese (অসমীয়া)',
+        'bn': 'Bengali (বাংলা)',
+        'mni': 'Manipuri / Meitei (মৈতৈলোন্)',
+        'kha': 'Khasi',
+        'lus': 'Mizo'
+      };
+      const langName = langNames[activeLang] || activeLang;
 
       const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
@@ -149,10 +170,11 @@ Current Real-Time Context:
 - Cherished Memories: ${JSON.stringify(patientProfile?.memories || [])}
 
 Directives:
-1. Always be warm, respectful, and empathetic (use culturally comforting Indian cues like "Namaste", "Dear", or respectful elder terms).
-2. Answer questions about current time, date, family, and progress using the real-time context above.
-3. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
-4. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
+1. STRICT LANGUAGE ENFORCEMENT: You must respond ONLY in the following language: ${langName} (${activeLang}). All words, greetings, answers, and emotional cues MUST be completely written in ${langName}.
+2. Always be warm, respectful, and empathetic (use culturally comforting Indian cues appropriate for ${langName}).
+3. Answer questions about current time, date, family, and progress using the real-time context above.
+4. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
+5. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
 
       // 2. Google Gemini API Integration (with stream: true SSE support)
       const geminiKey = process.env.GEMINI_API_KEY;
@@ -254,7 +276,7 @@ Directives:
       }
 
       // 4. Intelligent Context-Aware Synthesis Engine (Local / Server fallback)
-      const reply = generateContextualResponse(message, patientProfile, role);
+      const reply = generateContextualResponse(message, patientProfile, role, activeLang);
 
       if (stream) {
         res.writeHead(200, {

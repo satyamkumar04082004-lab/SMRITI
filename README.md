@@ -48,9 +48,6 @@
 10. **📋 Caregiver Hub** (`#/dashboard`)
     - Tabbed view: Overview stats, Family Contacts & Cultural Memories, Mood History, Medicines, AI Voice & Emergency Settings.
 
-11. **🌟 Hackathon Demo Preset** (`#/settings`)
-    - One-click button to load full realistic demo data for presentations.
-
 ---
 
 ## 🚀 Getting Started

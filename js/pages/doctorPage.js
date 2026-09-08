@@ -7,12 +7,14 @@
 import Storage from '../storage.js';
 
 export default function DoctorPage(container) {
-  const profile = Storage.getPatientProfile();
-  const patient = profile.patient || { name: 'Meera Das', age: 72, stage: 'Mild MCI', phone: '9876543210' };
-  const history = profile.gameHistory || [];
-  const medicines = profile.medicines || [];
-  const reminders = profile.reminders || [];
-  const doctorNotes = profile.doctorNotes || [];
+  let targetPatientUsername = 'meera_das';
+  let targetPatientId = 'patient_meera_01';
+  let profile = Storage.getPatientProfile(targetPatientId);
+  let patient = profile.patient || { name: 'Meera Das', age: 72, stage: 'Mild MCI', phone: '9876543210' };
+  let history = profile.gameHistory || [];
+  let medicines = profile.medicines || [];
+  let reminders = profile.reminders || [];
+  let doctorNotes = profile.doctorNotes || [];
 
   let timeFilter = '30d';
   let showAddNoteModal = false;
@@ -55,12 +57,17 @@ export default function DoctorPage(container) {
               </p>
             </div>
           </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <button id="btn-print-report" class="btn btn-primary" style="background: #2563EB; border-color: #2563EB; min-height: 46px; font-weight: 700; border-radius: 12px; gap: 0.4rem; display: inline-flex; align-items: center;">
-              🖨️ Print Clinical Report
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <!-- Search / Link Patient by Unique Username -->
+            <div style="display: flex; gap: 4px;">
+              <input type="text" id="inp-doc-search-patient" class="form-input" placeholder="Search @patient_username" style="width: 190px; height: 42px; font-size: 0.9rem;" value="${targetPatientUsername || 'meera_das'}" />
+              <button id="btn-doc-search-patient" class="btn btn-primary btn-sm" style="background: #1E40AF; border-color: #1E40AF; height: 42px;">Search</button>
+            </div>
+            <button id="btn-print-report" class="btn btn-primary" style="background: #2563EB; border-color: #2563EB; min-height: 42px; font-weight: 700; border-radius: 10px; gap: 0.4rem; display: inline-flex; align-items: center;">
+              🖨️ Print Report
             </button>
-            <button class="btn btn-outline btn-sm" onclick="window.location.hash='#/dashboard'" style="border-radius: 12px;">
-              Caregiver View
+            <button id="btn-doc-logout" class="btn btn-outline btn-sm" style="border-color: #EF4444; color: #DC2626; height: 42px;">
+              Sign Out
             </button>
           </div>
         </div>
@@ -239,6 +246,32 @@ export default function DoctorPage(container) {
     if (printBtn) {
       printBtn.addEventListener('click', () => {
         window.print();
+      });
+    }
+
+    const searchBtn = container.querySelector('#btn-doc-search-patient');
+    const searchInp = container.querySelector('#inp-doc-search-patient');
+    if (searchBtn && searchInp) {
+      searchBtn.addEventListener('click', () => {
+        const val = searchInp.value.trim().toLowerCase().replace(/^@/, '');
+        if (!val) return alert('Please enter a patient username');
+        targetPatientUsername = val;
+        targetPatientId = val === 'meera_das' ? 'patient_meera_01' : ('patient_' + val);
+        profile = Storage.getPatientProfile(targetPatientId);
+        patient = profile.patient || { name: val, age: 70, stage: 'Mild MCI', phone: '—' };
+        history = profile.gameHistory || [];
+        medicines = profile.medicines || [];
+        reminders = profile.reminders || [];
+        doctorNotes = profile.doctorNotes || [];
+        render();
+      });
+    }
+
+    const docLogoutBtn = container.querySelector('#btn-doc-logout');
+    if (docLogoutBtn) {
+      docLogoutBtn.addEventListener('click', () => {
+        Auth.logout();
+        window.location.hash = '#/login';
       });
     }
   }

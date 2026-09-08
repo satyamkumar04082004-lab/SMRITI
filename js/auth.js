@@ -103,16 +103,23 @@ const Auth = {
    * @param {{ name: string, phone: string, role: string }} userData
    */
   login(userData) {
-    Storage.setUser(userData);
-    Storage.registerUser(userData);
+    // Ensure strict user session isolation
+    const registered = Storage.registerUser(userData);
+    const fullUser = Object.assign({}, userData, registered);
+    Storage.setUser(fullUser);
+    return fullUser;
   },
 
   /**
-   * Logout
+   * Logout - Completely clears session and state
    */
   logout() {
     Storage.clearUser();
     this._clearOTP();
+    // Clear any memory or session caches
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiUserLoggedOut'));
+    }
   },
 
   /**

@@ -4,6 +4,7 @@
    ============================================================ */
 
 import Storage from './storage.js';
+import I18n from './i18n.js';
 
 const AIService = {
   // ------------------------------------------------------------
@@ -68,12 +69,15 @@ const AIService = {
     // Dynamic Context Injection
     const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const currentLang = I18n.lang || Storage.getLanguage() || 'en';
     const contextualPayload = {
       message: userMessage,
       currentDate: todayDate,
       currentTime: todayTime,
       patientProfile: profile,
       role: user.role || 'patient',
+      currentLanguage: currentLang,
+      language: currentLang,
       stream: true
     };
 
@@ -167,6 +171,8 @@ const AIService = {
           currentTime: todayTime,
           patientProfile: profile,
           role: user.role || 'patient',
+          currentLanguage: I18n.lang || Storage.getLanguage() || 'en',
+          language: I18n.lang || Storage.getLanguage() || 'en',
           stream: false
         })
       });
@@ -186,6 +192,7 @@ const AIService = {
 
   chatWithSmriti(userMessage, history = []) {
     const profile = Storage.getPatientProfile();
+    const currentLang = I18n.lang || Storage.getLanguage() || 'en';
     const patient = profile.patient || { name: 'Meera', state: 'Assam' };
     const firstName = (patient.preferredName || patient.name || 'Friend').split(' ')[0];
     const text = (userMessage || '').trim().toLowerCase();

@@ -364,7 +364,7 @@ function renderHeader() {
   headerEl.className = 'app-header';
   headerEl.innerHTML = `
     <div class="header-inner">
-      <div class="header-brand" onclick="window.location.hash='#/home'" style="cursor: pointer;">
+      <div class="header-brand" onclick="window.location.hash = (Auth.getUser()?.role === 'caregiver' ? '#/dashboard' : Auth.getUser()?.role === 'doctor' ? '#/doctor' : '#/home')" style="cursor: pointer;">
         <span class="header-logo">🧠</span>
         <span class="header-title">${I18n.t('appName')}</span>
       </div>
@@ -594,12 +594,24 @@ function navigate() {
     route = routes['#/login'];
   }
 
-  // If logged in and trying to access login, redirect
+  // If logged in and trying to access login, redirect based on role
   if (hash === '#/login' && Auth.isLoggedIn()) {
     const user = Auth.getUser();
-    const target = user && user.role === 'caregiver' ? '#/dashboard' : '#/home';
+    const target = (user && user.role === 'caregiver') ? '#/dashboard' : (user && user.role === 'doctor') ? '#/doctor' : '#/home';
     window.location.hash = target;
     return;
+  }
+
+  // Prevent Caregivers from seeing patient-only morning home screen
+  if (hash === '#/home' && Auth.isLoggedIn()) {
+    const user = Auth.getUser();
+    if (user && user.role === 'caregiver') {
+      window.location.hash = '#/dashboard';
+      return;
+    } else if (user && user.role === 'doctor') {
+      window.location.hash = '#/doctor';
+      return;
+    }
   }
 
   if (!route) {
