@@ -17,19 +17,22 @@ export default function SettingsPage(container) {
   let isEditingProfile = false;
 
   function render() {
+    const isHi = I18n.lang === 'hi';
+    const isAs = I18n.lang === 'as';
+
     container.innerHTML = `
     <div class="settings-container container page-enter" style="max-width: 600px; padding: 20px; padding-bottom: 2.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-        <h2 style="color: var(--maroon); margin: 0; font-size: 1.8rem;">⚙️ Settings & Preferences</h2>
-        <button class="btn btn-ghost btn-sm" onclick="window.history.back()">⬅ Back</button>
+        <h2 style="color: var(--maroon); margin: 0; font-size: 1.8rem;">⚙️ ${I18n.t('settingsTitle')} & ${I18n.t('settings') || 'Preferences'}</h2>
+        <button class="btn btn-ghost btn-sm" onclick="window.history.back()">⬅ ${I18n.t('back')}</button>
       </div>
 
       <!-- Profile & Personal Info Section -->
       <div class="card card-elevated mb-md" style="padding: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3 style="color: var(--maroon); margin: 0; font-size: 1.25rem;">👤 Personal & Care Details</h3>
+          <h3 style="color: var(--maroon); margin: 0; font-size: 1.25rem;">👤 ${I18n.t('settingsProfile') || 'Personal & Care Details'}</h3>
           <button id="btn-toggle-edit-profile" class="btn btn-secondary btn-sm">
-            ${isEditingProfile ? '✖ Cancel' : '✏️ Edit Info'}
+            ${isEditingProfile ? ('✖ ' + I18n.t('cancel')) : ('✏️ ' + (isHi ? 'विवरण बदलें' : (isAs ? 'তথ্য সম্পাদনা' : 'Edit Info')))}
           </button>
         </div>
 
@@ -96,7 +99,7 @@ export default function SettingsPage(container) {
 
       <!-- App Language -->
       <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 10px; font-size: 1.25rem;">🌐 App Language</h3>
+        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 10px; font-size: 1.25rem;">🌐 ${I18n.t('settingsLanguage')}</h3>
         <select id="lang-select" class="form-select" style="font-size: 1.1rem;">
           ${languages.map(l => `
             <option value="${l.code}" ${l.code === currentLang ? 'selected' : ''}>${l.name}</option>
@@ -107,7 +110,7 @@ export default function SettingsPage(container) {
 
       <!-- Voice-First Guidance & Spoken Audio -->
       <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎙️ Voice Guidance & Spoken Companion</h3>
+        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎙️ ${I18n.t('voiceGuide')}</h3>
         <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 12px;">Make the app speak instructions, give encouraging feedback, and navigate by voice.</p>
 
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -220,7 +223,7 @@ export default function SettingsPage(container) {
 
       <!-- Cultural Personalisation -->
       <div class="card card-elevated mb-md" style="padding: 1.25rem;">
-        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎨 Cultural Personalisation</h3>
+        <h3 style="color: var(--maroon); margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🎨 ${I18n.t('persTitle')}</h3>
         <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 12px;">Customize native place, favorite foods, festivals, and memory notes.</p>
         <button class="btn btn-gold btn-block" onclick="window.location.hash='#/personalisation'">
           ✏️ Edit Personalisation Notes
@@ -240,7 +243,7 @@ export default function SettingsPage(container) {
 
       <!-- Logout -->
       <button id="btn-logout" class="btn btn-outline btn-block" style="border-color: var(--maroon); color: var(--maroon);">
-        🚪 Logout
+        🚪 ${I18n.t('logout')}
       </button>
     </div>
   `;
@@ -502,7 +505,16 @@ export default function SettingsPage(container) {
     }
   }
 
+  const onLangChange = () => {
+    render();
+  };
+  window.addEventListener('languageChanged', onLangChange);
+
   render();
 
-  return { cleanup() {} };
+  return {
+    cleanup() {
+      window.removeEventListener('languageChanged', onLangChange);
+    }
+  };
 }

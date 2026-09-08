@@ -1,7 +1,7 @@
 /* ============================================================
    SMRITI — Serverless AI Chat API Route (/api/chat)
-   Supports OpenAI / Gemini / Grok if environment keys present,
-   with intelligent context-synthesizing fallback using actual patient profile.
+   Supports Gemini (with stream: true SSE), OpenAI, or dynamic context fallback.
+   Dynamically injects date, time, medical context, and real patient profile.
    ============================================================ */
 
 function generateContextualResponse(message, profile, role) {
@@ -20,15 +20,26 @@ function generateContextualResponse(message, profile, role) {
   const medicines = (profile && profile.medicines) || [];
   const state = profile?.preferences?.regionalState || patient.state || 'Assam';
 
+  const todayDateStr = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const todayTimeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
   // 1. Role-specific clinical or caregiver inquiry
   if (role === 'doctor') {
-    return `Clinical Overview for ${patient.name} (${patient.stage || 'Mild MCI'}): ${totalGames} cognitive sessions recorded with ${avgAcc}% overall accuracy. Adherence to prescribed routine is stable with ${medicines.length} active prescriptions. Recommended focus: episodic recall and gentle morning stimulation.`;
+    return `Clinical Overview for ${patient.name} (${patient.stage || 'Mild MCI'}): ${totalGames} cognitive sessions recorded with ${avgAcc}% overall accuracy as of ${todayDateStr}. Adherence to prescribed routine is stable with ${medicines.length} active prescriptions. Recommended focus: episodic recall and gentle morning stimulation.`;
   }
   if (role === 'caregiver') {
-    return `Caregiver Summary: ${patient.name} has played ${totalGames} sessions recently. Best consistency in ${recentGame ? recentGame.gameName : 'Visual Memory'}. ${reminders.filter(r => r.active).length} daily reminders are active.`;
+    return `Caregiver Summary (${todayDateStr}, ${todayTimeStr}): ${patient.name} has played ${totalGames} sessions recently. Best consistency in ${recentGame ? recentGame.gameName : 'Visual Memory'}. ${reminders.filter(r => r.active).length} daily reminders are active.`;
   }
 
-  // 2. Specialized Clinical & Memory Knowledge Base
+  // 2. Date & Time queries
+  if (text.includes('what time') || text.includes('time is it') || text.includes('current time') || text.includes('clock')) {
+    return `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. It's a peaceful moment to relax or do a gentle memory exercise! ⏰✨`;
+  }
+  if (text.includes('what date') || text.includes('today\'s date') || text.includes('which day') || text.includes('what day is today')) {
+    return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
+  }
+
+  // 3. Specialized Clinical & Memory Knowledge Base
   if (text.includes('dementia') || text.includes('what is dementia')) {
     return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks. It is not a personal failing—it is simply changes in brain connections over time. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
   }
@@ -41,10 +52,10 @@ function generateContextualResponse(message, profile, role) {
     return `Here are 4 proven daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing to oxygenate brain tissue; 3) Reminisce over one Life Story photo daily with a loved one; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
   }
 
-  // 3. Patient conversational intent
+  // 4. Patient conversational intent
   if (text.includes('medicine') || text.includes('pill') || text.includes('tablet')) {
     const medNames = medicines.map(m => m.name).join(', ');
-    return `Dear ${firstName}, according to your routine, you have ${medicines.length} prescribed items (${medNames}). Your morning medicine is scheduled with a warm glass of water. Remember to take it gently as Dr. Barua advised! 💊`;
+    return `Dear ${firstName}, according to your routine on ${todayDateStr}, you have ${medicines.length} prescribed items (${medNames}). Your morning medicine is scheduled with a warm glass of water. Remember to take it gently as Dr. Barua advised! 💊`;
   }
 
   if (text.includes('family') || text.includes('who is') || text.includes('children') || text.includes('son') || text.includes('daughter')) {
@@ -71,13 +82,19 @@ function generateContextualResponse(message, profile, role) {
   if (text.includes('joke') || text.includes('laugh')) {
     const jokes = [
       'Why did the teapot whistle so merrily in Assam? Because it couldn\'t wait to pour out fresh joy for you! ☕😄',
-      'What did one orchid say to the morning sun? "I am so glad we get to blossom together today!" 🌺😊'
+      'What did one orchid say to the morning sun? "I am so glad we get to blossom together today!" 🌺😊',
+      'Why did the grandfather clock go to school? To learn how to make every second count! ⏰😁'
     ];
     return jokes[Math.floor(Math.random() * jokes.length)];
   }
 
-  // General warm empathetic fallback
-  return `Namaste ${firstName}! It's a joy to talk with you. Your day is filled with gentle possibilities. We can revisit your cherished family memories, test your memory with a game, or take a peaceful 4-4 breath together. How are you feeling right now? 🌻`;
+  // General warm, context-aware personalized fallback
+  const generalGreetings = [
+    `Namaste ${firstName}! It is ${todayTimeStr} on ${todayDateStr}. You have completed ${totalGames} memory sessions so far. How can I brighten your day right now? 🌻`,
+    `Hello ${firstName}! I am right here with you. Your wellness journey in ${state} is going so well. Would you like to hear an inspiring story or revisit family photos? 🕊️`,
+    `Joyful day to you, ${firstName}! We can practice deep breathing, review your morning routine, or share a cheerful laugh. What is on your mind? 🌸`
+  ];
+  return generalGreetings[Math.floor(Math.random() * generalGreetings.length)];
 }
 
 module.exports = async function handler(req, res) {
@@ -102,61 +119,98 @@ module.exports = async function handler(req, res) {
   req.on('end', async () => {
     try {
       const data = body ? JSON.parse(body) : {};
-      const { message, patientProfile, role } = data;
+      const { message, patientProfile, role, stream } = data;
 
-      // 1. Google Gemini API Integration
+      const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+      const patient = patientProfile?.patient || { name: 'Meera Das', state: 'Assam' };
+      const games = patientProfile?.gameHistory || [];
+      const totalGames = games.length;
+      const avgAcc = totalGames > 0 ? Math.round(games.reduce((s, g) => s + (g.accuracy || 0), 0) / totalGames) : 90;
+      const reminders = patientProfile?.reminders || [];
+      const completedTasks = reminders.filter(r => r.completedToday).length;
+      const totalTasks = reminders.length;
+      const moods = patientProfile?.moodHistory || [];
+      const latestMood = moods.length > 0 ? moods[moods.length - 1].mood : 'good';
+
+      // 1. DYNAMIC SYSTEM PROMPT WITH TIME, DATE, AND PATIENT PROFILE CONTEXT
+      const systemPrompt = `You are SWAI (Smriti Wisdom AI), a warm, compassionate, and attentive memory care companion in the SMRITI elderly care platform.
+Current Real-Time Context:
+- Current Date: ${todayDate}
+- Current Local Time: ${todayTime}
+- User Profile: ${patient.name} (Role: ${role || 'patient'}, Stage: ${patient.stage || 'Mild Cognitive Impairment / Healthy Senior'})
+- Region / Cultural State: ${patientProfile?.preferences?.regionalState || patient.state || 'Assam'}
+- Cognitive Stats: ${totalGames} games completed, Average Accuracy: ${avgAcc}%
+- Daily Routine: ${completedTasks} of ${totalTasks} tasks completed today
+- Latest Mood: ${latestMood}
+- Family Members: ${JSON.stringify(patientProfile?.familyMembers || [])}
+- Prescriptions: ${JSON.stringify(patientProfile?.medicines || [])}
+- Cherished Memories: ${JSON.stringify(patientProfile?.memories || [])}
+
+Directives:
+1. Always be warm, respectful, and empathetic (use culturally comforting Indian cues like "Namaste", "Dear", or respectful elder terms).
+2. Answer questions about current time, date, family, and progress using the real-time context above.
+3. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
+4. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
+
+      // 2. Google Gemini API Integration (with stream: true SSE support)
       const geminiKey = process.env.GEMINI_API_KEY;
       if (geminiKey) {
         try {
-          const patient = patientProfile?.patient || { name: 'Meera', state: 'Assam' };
-          const games = patientProfile?.gameHistory || [];
-          const totalGames = games.length;
-          const avgAcc = totalGames > 0 ? Math.round(games.reduce((s, g) => s + (g.accuracy || 0), 0) / totalGames) : 90;
-          const reminders = patientProfile?.reminders || [];
-          const completedTasks = reminders.filter(r => r.completedToday).length;
-          const totalTasks = reminders.length;
-          const moods = patientProfile?.moodHistory || [];
-          const latestMood = moods.length > 0 ? moods[moods.length - 1].mood : 'good';
+          if (stream) {
+            // Streaming via Gemini generateContent SSE
+            const geminiStreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${geminiKey}`;
+            const geminiRes = await fetch(geminiStreamUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: message || 'Namaste' }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
+              })
+            });
 
-          const systemPrompt = `You are SWAI, an empathetic, respectful, and encouraging AI memory & cognitive care companion in the SMRITI platform for elderly users in India.
-Current Patient Context:
-- Name: ${patient.name} (${patient.stage || 'Mild Cognitive Impairment'})
-- State/Region: ${patientProfile?.preferences?.regionalState || patient.state || 'Assam'}
-- Cognitive Game Performance: ${totalGames} sessions played, Average Accuracy: ${avgAcc}%
-- Daily Routine Completion: ${completedTasks} of ${totalTasks} tasks completed today
-- Current Mood Check-in: ${latestMood}
-- Family Members: ${JSON.stringify(patientProfile?.familyMembers || [])}
-- Active Prescriptions: ${JSON.stringify(patientProfile?.medicines || [])}
-- Life Story Memories: ${JSON.stringify(patientProfile?.memories || [])}
+            if (geminiRes.ok && geminiRes.body) {
+              res.writeHead(200, {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive'
+              });
 
-Instructions:
-1. Always be warm, respectful, and compassionate (use gentle Indian cultural cues like "Namaste", "Dear", or respectful terms).
-2. Answer questions about their progress, accuracy, completed tasks, and family directly using their real data.
-3. Answer medical/cognitive care questions accurately and empathetically:
-   - "What is Dementia?": Explain that it is an umbrella medical term for changes in brain pathways affecting memory and daily tasks, manageable with routine, cognitive stimulation, and warmth.
-   - "How does memory reduction happen?": Explain neuronal communication changes, aging, and reduced synaptic connections, noting that mental exercises help preserve paths.
-   - "Daily exercises for memory retention?": Recommend 10 mins of SMRITI memory games, 4-4 calm breathing, photo reminiscence, and morning hydration/walks.
-4. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
-5. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
+              const reader = geminiRes.body.getReader ? geminiRes.body.getReader() : null;
+              if (reader) {
+                const decoder = new TextDecoder();
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  const chunk = decoder.decode(value, { stream: true });
+                  res.write(chunk);
+                }
+                res.end();
+                return;
+              }
+            }
+          } else {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+            const geminiRes = await fetch(geminiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: message || 'Namaste' }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
+              })
+            });
 
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
-          const geminiRes = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: message || 'Namaste' }] }],
-              systemInstruction: { parts: [{ text: systemPrompt }] },
-              generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
-            })
-          });
-
-          if (geminiRes.ok) {
-            const result = await geminiRes.json();
-            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ reply: text, source: 'gemini' }));
-              return;
+            if (geminiRes.ok) {
+              const result = await geminiRes.json();
+              const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ reply: text, source: 'gemini' }));
+                return;
+              }
             }
           }
         } catch (geminiErr) {
@@ -164,18 +218,10 @@ Instructions:
         }
       }
 
-      // 2. OpenAI API Integration fallback
+      // 3. OpenAI API Integration fallback
       const openaiKey = process.env.OPENAI_API_KEY;
       if (openaiKey) {
         try {
-          const systemPrompt = `You are SWAI, an empathetic, respectful, and cheerful AI memory and cognitive companion in the SMRITI platform.
-User profile: ${JSON.stringify(patientProfile?.patient || { name: 'Meera', state: 'Assam' })}.
-Family: ${JSON.stringify(patientProfile?.familyMembers || [])}.
-Active Reminders: ${JSON.stringify(patientProfile?.reminders || [])}.
-Memories: ${JSON.stringify(patientProfile?.memories || [])}.
-Recent Accuracy: ${patientProfile?.gameHistory?.length ? 'Active' : 'New'}.
-Safety guideline: Maintain a compassionate tone, never provide formal diagnostic claims, and reference the patient's real memories and family members when helpful.`;
-
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -207,13 +253,37 @@ Safety guideline: Maintain a compassionate tone, never provide formal diagnostic
         }
       }
 
-      // Contextual Data Synthesis Fallback
+      // 4. Intelligent Context-Aware Synthesis Engine (Local / Server fallback)
       const reply = generateContextualResponse(message, patientProfile, role);
+
+      if (stream) {
+        res.writeHead(200, {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        });
+        // Stream out words progressively to fulfill stream contracts
+        const words = reply.split(' ');
+        let wordIndex = 0;
+        const streamTimer = setInterval(() => {
+          if (wordIndex < words.length) {
+            const word = (wordIndex > 0 ? ' ' : '') + words[wordIndex];
+            res.write(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: word }] } }] })}\n\n`);
+            wordIndex++;
+          } else {
+            clearInterval(streamTimer);
+            res.write('data: [DONE]\n\n');
+            res.end();
+          }
+        }, 35);
+        return;
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ reply, source: 'context_engine' }));
     } catch (err) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Invalid request body' }));
+      res.end(JSON.stringify({ error: 'Invalid request body: ' + err.message }));
     }
   });
 };

@@ -1,9 +1,72 @@
+/* ============================================================
+   SMRITI — Game 5: My Day
+   Daily routine sequencing with full reactive multilingual support
+   ============================================================ */
+
 import GameShell from '../gameShell.js';
 import I18n from '../i18n.js';
 import TTS from '../tts.js';
 import Storage from '../storage.js';
 
 export default function MyDay(container) {
+    let currentController;
+    let timer;
+    let langChangeHandler = null;
+    let currentGameArea = null;
+    let currentDifficulty = 'medium';
+
+    const defaultRoutineVariationsByLang = {
+        en: {
+            morning: {
+                easy: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🍳 Eat warm breakfast', '🚶 Gentle garden walk'],
+                medium: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🍳 Eat warm breakfast', '🍵 Drink ginger tea', '🚶 Gentle garden walk'],
+                hard: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🚿 Take warm bath', '🍳 Eat warm breakfast', '🍵 Drink ginger tea', '💊 Take morning medicine', '🚶 Gentle garden walk']
+            },
+            afternoon: {
+                easy: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '📖 Read or listen to story'],
+                medium: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '🍵 Afternoon tea & snack', '📞 Call family member'],
+                hard: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '🍵 Afternoon tea & snack', '📞 Call family member', '🌸 Water veranda plants', '🚶 Short evening stroll']
+            },
+            evening: {
+                easy: ['🌅 Watch the sunset', '🍲 Eat light dinner', '🥛 Drink warm milk', '😴 Sleep peacefully'],
+                medium: ['🌅 Watch the sunset', '🍲 Eat light dinner', '💊 Take night medicine', '🥛 Drink warm milk', '😴 Sleep peacefully'],
+                hard: ['🌅 Watch the sunset', '🧘 4-4 Guided breathing', '🍲 Eat light dinner', '💊 Take night medicine', '🥛 Drink warm milk', '📻 Listen to soft melody', '😴 Sleep peacefully']
+            }
+        },
+        hi: {
+            morning: {
+                easy: ['☀️ सुबह उठना और अंगड़ाई लेना', '🪥 दाँत साफ़ करना और हाथ-मुँह धोना', '🍳 पौष्टिक नाश्ता करना', '🚶 बगीचे में हल्की सैर करना'],
+                medium: ['☀️ सुबह उठना और अंगड़ाई लेना', '🪥 दाँत साफ़ करना और हाथ-मुँह धोना', '🍳 पौष्टिक नाश्ता करना', '🍵 अदरक वाली गरमा-गरम चाय पीना', '🚶 बगीचे में हल्की सैर करना'],
+                hard: ['☀️ सुबह उठना और अंगड़ाई लेना', '🪥 दाँत साफ़ करना और हाथ-मुँह धोना', '🚿 स्नान करना', '🍳 पौष्टिक नाश्ता करना', '🍵 अदरक वाली चाय पीना', '💊 सुबह की दवा लेना', '🚶 बगीचे में हल्की सैर']
+            },
+            afternoon: {
+                easy: ['🥗 दोपहर का भोजन करना', '💧 एक गिलास पानी पीना', '🛌 थोड़ी देर विश्राम (झपकी) लेना', '📖 प्रेरक कहानी सुनना'],
+                medium: ['🥗 दोपहर का भोजन करना', '💧 एक गिलास पानी पीना', '🛌 विश्राम करना', '🍵 शाम की चाय और नाश्ता', '📞 परिवार से बातचीत करना'],
+                hard: ['🥗 दोपहर का भोजन करना', '💧 पानी पीना', '🛌 विश्राम करना', '🍵 शाम की चाय', '📞 परिवार से बात करना', '🌸 पौधों में पानी देना', '🚶 शाम की सैर']
+            },
+            evening: {
+                easy: ['🌅 सूर्यास्त देखना', '🍲 हल्का सुपाच्य रात का खाना', '🥛 गुनगुना दूध पीना', '😴 चैन की नींद सोना'],
+                medium: ['🌅 सूर्यास्त देखना', '🍲 रात का खाना खाना', '💊 रात की दवा लेना', '🥛 गुनगुना दूध पीना', '😴 चैन की नींद सोना'],
+                hard: ['🌅 सूर्यास्त देखना', '🧘 4-4 शांत साँस व्यायाम', '🍲 रात का खाना खाना', '💊 रात की दवा लेना', '🥛 दूध पीना', '📻 मधुर भजन सुनना', '😴 चैन की नींद सोना']
+            }
+        },
+        as: {
+            morning: {
+                easy: ['☀️ ৰাতিপুৱা সাৰ পাই হাত-ভৰি মেলা', '🪥 মুখ-হাত ধোৱা আৰু দাঁত ঘঁহা', '🍳 গৰম পুষ্টিকৰ জলপান খোৱা', '🚶 ফুলনিত লাহে লাহে খোজ কঢ়া'],
+                medium: ['☀️ ৰাতিপুৱা সাৰ পোৱা', '🪥 মুখ-হাত ধোৱা', '🍳 গৰম জলপান খোৱা', '🍵 আদা দিয়া সুগন্ধি চাহ খোৱা', '🚶 ফুলনিত খোজ কঢ়া'],
+                hard: ['☀️ ৰাতিপুৱা সাৰ পোৱা', '🪥 মুখ ধোৱা', '🚿 গা ধোৱা', '🍳 জলপান খোৱা', '🍵 সুগন্ধি চাহ খোৱা', '💊 ৰাতিপুৱাৰ ঔষধ খোৱা', '🚶 ফুলনিত খোজ কঢ়া']
+            },
+            afternoon: {
+                easy: ['🥗 দুপৰীয়াৰ ভাত খোৱা', '💧 এগিলাচ বিশুদ্ধ পানী খোৱা', '🛌 অলপ জিৰণি লোৱা', '📖 সাধু বা গান শুনা'],
+                medium: ['🥗 দুপৰীয়াৰ আহাৰ গ্ৰহণ', '💧 এগিলাচ পানী খোৱা', '🛌 অলপ সময় জিৰণি লোৱা', '🍵 আবেলিৰ চাহ খোৱা', '📞 আপোনজনৰ লগত কথা পতা']
+            },
+            evening: {
+                easy: ['🌅 বেলি লহিওৱা দৃশ্য উপভোগ কৰা', '🍲 লঘু ৰাতিৰ আহাৰ খোৱা', '🥛 গৰম গাখীৰ খোৱা', '😴 শান্তভাৱে টোপনি যোৱা'],
+                medium: ['🌅 বেলি লহিওৱা দৃশ্য চোৱা', '🍲 ৰাতিৰ আহাৰ খোৱা', '💊 ৰাতিৰ ঔষধ সেৱন কৰা', '🥛 এগিলাচ গাখীৰ খোৱা', '😴 শান্তভাৱে টোপনি যোৱা']
+            }
+        }
+    };
+
     const config = {
         gameId: 'my-day',
         titleKey: 'g5Title',
@@ -15,31 +78,17 @@ export default function MyDay(container) {
         onCleanup: cleanup
     };
 
-    let currentController;
-    let timer;
-
-    const defaultRoutineVariations = {
-        morning: {
-            easy: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🍳 Eat warm breakfast', '🚶 Gentle garden walk'],
-            medium: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🍳 Eat warm breakfast', '🍵 Drink ginger tea', '🚶 Gentle garden walk'],
-            hard: ['☀️ Wake up & stretch', '🪥 Brush teeth & wash', '🚿 Take warm bath', '🍳 Eat warm breakfast', '🍵 Drink ginger tea', '💊 Take morning medicine', '🚶 Gentle garden walk']
-        },
-        afternoon: {
-            easy: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '📖 Read or listen to story'],
-            medium: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '🍵 Afternoon tea & snack', '📞 Call family member'],
-            hard: ['🥗 Eat healthy lunch', '💧 Drink a glass of water', '🛌 Take a restful nap', '🍵 Afternoon tea & snack', '📞 Call family member', '🌸 Water veranda plants', '🚶 Short evening stroll']
-        },
-        evening: {
-            easy: ['🌅 Watch the sunset', '🍲 Eat light dinner', '🥛 Drink warm milk', '😴 Sleep peacefully'],
-            medium: ['🌅 Watch the sunset', '🍲 Eat light dinner', '💊 Take night medicine', '🥛 Drink warm milk', '😴 Sleep peacefully'],
-            hard: ['🌅 Watch the sunset', '🧘 4-4 Guided breathing', '🍲 Eat light dinner', '💊 Take night medicine', '🥛 Drink warm milk', '📻 Listen to soft melody', '😴 Sleep peacefully']
-        }
-    };
-
     const shell = GameShell.create(container, config);
+
+    function getRoutinesForCurrentLang() {
+        const lang = I18n.lang;
+        return defaultRoutineVariationsByLang[lang] || defaultRoutineVariationsByLang.en;
+    }
 
     function startGame(difficulty, gameArea, controller) {
         currentController = controller;
+        currentGameArea = gameArea;
+        currentDifficulty = difficulty;
         
         let routine = [];
         if (Storage.getRoutines && typeof Storage.getRoutines === 'function') {
@@ -52,25 +101,24 @@ export default function MyDay(container) {
         if (routine.length === 0) {
             const hour = new Date().getHours();
             const periods = ['morning', 'afternoon', 'evening'];
-            // Dynamic selection: prioritize time of day, but randomize step pool if repeated
             let period = 'morning';
             if (hour >= 12 && hour < 17) period = 'afternoon';
             else if (hour >= 17) period = 'evening';
 
-            // Random variation across periods for variety
-            if (Math.random() > 0.6) {
-                period = periods[Math.floor(Math.random() * periods.length)];
-            }
-
-            const pool = defaultRoutineVariations[period] || defaultRoutineVariations.morning;
-            routine = [...(pool[difficulty] || pool.easy)];
+            const langRoutines = getRoutinesForCurrentLang();
+            const pool = langRoutines[period] || langRoutines.morning || defaultRoutineVariationsByLang.en.morning;
+            routine = [...(pool[difficulty] || pool.easy || pool.medium)];
 
             // If family members exist, integrate personalized interaction
             const family = Storage.getFamilyMembers() || [];
             if (family.length > 0 && routine.length > 3) {
                 const fam = family[Math.floor(Math.random() * family.length)];
-                const customStep = `📞 Call ${fam.name} (${fam.relation})`;
-                if (!routine.some(s => s.includes('Call'))) {
+                const isHi = I18n.lang === 'hi';
+                const isAs = I18n.lang === 'as';
+                const customStep = isHi 
+                    ? `📞 ${fam.name} (${fam.relation}) को फ़ोन करना`
+                    : (isAs ? `📞 ${fam.name}লৈ (${fam.relation}) ফোন কৰা` : `📞 Call ${fam.name} (${fam.relation})`);
+                if (!routine.some(s => s.includes('Call') || s.includes('फ़ोन') || s.includes('ফোন'))) {
                     routine[routine.length - 2] = customStep;
                 }
             }
@@ -78,13 +126,28 @@ export default function MyDay(container) {
 
         showCorrectOrder(routine, gameArea, controller);
     }
+
+    // Subscribe to language change for active in-game re-render
+    langChangeHandler = () => {
+        if (currentController && currentGameArea) {
+            startGame(currentDifficulty, currentGameArea, currentController);
+        }
+    };
+    window.addEventListener('languageChanged', langChangeHandler);
     
     function showCorrectOrder(routine, gameArea, controller) {
         gameArea.innerHTML = '';
         
+        const isHi = I18n.lang === 'hi';
+        const isAs = I18n.lang === 'as';
+
+        const titleText = isHi ? 'अपनी दिनचर्या का क्रम देखें' : (isAs ? 'আপোনাৰ দিনলিপিৰ ক্ৰম চাওক' : 'Review your routine');
+        const memoText = isHi ? 'क्रम को ध्यान से याद कर लें...' : (isAs ? 'ক্ৰমটো মনত ৰাখক...' : 'Memorize the order...');
+        const readBtnText = isHi ? 'दिनचर्या सुनें' : (isAs ? 'দিনলিপি শুনক' : 'Read Routine');
+
         const heading = document.createElement('h3');
         heading.className = 'text-2xl font-bold text-center mb-6 text-maroon';
-        heading.textContent = 'Review your routine';
+        heading.textContent = titleText;
         gameArea.appendChild(heading);
         
         const listContainer = document.createElement('div');
@@ -101,31 +164,39 @@ export default function MyDay(container) {
         
         const notice = document.createElement('p');
         notice.className = 'text-center text-sm text-gray-500 mt-6';
-        notice.textContent = 'Memorize the order...';
+        notice.textContent = memoText;
         gameArea.appendChild(notice);
         
         if (TTS.isSupported()) {
-            const textToSpeak = routine.map((step, i) => `Step ${i + 1}, ${step.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')}`).join('. ');
-            const ttsBtn = TTS.createButton(textToSpeak, 'Read Routine');
+            const stepPrefix = isHi ? 'कदम' : (isAs ? 'পদক্ষেপ' : 'Step');
+            const textToSpeak = routine.map((step, i) => `${stepPrefix} ${i + 1}, ${step.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')}`).join('. ');
+            const ttsBtn = TTS.createButton(textToSpeak, readBtnText);
             ttsBtn.classList.add('mt-4', 'mx-auto', 'block');
             gameArea.appendChild(ttsBtn);
         }
         
         timer = setTimeout(() => {
             playSortGame(routine, gameArea, controller);
-        }, 4000);
+        }, 4200);
     }
     
     function playSortGame(routine, gameArea, controller) {
         gameArea.innerHTML = '';
         
+        const isHi = I18n.lang === 'hi';
+        const isAs = I18n.lang === 'as';
+
+        const promptText = isHi ? 'गतिविधियों को पहले से आखिरी तक सही क्रम में टैप करें' : (isAs ? 'কাৰ্যসূচীবোৰ সঠিক ক্ৰমত টেপ কৰক' : (I18n.t('g5TapOrder') || 'Tap the activities in the correct order:'));
+        const checkBtnText = I18n.t('g5CheckOrder') || (isHi ? 'क्रम जांचें' : 'Check My Order');
+        const resetBtnText = I18n.t('g5Reset') || (isHi ? 'पुनः सेट करें' : 'Reset');
+
         const heading = document.createElement('h3');
         heading.className = 'text-xl font-bold text-center mb-4 text-maroon';
-        heading.textContent = 'Tap the items in the correct order';
+        heading.textContent = promptText;
         gameArea.appendChild(heading);
         
         if (TTS.isSupported()) {
-            const ttsBtn = TTS.createButton('Tap the items in the correct order from first to last.');
+            const ttsBtn = TTS.createButton(promptText);
             ttsBtn.classList.add('mb-4', 'mx-auto', 'block');
             gameArea.appendChild(ttsBtn);
         }
@@ -139,7 +210,7 @@ export default function MyDay(container) {
         
         function updateDisplay() {
             listContainer.innerHTML = '';
-            shuffled.forEach((item, index) => {
+            shuffled.forEach((item) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'sortable-item tap-to-order p-3 bg-white border-2 border-gray-300 rounded-lg shadow-sm flex items-center justify-between text-lg cursor-pointer hover:bg-gray-50 transition-colors';
                 
@@ -187,12 +258,12 @@ export default function MyDay(container) {
         
         const checkBtn = document.createElement('button');
         checkBtn.className = 'btn bg-teal text-white flex-1 py-3 font-bold rounded-lg';
-        checkBtn.textContent = 'Check My Order';
+        checkBtn.textContent = checkBtnText;
         checkBtn.disabled = true;
         
         const resetBtn = document.createElement('button');
         resetBtn.className = 'btn bg-gray-200 text-gray-800 px-4 py-3 font-bold rounded-lg';
-        resetBtn.innerHTML = '↺ Reset';
+        resetBtn.innerHTML = `↺ ${resetBtnText}`;
         
         resetBtn.addEventListener('click', () => {
             selectedOrder = [];
@@ -219,7 +290,7 @@ export default function MyDay(container) {
                 if (!isCorrect) {
                     const expectedBadge = document.createElement('span');
                     expectedBadge.className = 'text-sm text-gray-500';
-                    expectedBadge.textContent = `(Should be ${item.originalIndex + 1})`;
+                    expectedBadge.textContent = isHi ? `(क्रम ${item.originalIndex + 1} होना चाहिए था)` : `(Should be ${item.originalIndex + 1})`;
                     badgeInfo.appendChild(expectedBadge);
                 }
                 
@@ -228,10 +299,8 @@ export default function MyDay(container) {
                 badge.textContent = index + 1;
                 
                 badgeInfo.appendChild(badge);
-                
                 itemEl.appendChild(textSpan);
                 itemEl.appendChild(badgeInfo);
-                
                 listContainer.appendChild(itemEl);
             });
             
@@ -243,23 +312,23 @@ export default function MyDay(container) {
             
             if (accuracy === 1) {
                 controller.recordCorrect();
-                if (TTS.isSupported()) TTS.speak('Perfect! You got everything in the right order.');
+                if (TTS.isSupported()) TTS.speak(isHi ? 'अद्भुत! आपने सभी गतिविधियों को बिल्कुल सही क्रम में रखा।' : 'Perfect! You got everything in the right order.');
             } else if (accuracy >= 0.5) {
                 controller.recordCorrect();
-                if (TTS.isSupported()) TTS.speak('Good job! Most of them are in the right order.');
+                if (TTS.isSupported()) TTS.speak(isHi ? 'बहुत अच्छा प्रयास! अधिकांश गतिविधियाँ सही क्रम में हैं।' : 'Good job! Most of them are in the right order.');
             } else {
                 controller.recordWrong();
-                if (TTS.isSupported()) TTS.speak('Not quite right. Keep practicing.');
+                if (TTS.isSupported()) TTS.speak(isHi ? 'कोई बात नहीं, अभ्यास से सब आसान हो जाता है।' : 'Good effort. Keep practicing.');
             }
             
             const feedback = document.createElement('div');
             feedback.className = 'text-center mt-6 text-xl font-bold mb-4';
-            feedback.textContent = `You got ${correctCount} out of ${routine.length} right!`;
+            feedback.textContent = isHi ? `आपने ${routine.length} में से ${correctCount} सही किए!` : `You got ${correctCount} out of ${routine.length} right!`;
             gameArea.appendChild(feedback);
             
             const nextBtn = document.createElement('button');
             nextBtn.className = 'btn bg-teal text-white w-full max-w-md mx-auto block py-3 font-bold rounded-lg mt-4';
-            nextBtn.textContent = 'Finish Game';
+            nextBtn.textContent = isHi ? 'खेल समाप्त करें' : (isAs ? 'খেল সমাপ্ত কৰক' : 'Finish Game');
             nextBtn.addEventListener('click', () => {
                 controller.endGame({ accuracy: Math.round(accuracy * 100) });
             });
@@ -274,7 +343,7 @@ export default function MyDay(container) {
         
         const safetyNotice = document.createElement('div');
         safetyNotice.className = 'safety-notice mt-8 text-center text-sm text-gray-500 italic';
-        safetyNotice.textContent = 'This is a practice activity, not medical advice.';
+        safetyNotice.textContent = I18n.t('g5Safety') || 'This is a practice activity, not medical advice.';
         gameArea.appendChild(safetyNotice);
         
         updateDisplay();
@@ -282,6 +351,10 @@ export default function MyDay(container) {
 
     function cleanup() {
         if (timer) clearTimeout(timer);
+        if (langChangeHandler) {
+            window.removeEventListener('languageChanged', langChangeHandler);
+        }
+        TTS.stop();
     }
 
     return shell;

@@ -653,7 +653,7 @@ export default function EntertainmentPage(container) {
           btn.style.background = '#0D9488';
           btn.style.color = '#FFFFFF';
           quizScore += 10;
-          Coins.addCoins(10, 'Music Quiz');
+          Coins.add(10, 'Music Quiz');
           if (feedback) {
             feedback.style.display = 'block';
             feedback.style.background = '#ECFDF5';

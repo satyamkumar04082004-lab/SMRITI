@@ -61,9 +61,101 @@ const AIService = {
   // ------------------------------------------------------------
   // 2. SMRITI AI COMPANION (EMPATHETIC, CONTEXT-AWARE, PATIENT DATA CONNECTED)
   // ------------------------------------------------------------
+  async streamChatWithSmriti(userMessage, onChunk, history = []) {
+    const profile = Storage.getPatientProfile();
+    const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
+
+    // Dynamic Context Injection
+    const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const contextualPayload = {
+      message: userMessage,
+      currentDate: todayDate,
+      currentTime: todayTime,
+      patientProfile: profile,
+      role: user.role || 'patient',
+      stream: true
+    };
+
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contextualPayload)
+      });
+
+      const contentType = resp.headers.get('content-type') || '';
+      if (resp.ok && contentType.includes('text/event-stream') && resp.body) {
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // keep remainder
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data:')) {
+              const dataStr = trimmed.replace(/^data:\s*/, '').trim();
+              if (dataStr === '[DONE]') {
+                onChunk('', true);
+                return;
+              }
+              try {
+                const parsed = JSON.parse(dataStr);
+                const textChunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text
+                  || parsed?.choices?.[0]?.delta?.content
+                  || parsed?.text
+                  || '';
+                if (textChunk) {
+                  onChunk(textChunk, false);
+                }
+              } catch (parseErr) {
+                // Raw text chunk fallback
+                if (dataStr) onChunk(dataStr, false);
+              }
+            }
+          }
+        }
+        onChunk('', true);
+        return;
+      } else if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.reply) {
+          onChunk(data.reply, true);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Streaming fetch failed, switching to local generation:', e);
+    }
+
+    // Fallback generation progressively rendered
+    const fallbackText = this.chatWithSmriti(userMessage, history);
+    const words = fallbackText.split(' ');
+    let wIdx = 0;
+    const interval = setInterval(() => {
+      if (wIdx < words.length) {
+        const chunk = (wIdx > 0 ? ' ' : '') + words[wIdx];
+        onChunk(chunk, false);
+        wIdx++;
+      } else {
+        clearInterval(interval);
+        onChunk('', true);
+      }
+    }, 40);
+  },
+
   async chatWithSmritiAsync(userMessage, history = []) {
     const profile = Storage.getPatientProfile();
     const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
+    const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
     try {
       const resp = await fetch('/api/chat', {
@@ -71,8 +163,11 @@ const AIService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage,
+          currentDate: todayDate,
+          currentTime: todayTime,
           patientProfile: profile,
-          role: user.role || 'patient'
+          role: user.role || 'patient',
+          stream: false
         })
       });
 

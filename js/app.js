@@ -494,6 +494,17 @@ function renderNav(activeHash) {
     return;
   }
 
+  // Hide bottom navigation completely for Caregiver role or Caregiver/Doctor dashboard routes
+  const currentUser = Auth.getUser();
+  const userRole = currentUser && currentUser.role ? currentUser.role.toLowerCase() : '';
+  const isCaregiverRoute = ['#/dashboard', '#/doctor', '#/report', '#/doctor-report', '#/caregiver'].includes(activeHash)
+    || (window.location.hash && (window.location.hash.includes('dashboard') || window.location.hash.includes('doctor') || window.location.hash.includes('caregiver')));
+
+  if (userRole === 'caregiver' || isCaregiverRoute) {
+    document.body.classList.remove('has-nav');
+    return;
+  }
+
   // Streamline to exactly 4 core tabs for elderly clarity (Item 12)
   const navItems = [
     { hash: '#/home', icon: '🏠', label: I18n.t('navHome') || 'Home' },

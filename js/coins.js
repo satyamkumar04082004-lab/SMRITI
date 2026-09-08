@@ -33,7 +33,15 @@ const Coins = {
     const newBalance = current + Math.max(0, amount);
     Storage.setCoins(newBalance);
     console.log(`🪙 +${amount} coins (${reason}). Balance: ${newBalance}`);
+    this.updateBadge();
     return newBalance;
+  },
+
+  /**
+   * Alias for add()
+   */
+  addCoins(amount, reason = '') {
+    return this.add(amount, reason);
   },
 
   /**
