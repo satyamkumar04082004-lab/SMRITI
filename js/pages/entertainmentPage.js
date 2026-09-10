@@ -11,6 +11,166 @@ import TTS from '../tts.js';
 import I18n from '../i18n.js';
 import Coins from '../coins.js';
 
+// Top-level module-scoped Quiz Data pool (prevents TDZ ReferenceErrors)
+export const quizData = {
+  instrument: [
+    {
+      id: 'q_inst_1',
+      title: 'Listen carefully to this sweet, high-pitched wind instrument:',
+      notes: [587.33, 659.25, 739.99, 880.00, 987.77, 880.00, 739.99, 659.25],
+      wave: 'sine',
+      tempo: 450,
+      options: ['Bansuri (Bamboo Flute) 🪈', 'Tabla (Drums) 🥁', 'Sitar (Strings) 🪕', 'Shehnai 🎺'],
+      correct: 'Bansuri (Bamboo Flute) 🪈',
+      fact: 'The bamboo flute (Bansuri) has echoed across Indian classical music and Krishna folklore for thousands of years!'
+    },
+    {
+      id: 'q_inst_2',
+      title: 'Listen to the deep resonant rhythmic beats:',
+      notes: [130.81, 146.83, 164.81, 130.81, 174.61, 146.83, 130.81],
+      wave: 'triangle',
+      tempo: 380,
+      options: ['Tabla 🥁', 'Veena 🎼', 'Flute 🪈', 'Harmonium 🎹'],
+      correct: 'Tabla 🥁',
+      fact: 'The Tabla consists of the Dayan (treble) and Bayan (bass drum), creating the heartbeat of Indian music.'
+    },
+    {
+      id: 'q_inst_3',
+      title: 'Listen to these delicate acoustic strings with resonating sympathetic buzz:',
+      notes: [261.63, 277.18, 329.63, 349.23, 392.00, 415.30, 493.88],
+      wave: 'sawtooth',
+      tempo: 500,
+      options: ['Sitar 🪕', 'Shehnai 🎺', 'Dholak 🥁', 'Bansuri 🪈'],
+      correct: 'Sitar 🪕',
+      fact: 'Made world-famous by Pandit Ravi Shankar, the sitar has movable frets and sympathetic buzzing strings.'
+    },
+    {
+      id: 'q_inst_4',
+      title: 'Listen to this festive and auspicious reeded wind melody:',
+      notes: [329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 493.88],
+      wave: 'triangle',
+      tempo: 600,
+      options: ['Shehnai 🎺', 'Sarod 🎻', 'Bansuri 🪈', 'Jal Tarang 🥣'],
+      correct: 'Shehnai 🎺',
+      fact: 'Ustad Bismillah Khan brought the Shehnai from royal courtyards to international concert stages.'
+    },
+    {
+      id: 'q_inst_5',
+      title: 'Listen to the rippling hundred-stringed Himalayan zither:',
+      notes: [349.23, 392.00, 440.00, 523.25, 587.33, 659.25, 523.25],
+      wave: 'square',
+      tempo: 400,
+      options: ['Santoor 🌊', 'Guitar 🎸', 'Sitar 🪕', 'Tanpura 🎶'],
+      correct: 'Santoor 🌊',
+      fact: 'Pandit Shivkumar Sharma transformed the folk Kashmiri Santoor into a premier classical instrument.'
+    }
+  ],
+  song: [
+    {
+      id: 'q_song_1',
+      title: 'Which golden evergreen classic has this melody?',
+      notes: [261.63, 293.66, 329.63, 349.23, 392.00, 349.23, 329.63, 293.66],
+      wave: 'sine',
+      tempo: 600,
+      options: ['Ajeeb Dastan Hai Yeh 📻', 'Chura Liya Hai Tumne 🎸', 'Lag Ja Gale 🌸', 'Yeh Dosti 🏍️'],
+      correct: 'Ajeeb Dastan Hai Yeh 📻',
+      fact: 'From the 1960 movie Dil Apna Aur Preet Parai, sung soulfully by Lata Mangeshkar.'
+    },
+    {
+      id: 'q_song_2',
+      title: 'Identify the iconic romantic rain tune:',
+      notes: [392.00, 349.23, 329.63, 293.66, 261.63, 329.63, 392.00],
+      wave: 'triangle',
+      tempo: 550,
+      options: ['Pyaar Hua Ikraar Hua ☔', 'Roop Tera Mastana 🔥', 'Ek Ladki Bheegi Bhaagi Si 🌧️', 'Rimjhim Gire Sawan 🌂'],
+      correct: 'Pyaar Hua Ikraar Hua ☔',
+      fact: 'Featuring Raj Kapoor and Nargis under the black umbrella in Shree 420 (1955).'
+    },
+    {
+      id: 'q_song_3',
+      title: 'Which timeless ghazal melody touches the soul with nostalgia?',
+      notes: [293.66, 329.63, 349.23, 392.00, 440.00, 392.00, 349.23],
+      wave: 'sine',
+      tempo: 600,
+      options: ['Lag Ja Gale 🌸', 'Kabhi Kabhie Mere Dil Mein 📜', 'Tere Bina Zindagi Se 🍁', 'Chaudhvin Ka Chand 🌙'],
+      correct: 'Lag Ja Gale 🌸',
+      fact: 'Composed by Madan Mohan in Woh Kaun Thi? (1964), it remains one of the most loved songs in history.'
+    },
+    {
+      id: 'q_song_4',
+      title: 'Which joyful acoustic strumming track celebrates friendship?',
+      notes: [329.63, 392.00, 440.00, 523.25, 440.00, 392.00, 329.63],
+      wave: 'sawtooth',
+      tempo: 480,
+      options: ['Yeh Dosti Hum Nahi Todenge 🏍️', 'Zindagi Ek Safar Hai Suhana 🚗', 'Mere Samne Wali Khidki 🪟', 'Kishore Ki Baatein 🎙️'],
+      correct: 'Yeh Dosti Hum Nahi Todenge 🏍️',
+      fact: 'From the epic film Sholay (1975), celebrating the eternal bond between Jai and Veeru.'
+    },
+    {
+      id: 'q_song_5',
+      title: 'Which poetic song asks for gentle blessings from the evening breeze?',
+      notes: [261.63, 329.63, 392.00, 440.00, 493.88, 440.00, 392.00],
+      wave: 'sine',
+      tempo: 580,
+      options: ['Chaudhvin Ka Chand Ho 🌙', 'Aap Ki Nazron Ne Samjha 👁️', 'Tere Mere Sapne 🌅', 'Aaja Re Pardesi 🌳'],
+      correct: 'Chaudhvin Ka Chand Ho 🌙',
+      fact: 'Sung by Mohammed Rafi in 1960, earning him the prestigious Filmfare Award.'
+    }
+  ],
+  singer: [
+    {
+      id: 'q_sing_1',
+      title: 'Who was revered as the "Nightingale of India" with timeless melodies?',
+      notes: [440.00, 493.88, 523.25, 587.33, 523.25, 493.88, 440.00],
+      wave: 'sine',
+      tempo: 650,
+      options: ['Lata Mangeshkar 🕊️', 'Asha Bhosle 🌸', 'Geeta Dutt 📻', 'M. S. Subbulakshmi 🪷'],
+      correct: 'Lata Mangeshkar 🕊️',
+      fact: 'Bharat Ratna Lata Mangeshkar recorded songs in over 36 languages across seven legendary decades.'
+    },
+    {
+      id: 'q_sing_2',
+      title: 'Which soulful maestro sang "Pal Pal Dil Ke Paas" and "Mere Sapnon Ki Rani"?',
+      notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63],
+      wave: 'sawtooth',
+      tempo: 500,
+      options: ['Kishore Kumar 🎙️', 'Mohammed Rafi 🎤', 'Mukesh 🎼', 'Hemant Kumar 🌊'],
+      correct: 'Kishore Kumar 🎙️',
+      fact: 'Kishore Kumar was an unmatched genius who could switch between soulful ballads and joyful yodeling!'
+    },
+    {
+      id: 'q_sing_3',
+      title: 'Which versatile legend sang "Kya Hua Tera Wada" and "Gulabi Aankhen"?',
+      notes: [293.66, 329.63, 369.99, 440.00, 493.88, 440.00, 369.99],
+      wave: 'triangle',
+      tempo: 520,
+      options: ['Mohammed Rafi 🎤', 'Kishore Kumar 🎙️', 'Manna Dey 🎼', 'Talat Mahmood 📻'],
+      correct: 'Mohammed Rafi 🎤',
+      fact: 'Mohammed Rafi possessed an extraordinary range and sang over 7,000 songs spanning every emotion.'
+    },
+    {
+      id: 'q_sing_4',
+      title: 'Known as the Queen of Indie & Bollywood versatility, singing "Dum Maro Dum":',
+      notes: [329.63, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00],
+      wave: 'sawtooth',
+      tempo: 450,
+      options: ['Asha Bhosle 🌸', 'Lata Mangeshkar 🕊️', 'Alka Yagnik 🌺', 'Anuradha Paudwal 🪷'],
+      correct: 'Asha Bhosle 🌸',
+      fact: 'Asha Bhosle entered the Guinness World Records for the most studio recordings in music history.'
+    },
+    {
+      id: 'q_sing_5',
+      title: 'Who is fondly called the "Voice of Raj Kapoor" for songs like "Jeena Yahan Marna Yahan"?',
+      notes: [261.63, 293.66, 329.63, 392.00, 329.63, 293.66, 261.63],
+      wave: 'triangle',
+      tempo: 560,
+      options: ['Mukesh 🎼', 'Mohammed Rafi 🎤', 'Hemant Kumar 🌊', 'Bhupen Hazarika 🎶'],
+      correct: 'Mukesh 🎼',
+      fact: 'Mukesh had a deeply comforting golden voice that resonated with poignant warmth.'
+    }
+  ]
+};
+
 export default function EntertainmentPage(container) {
   let activeTab = 'quiz'; // 'quiz' | 'music' | 'stories' | 'visuals'
   let currentPlayingAudio = null;
@@ -33,8 +193,10 @@ export default function EntertainmentPage(container) {
   };
 
   function getRandomQuestion(mode) {
-    const list = quizData[mode] || quizData.instrument;
-    const asked = askedQuestions[mode];
+    const list = (quizData && quizData[mode]) || (quizData && quizData.instrument) || [];
+    if (!list || list.length === 0) return null;
+
+    const asked = askedQuestions[mode] || new Set();
     
     // If all questions in this mode have been asked, reset pool
     if (asked.size >= list.length) {
@@ -43,183 +205,25 @@ export default function EntertainmentPage(container) {
 
     // Filter remaining unasked questions
     const available = list.filter(q => !asked.has(q.id));
-    // Pick random from available
     const chosen = available[Math.floor(Math.random() * available.length)] || list[0];
-    asked.add(chosen.id);
+    if (chosen && chosen.id) {
+      asked.add(chosen.id);
+    }
 
     // Also shuffle options randomly for that question
-    const shuffledOptions = [...chosen.options].sort(() => Math.random() - 0.5);
+    const optionsArray = chosen.options ? [...chosen.options] : [];
+    const shuffledOptions = optionsArray.sort(() => Math.random() - 0.5);
     return {
       ...chosen,
       options: shuffledOptions
     };
   }
 
-  // Initialize first question
+  // Initialize first question safely
   currentQuestion = getRandomQuestion(quizMode);
 
   // --- Visuals Sub-tab State ---
   let visualSubTab = 'greenery'; // 'greenery' | 'animals' | 'vegetation'
-
-  // Quiz Data with distinct acoustic frequencies & wave patterns (expanded pool)
-  const quizData = {
-    instrument: [
-      {
-        id: 'q_inst_1',
-        title: 'Listen carefully to this sweet, high-pitched wind instrument:',
-        notes: [587.33, 659.25, 739.99, 880.00, 987.77, 880.00, 739.99, 659.25],
-        wave: 'sine',
-        tempo: 450,
-        options: ['Bansuri (Bamboo Flute) 🪈', 'Tabla (Drums) 🥁', 'Sitar (Strings) 🪕', 'Shehnai 🎺'],
-        correct: 'Bansuri (Bamboo Flute) 🪈',
-        fact: 'The bamboo flute (Bansuri) has echoed across Indian classical music and Krishna folklore for thousands of years!'
-      },
-      {
-        id: 'q_inst_2',
-        title: 'Listen to the deep resonant rhythmic beats:',
-        notes: [130.81, 146.83, 164.81, 130.81, 174.61, 146.83, 130.81],
-        wave: 'triangle',
-        tempo: 380,
-        options: ['Tabla 🥁', 'Veena 🎼', 'Flute 🪈', 'Harmonium 🎹'],
-        correct: 'Tabla 🥁',
-        fact: 'The Tabla consists of the Dayan (treble) and Bayan (bass drum), creating the heartbeat of Indian music.'
-      },
-      {
-        id: 'q_inst_3',
-        title: 'Listen to these delicate acoustic strings with resonating sympathetic buzz:',
-        notes: [261.63, 277.18, 329.63, 349.23, 392.00, 415.30, 493.88],
-        wave: 'sawtooth',
-        tempo: 500,
-        options: ['Sitar 🪕', 'Shehnai 🎺', 'Dholak 🥁', 'Bansuri 🪈'],
-        correct: 'Sitar 🪕',
-        fact: 'Made world-famous by Pandit Ravi Shankar, the sitar has movable frets and sympathetic buzzing strings.'
-      },
-      {
-        id: 'q_inst_4',
-        title: 'Listen to this festive and auspicious reeded wind melody:',
-        notes: [329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 493.88],
-        wave: 'triangle',
-        tempo: 600,
-        options: ['Shehnai 🎺', 'Sarod 🎻', 'Bansuri 🪈', 'Jal Tarang 🥣'],
-        correct: 'Shehnai 🎺',
-        fact: 'Ustad Bismillah Khan brought the Shehnai from royal courtyards to international concert stages.'
-      },
-      {
-        id: 'q_inst_5',
-        title: 'Listen to the rippling hundred-stringed Himalayan zither:',
-        notes: [349.23, 392.00, 440.00, 523.25, 587.33, 659.25, 523.25],
-        wave: 'square',
-        tempo: 400,
-        options: ['Santoor 🌊', 'Guitar 🎸', 'Sitar 🪕', 'Tanpura 🎶'],
-        correct: 'Santoor 🌊',
-        fact: 'Pandit Shivkumar Sharma transformed the folk Kashmiri Santoor into a premier classical instrument.'
-      }
-    ],
-    song: [
-      {
-        id: 'q_song_1',
-        title: 'Which golden evergreen classic has this melody?',
-        notes: [261.63, 293.66, 329.63, 349.23, 392.00, 349.23, 329.63, 293.66],
-        wave: 'sine',
-        tempo: 600,
-        options: ['Ajeeb Dastan Hai Yeh 📻', 'Chura Liya Hai Tumne 🎸', 'Lag Ja Gale 🌸', 'Yeh Dosti 🏍️'],
-        correct: 'Ajeeb Dastan Hai Yeh 📻',
-        fact: 'From the 1960 movie Dil Apna Aur Preet Parai, sung soulfully by Lata Mangeshkar.'
-      },
-      {
-        id: 'q_song_2',
-        title: 'Identify the iconic romantic rain tune:',
-        notes: [392.00, 349.23, 329.63, 293.66, 261.63, 329.63, 392.00],
-        wave: 'triangle',
-        tempo: 550,
-        options: ['Pyaar Hua Ikraar Hua ☔', 'Roop Tera Mastana 🔥', 'Ek Ladki Bheegi Bhaagi Si 🌧️', 'Rimjhim Gire Sawan 🌂'],
-        correct: 'Pyaar Hua Ikraar Hua ☔',
-        fact: 'Featuring Raj Kapoor and Nargis under the black umbrella in Shree 420 (1955).'
-      },
-      {
-        id: 'q_song_3',
-        title: 'Which timeless ghazal melody touches the soul with nostalgia?',
-        notes: [293.66, 329.63, 349.23, 392.00, 440.00, 392.00, 349.23],
-        wave: 'sine',
-        tempo: 600,
-        options: ['Lag Ja Gale 🌸', 'Kabhi Kabhie Mere Dil Mein 📜', 'Tere Bina Zindagi Se 🍁', 'Chaudhvin Ka Chand 🌙'],
-        correct: 'Lag Ja Gale 🌸',
-        fact: 'Composed by Madan Mohan in Woh Kaun Thi? (1964), it remains one of the most loved songs in history.'
-      },
-      {
-        id: 'q_song_4',
-        title: 'Which joyful acoustic strumming track celebrates friendship?',
-        notes: [329.63, 392.00, 440.00, 523.25, 440.00, 392.00, 329.63],
-        wave: 'sawtooth',
-        tempo: 480,
-        options: ['Yeh Dosti Hum Nahi Todenge 🏍️', 'Zindagi Ek Safar Hai Suhana 🚗', 'Mere Samne Wali Khidki 🪟', 'Kishore Ki Baatein 🎙️'],
-        correct: 'Yeh Dosti Hum Nahi Todenge 🏍️',
-        fact: 'From the epic film Sholay (1975), celebrating the eternal bond between Jai and Veeru.'
-      },
-      {
-        id: 'q_song_5',
-        title: 'Which poetic song asks for gentle blessings from the evening breeze?',
-        notes: [261.63, 329.63, 392.00, 440.00, 493.88, 440.00, 392.00],
-        wave: 'sine',
-        tempo: 580,
-        options: ['Chaudhvin Ka Chand Ho 🌙', 'Aap Ki Nazron Ne Samjha 👁️', 'Tere Mere Sapne 🌅', 'Aaja Re Pardesi 🌳'],
-        correct: 'Chaudhvin Ka Chand Ho 🌙',
-        fact: 'Sung by Mohammed Rafi in 1960, earning him the prestigious Filmfare Award.'
-      }
-    ],
-    singer: [
-      {
-        id: 'q_sing_1',
-        title: 'Who was revered as the "Nightingale of India" with timeless melodies?',
-        notes: [440.00, 493.88, 523.25, 587.33, 523.25, 493.88, 440.00],
-        wave: 'sine',
-        tempo: 650,
-        options: ['Lata Mangeshkar 🕊️', 'Asha Bhosle 🌸', 'Geeta Dutt 📻', 'M. S. Subbulakshmi 🪷'],
-        correct: 'Lata Mangeshkar 🕊️',
-        fact: 'Bharat Ratna Lata Mangeshkar recorded songs in over 36 languages across seven legendary decades.'
-      },
-      {
-        id: 'q_sing_2',
-        title: 'Which soulful maestro sang "Pal Pal Dil Ke Paas" and "Mere Sapnon Ki Rani"?',
-        notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63],
-        wave: 'sawtooth',
-        tempo: 500,
-        options: ['Kishore Kumar 🎙️', 'Mohammed Rafi 🎤', 'Mukesh 🎼', 'Hemant Kumar 🌊'],
-        correct: 'Kishore Kumar 🎙️',
-        fact: 'Kishore Kumar was an unmatched genius who could switch between soulful ballads and joyful yodeling!'
-      },
-      {
-        id: 'q_sing_3',
-        title: 'Which versatile legend sang "Kya Hua Tera Wada" and "Gulabi Aankhen"?',
-        notes: [293.66, 329.63, 369.99, 440.00, 493.88, 440.00, 369.99],
-        wave: 'triangle',
-        tempo: 520,
-        options: ['Mohammed Rafi 🎤', 'Kishore Kumar 🎙️', 'Manna Dey 🎼', 'Talat Mahmood 📻'],
-        correct: 'Mohammed Rafi 🎤',
-        fact: 'Mohammed Rafi possessed an extraordinary range and sang over 7,000 songs spanning every emotion.'
-      },
-      {
-        id: 'q_sing_4',
-        title: 'Known as the Queen of Indie & Bollywood versatility, singing "Dum Maro Dum":',
-        notes: [329.63, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00],
-        wave: 'sawtooth',
-        tempo: 450,
-        options: ['Asha Bhosle 🌸', 'Lata Mangeshkar 🕊️', 'Alka Yagnik 🌺', 'Anuradha Paudwal 🪷'],
-        correct: 'Asha Bhosle 🌸',
-        fact: 'Asha Bhosle entered the Guinness World Records for the most studio recordings in music history.'
-      },
-      {
-        id: 'q_sing_5',
-        title: 'Who is fondly called the "Voice of Raj Kapoor" for songs like "Jeena Yahan Marna Yahan"?',
-        notes: [261.63, 293.66, 329.63, 392.00, 329.63, 293.66, 261.63],
-        wave: 'triangle',
-        tempo: 560,
-        options: ['Mukesh 🎼', 'Mohammed Rafi 🎤', 'Hemant Kumar 🌊', 'Bhupen Hazarika 🎶'],
-        correct: 'Mukesh 🎼',
-        fact: 'Mukesh had a deeply comforting golden voice that resonated with poignant warmth.'
-      }
-    ]
-  };
 
   // Distinct Indian Instrumentals with custom covers support
   let customCovers = {};
@@ -271,149 +275,162 @@ export default function EntertainmentPage(container) {
   ];
 
   // Dynamic Stories List with Refresh
-  const masterStories = [
+  const storiesPool = [
     {
-      id: 'st_1',
-      title: 'The Ancestral Mango Tree',
-      text: 'On warm summer afternoons, the whole courtyard would gather under the giant green canopy of our ancestral mango tree. Grandmother would bring slices of raw green mango sprinkled with rock salt and roasted cumin, while grandfather shared tales of rivers and harvests.',
-      icon: '🌳'
+      id: 'story_1',
+      title: 'The Courtyard Jasmine of Jorhat',
+      icon: '🌸',
+      text: 'Every morning in early summer, Dadi would step into the red-brick courtyard with a brass bowl. The fragrant white jasmine blossoms would tumble onto the cool paving stones like stars. She would hum old songs and arrange the flowers by the veranda tea table, filling the entire morning with calm joy.'
     },
     {
-      id: 'st_2',
-      title: 'The Steaming Kettle at Jorhat',
-      text: 'Early dawn over the Assam tea gardens smelled of wet leaves and morning rain. The kitchen kettle would begin to whistle softly, announcing fresh ginger tea brewed with rich buffalo milk and cardamoms, shared warm between cupped hands.',
-      icon: '☕'
+      id: 'story_2',
+      title: 'The Whistling Mountain Train of Darjeeling',
+      icon: '🚂',
+      text: 'The tiny blue train puffed slowly up the misty pine hills, blowing a cheerful steam whistle at every bend. Schoolchildren smiled and waved through open wooden windows as the aroma of roasted peanuts and cardamom tea drifted from the platform stalls into the morning breeze.'
     },
     {
-      id: 'st_3',
-      title: 'Evening Bells of Kamakhya',
-      text: 'As the sun dipped behind the Nilachal hills, the evening temple bells began their rhythmic chime. Incense smoke drifted into the cool Brahmaputra breeze, carrying prayers of safety, peace, and long life for every family member.',
-      icon: '🔔'
+      id: 'story_3',
+      title: 'The Golden Bihu Kitchen Gathering',
+      icon: '🥥',
+      text: 'The warm aroma of roasted sticky rice and sweet coconut pitha filled every corner of the ancestral home. Three generations gathered around the earthen stove, laughing as sticky hands rolled sesame laddoos and shared memories of harvests celebrated under the clear winter moon.'
     },
     {
-      id: 'st_4',
-      title: 'Grandmother\'s Brass Box',
-      text: 'Tucked inside the old carved wooden cupboard was a gleaming brass box with cardamom seeds, cloves, and betel leaves. Whenever grandchildren returned from school, grandmother would gently open it with a smile that felt like warm sunshine.',
-      icon: '✨'
+      id: 'story_4',
+      title: 'Shillong Cherry Blossoms in Autumn',
+      icon: '🌺',
+      text: 'When November arrived, the hills around Shillong turned into a delicate sea of pink cherry blossoms. Grandfather would bring out his warm woolen shawl, hold a hot cup of Assam tea, and watch the small mountain birds feast happily on the sweet nectar.'
     }
   ];
 
-  let displayStories = [...masterStories];
+  let displayStories = [...storiesPool];
 
-  // Visuals Categories with Custom Upload Support
-  let customVisuals = [];
-  try {
-    customVisuals = JSON.parse(localStorage.getItem('smriti_custom_visuals') || '[]');
-  } catch (e) {}
+  function shuffleStories() {
+    displayStories = [...storiesPool].sort(() => Math.random() - 0.5);
+    render();
+    if (window.SmritiToast) {
+      window.SmritiToast.show('Stories refreshed with new nostalgic tales! 📖✨', 'info');
+    }
+  }
 
+  // Visuals Gallery Data (Greenery, Animals, Vegetation)
   const defaultVisuals = {
     greenery: [
       {
         id: 'vis_gr_1',
-        title: 'Serene Assam Tea Slopes',
-        caption: '“Take a slow breath. Like morning mist, all worries softly melt away.” 🌿',
-        image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80'
+        title: 'Misty Tea Slopes of Upper Assam',
+        image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80',
+        caption: 'Endless rolling emerald green tea bushes basking peacefully under early morning sunlight and dew.'
       },
       {
         id: 'vis_gr_2',
-        title: 'Lush Bamboo Groves of Meghalaya',
-        caption: 'Gentle green bamboo stalks swaying with the mountain breeze. 🎋',
-        image: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80'
+        title: 'Lush Bamboo Groves of Majuli',
+        image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&auto=format&fit=crop&q=80',
+        caption: 'Tall bamboo shoots gently swaying to the river breeze, providing cool shade and serenity.'
       }
     ],
     animals: [
       {
         id: 'vis_an_1',
-        title: 'Gentle Asian Elephant with Calf',
-        caption: 'Walking peacefully through Kaziranga grasslands with maternal love. 🐘',
-        image: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=800&auto=format&fit=crop&q=80'
+        title: 'One-Horned Rhinoceros at Kaziranga',
+        image: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?w=600&auto=format&fit=crop&q=80',
+        caption: 'A magnificent rhino grazing peacefully in the tall golden wetlands of Kaziranga National Park.'
       },
       {
         id: 'vis_an_2',
-        title: 'Colorful Great Hornbill',
-        caption: 'The majestic guardian bird of the northeast forests soaring above canopies. 🦅',
-        image: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=800&auto=format&fit=crop&q=80'
+        title: 'Gentle Elephant Family at Sunset',
+        image: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=600&auto=format&fit=crop&q=80',
+        caption: 'Loving elephant herd walking together under a warm orange evening sky.'
       }
     ],
     vegetation: [
       {
-        id: 'vis_vg_1',
-        title: 'Golden Paddy Fields at Harvest',
-        caption: 'Golden ripened rice stalks dancing beneath autumn skies. 🌾',
-        image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop&q=80'
+        id: 'vis_veg_1',
+        title: 'Golden Mustard Fields in Winter',
+        image: 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=600&auto=format&fit=crop&q=80',
+        caption: 'Vibrant yellow mustard blooms glowing under the gentle winter morning sun.'
       },
       {
-        id: 'vis_vg_2',
-        title: 'Wild Foxtail Orchids (Kopou Phool)',
-        caption: 'Vibrant spring blossom celebrated in Assam as a symbol of youth and joy. 🌸',
-        image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800&auto=format&fit=crop&q=80'
+        id: 'vis_veg_2',
+        title: 'Traditional Betel Nut & Coconut Palms',
+        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&auto=format&fit=crop&q=80',
+        caption: 'Slender palm trees standing gracefully against the clear blue sky outside the village veranda.'
       }
     ]
   };
 
+  let userCustomVisuals = {};
+  try {
+    userCustomVisuals = JSON.parse(localStorage.getItem('smriti_user_custom_visuals') || '{}');
+  } catch (e) {}
+
+  // Web Audio Synthesizer for Instrumentals & Quiz Sounds
   function stopSynthesizer() {
     if (synthInterval) {
       clearInterval(synthInterval);
       synthInterval = null;
     }
     if (synthAudioCtx) {
-      try { synthAudioCtx.close(); } catch {}
+      try { synthAudioCtx.close(); } catch (e) {}
       synthAudioCtx = null;
     }
     currentPlayingAudio = null;
   }
 
-  function stopQuizAudio() {
-    if (quizInterval) {
-      clearInterval(quizInterval);
-      quizInterval = null;
-    }
-    if (quizAudioCtx) {
-      try { quizAudioCtx.close(); } catch {}
-      quizAudioCtx = null;
-    }
-    isQuizAudioPlaying = false;
-  }
-
-  function playSynthesizedMelody(notes, title, waveType = 'sine', tempo = 600) {
+  function playSynthesizedMelody(notes, title, waveType = 'sine', tempo = 500) {
     stopSynthesizer();
     stopQuizAudio();
-    if (TTS) TTS.stop();
 
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
+    if (!AudioContext) {
+      alert('Audio synthesizer is not supported on this browser.');
+      return;
+    }
 
     synthAudioCtx = new AudioContext();
     currentPlayingAudio = title;
+    render();
 
-    let step = 0;
-    const playNote = () => {
-      if (!synthAudioCtx) return;
-      const freq = notes[step % notes.length];
+    let noteIdx = 0;
+    const playNext = () => {
+      if (!synthAudioCtx || synthAudioCtx.state === 'closed') return;
+      const freq = notes[noteIdx % notes.length];
       const osc = synthAudioCtx.createOscillator();
       const gain = synthAudioCtx.createGain();
 
       osc.type = waveType;
       osc.frequency.setValueAtTime(freq, synthAudioCtx.currentTime);
 
-      gain.gain.setValueAtTime(0.001, synthAudioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.2, synthAudioCtx.currentTime + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, synthAudioCtx.currentTime + (tempo / 1000) * 1.2);
+      gain.gain.setValueAtTime(0, synthAudioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.28, synthAudioCtx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, synthAudioCtx.currentTime + (tempo / 1000) * 0.95);
 
       osc.connect(gain);
       gain.connect(synthAudioCtx.destination);
 
-      osc.start();
-      osc.stop(synthAudioCtx.currentTime + (tempo / 1000) * 1.3);
-      step++;
+      osc.start(synthAudioCtx.currentTime);
+      osc.stop(synthAudioCtx.currentTime + tempo / 1000);
+
+      noteIdx++;
     };
 
-    playNote();
-    synthInterval = setInterval(playNote, tempo);
-    render();
+    playNext();
+    synthInterval = setInterval(playNext, tempo);
   }
 
-  function toggleQuizAudio(notes, waveType = 'sine', tempo = 550) {
+  // Audio for Quiz
+  function stopQuizAudio() {
+    if (quizInterval) {
+      clearInterval(quizInterval);
+      quizInterval = null;
+    }
+    if (quizAudioCtx) {
+      try { quizAudioCtx.close(); } catch (e) {}
+      quizAudioCtx = null;
+    }
+    isQuizAudioPlaying = false;
+  }
+
+  function toggleQuizAudio(notes, waveType = 'sine', tempo = 500) {
     if (isQuizAudioPlaying) {
       stopQuizAudio();
       render();
@@ -426,66 +443,58 @@ export default function EntertainmentPage(container) {
 
     quizAudioCtx = new AudioContext();
     isQuizAudioPlaying = true;
+    render();
 
-    let step = 0;
-    const playStep = () => {
-      if (!quizAudioCtx) return;
-      const freq = notes[step % notes.length];
+    let idx = 0;
+    const playNote = () => {
+      if (!quizAudioCtx || quizAudioCtx.state === 'closed') return;
+      const freq = notes[idx % notes.length];
       const osc = quizAudioCtx.createOscillator();
       const gain = quizAudioCtx.createGain();
 
       osc.type = waveType;
       osc.frequency.setValueAtTime(freq, quizAudioCtx.currentTime);
 
-      gain.gain.setValueAtTime(0.001, quizAudioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.22, quizAudioCtx.currentTime + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, quizAudioCtx.currentTime + (tempo / 1000) * 1.2);
+      gain.gain.setValueAtTime(0, quizAudioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.35, quizAudioCtx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, quizAudioCtx.currentTime + (tempo / 1000) * 0.9);
 
       osc.connect(gain);
       gain.connect(quizAudioCtx.destination);
 
-      osc.start();
-      osc.stop(quizAudioCtx.currentTime + (tempo / 1000) * 1.3);
-      step++;
+      osc.start(quizAudioCtx.currentTime);
+      osc.stop(quizAudioCtx.currentTime + tempo / 1000);
+
+      idx++;
     };
 
-    playStep();
-    quizInterval = setInterval(playStep, tempo);
-    render();
-  }
-
-  function shuffleStories() {
-    displayStories = [...masterStories].sort(() => Math.random() - 0.5);
-    if (window.SmritiToast) {
-      window.SmritiToast.show('Refreshed comforting stories! 📖✨', 'success');
-    }
-    render();
+    playNote();
+    quizInterval = setInterval(playNote, tempo);
   }
 
   function render() {
-    // Determine active visuals list including custom uploads
+    // Current visual list combining defaults + custom uploads
     const activeVisualsList = [
-      ...(defaultVisuals[visualSubTab] || []),
-      ...customVisuals.filter(v => v.category === visualSubTab)
+      ...(userCustomVisuals[visualSubTab] || []),
+      ...(defaultVisuals[visualSubTab] || [])
     ];
 
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 760px; padding-bottom: 3.5rem;">
-        <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-          <div>
-            <h2 style="color: var(--maroon, #9B2C2C); margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
-              <span>🎭</span> Entertainment & Mind Games
-            </h2>
-            <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.95rem;">Interactive music quiz, golden melodies & heartwarming stories</p>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="window.location.hash='#/home'">⬅ Home</button>
+        
+        <!-- Header Banner -->
+        <div class="card card-elevated text-center mb-md" style="background: linear-gradient(135deg, #FFF9F2, #FFF2E2); border: 2px solid #F3E8DC; padding: 1.5rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.35rem;">🎭🎶</div>
+          <h2 style="color: var(--maroon, #9B2C2C); margin: 0; font-size: 1.8rem; font-weight: 800;">Entertainment & Cultural Joy</h2>
+          <p class="text-muted" style="margin: 0.35rem 0 0 0; font-size: 1.05rem;">
+            Nostalgic melodies, cultural sound quiz, soothing stories & nature visuals
+          </p>
         </div>
 
-        <!-- Entertainment Tabs -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1.25rem; background: #FFF; padding: 6px; border-radius: 16px; border: 1.5px solid #F3E8DC;">
+        <!-- 4 Primary Entertainment Tabs -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1.5rem;">
           <button class="btn btn-ghost ent-tab-btn ${activeTab === 'quiz' ? 'btn-primary text-white' : ''}" data-tab="quiz" style="padding: 0.75rem 0.3rem; font-size: 0.95rem; font-weight: 700; flex-direction: column; gap: 4px;">
-            <span>🧩</span> Music Quiz
+            <span>🎯</span> Quiz
           </button>
           <button class="btn btn-ghost ent-tab-btn ${activeTab === 'music' ? 'btn-primary text-white' : ''}" data-tab="music" style="padding: 0.75rem 0.3rem; font-size: 0.95rem; font-weight: 700; flex-direction: column; gap: 4px;">
             <span>🎵</span> Melodies
@@ -514,7 +523,7 @@ export default function EntertainmentPage(container) {
           </div>
         ` : ''}
 
-        <!-- 1. MULTIMEDIA QUIZ TAB -->
+        <!-- 1. MULTIMEDIA QUIZ TAB (Safeguarded against TDZ ReferenceErrors) -->
         ${activeTab === 'quiz' ? `
           <div class="card card-elevated" style="background: #FFFDF9; border: 2px solid #FDE68A; border-radius: 18px; padding: 1.75rem; margin-bottom: 1.5rem;">
             <!-- Quiz Mode Selectors -->
@@ -527,15 +536,33 @@ export default function EntertainmentPage(container) {
               </div>
             </div>
 
-            <!-- Quiz Card -->
+            <!-- Quiz Card Safeguarded -->
             ${(() => {
-              const currentList = quizData[quizMode] || quizData.instrument;
-              const safeIndex = currentQuestionIndex % currentList.length;
-              const q = currentList[safeIndex];
+              const currentList = (quizData && quizData[quizMode]) || (quizData && quizData.instrument) || [];
+              if (!currentList || currentList.length === 0) {
+                return `
+                  <div style="padding: 2rem; text-align: center; color: #64748B;">
+                    <p>Loading cultural quiz questions...</p>
+                  </div>
+                `;
+              }
+
+              const q = currentQuestion || currentList[0];
+              if (!q) {
+                return `
+                  <div style="padding: 2rem; text-align: center; color: #64748B;">
+                    <p>No question available right now.</p>
+                  </div>
+                `;
+              }
+
+              const askedCount = (askedQuestions[quizMode] && askedQuestions[quizMode].size) || 1;
+              const optionsToRender = (q.options && q.options.length > 0) ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'];
+
               return `
                 <div style="background: #FFFFFF; border-radius: 16px; padding: 1.5rem; border: 1.5px solid #E2E8F0; text-align: center;">
                   <div style="font-size: 0.95rem; font-weight: 700; color: var(--teal-dark, #0F766E); margin-bottom: 0.5rem;">
-                    Question ${safeIndex + 1} of ${currentList.length} • Score: ${quizScore} 🪙
+                    Question ${askedCount} of ${currentList.length} • Score: ${quizScore} 🪙
                   </div>
                   <h4 style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1.25rem; line-height: 1.4;">${q.title}</h4>
 
@@ -549,7 +576,7 @@ export default function EntertainmentPage(container) {
 
                   <!-- Options Grid -->
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
-                    ${q.options.map(opt => `
+                    ${optionsToRender.map(opt => `
                       <button class="btn btn-outline btn-quiz-opt" data-answer="${opt}" style="min-height: 56px; font-size: 1.05rem; font-weight: 700; border-radius: 12px; padding: 0.75rem; text-align: center;">
                         ${opt}
                       </button>
@@ -638,25 +665,24 @@ export default function EntertainmentPage(container) {
         ${activeTab === 'visuals' ? `
           <div style="display: flex; flex-direction: column; gap: 1.25rem;">
             <!-- Sub-tabs for Visuals -->
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-              <div style="display: flex; gap: 8px; background: #FFF; padding: 4px; border-radius: 12px; border: 1px solid #E2E8F0;">
-                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'greenery' ? 'btn-primary' : 'btn-ghost'}" data-sub="greenery">🌿 Greenery</button>
-                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'animals' ? 'btn-primary' : 'btn-ghost'}" data-sub="animals">🐘 Animals</button>
-                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'vegetation' ? 'btn-primary' : 'btn-ghost'}" data-sub="vegetation">🌾 Vegetation</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'greenery' ? 'btn-primary' : 'btn-outline'}" data-sub="greenery">🌿 Greenery</button>
+                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'animals' ? 'btn-primary' : 'btn-outline'}" data-sub="animals">🐘 Animals</button>
+                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'vegetation' ? 'btn-primary' : 'btn-outline'}" data-sub="vegetation">🌾 Vegetation</button>
               </div>
-              <button id="btn-open-custom-visual" class="btn btn-secondary btn-sm" style="font-weight: 700;">
-                📷 Add Custom Visual
+              <button id="btn-toggle-upload-vis" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                + Add Custom Visual Photo
               </button>
             </div>
 
-            <!-- Upload Custom Visual Panel (Toggleable) -->
-            <div id="panel-add-visual" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal, #0D9488); border-radius: 14px; padding: 1.25rem;">
-              <h4 style="margin: 0 0 0.5rem 0; color: var(--maroon, #9B2C2C);">📷 Add Your Scenic or Family Photo</h4>
-              <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.85rem;">Upload a comforting nature or family photo to enjoy during relaxation.</p>
-              <form id="form-custom-visual" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Upload Custom Photo Panel (Hidden by default) -->
+            <div id="panel-upload-vis" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal, #0D9488); border-radius: 14px; padding: 1.25rem;">
+              <h4 style="margin: 0 0 0.75rem 0; color: var(--teal, #0D9488);">Upload Nostalgic Nature Photo</h4>
+              <form id="form-upload-vis" style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <div>
-                  <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Title</label>
-                  <input type="text" id="vis-title" class="form-input" placeholder="e.g. My Backyard Garden" required />
+                  <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Photo Title</label>
+                  <input type="text" id="vis-title" class="form-input" placeholder="e.g. Grandma's Garden Marigolds" required />
                 </div>
                 <div>
                   <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Category</label>
@@ -740,7 +766,7 @@ export default function EntertainmentPage(container) {
     if (quizAudioBtn) {
       quizAudioBtn.addEventListener('click', () => {
         const q = currentQuestion;
-        if (q) {
+        if (q && q.notes) {
           toggleQuizAudio(q.notes, q.wave, q.tempo);
         }
       });
@@ -849,7 +875,7 @@ export default function EntertainmentPage(container) {
       });
     });
 
-    // Visuals Sub-tab buttons
+    // Visuals Sub-tab Switcher
     container.querySelectorAll('.btn-vis-sub').forEach(btn => {
       btn.addEventListener('click', () => {
         visualSubTab = btn.getAttribute('data-sub');
@@ -857,55 +883,58 @@ export default function EntertainmentPage(container) {
       });
     });
 
-    // Custom Visual Upload Panel Toggle
-    const btnOpenVisual = container.querySelector('#btn-open-custom-visual');
-    const panelVisual = container.querySelector('#panel-add-visual');
-    const btnCancelVisual = container.querySelector('#btn-cancel-visual');
-    const formVisual = container.querySelector('#form-custom-visual');
-
-    if (btnOpenVisual && panelVisual) {
-      btnOpenVisual.addEventListener('click', () => {
-        panelVisual.style.display = panelVisual.style.display === 'none' ? 'block' : 'none';
+    // Toggle Custom Visual Upload Form
+    const toggleUploadBtn = container.querySelector('#btn-toggle-upload-vis');
+    const uploadPanel = container.querySelector('#panel-upload-vis');
+    const cancelUploadBtn = container.querySelector('#btn-cancel-visual');
+    if (toggleUploadBtn && uploadPanel) {
+      toggleUploadBtn.addEventListener('click', () => {
+        uploadPanel.style.display = uploadPanel.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+    if (cancelUploadBtn && uploadPanel) {
+      cancelUploadBtn.addEventListener('click', () => {
+        uploadPanel.style.display = 'none';
       });
     }
 
-    if (btnCancelVisual && panelVisual) {
-      btnCancelVisual.addEventListener('click', () => {
-        panelVisual.style.display = 'none';
-      });
-    }
-
-    if (formVisual) {
-      formVisual.addEventListener('submit', (e) => {
+    // Save Custom Visual Photo
+    const formUploadVis = container.querySelector('#form-upload-vis');
+    if (formUploadVis) {
+      formUploadVis.addEventListener('submit', (e) => {
         e.preventDefault();
-        const title = container.querySelector('#vis-title').value.trim();
-        const category = container.querySelector('#vis-cat').value;
-        const caption = container.querySelector('#vis-caption').value.trim() || 'A peaceful cherished scene.';
-        const fileInp = container.querySelector('#vis-file');
-        const file = fileInp.files && fileInp.files[0];
+        const title = container.querySelector('#vis-title')?.value.trim();
+        const cat = container.querySelector('#vis-cat')?.value || 'greenery';
+        const caption = container.querySelector('#vis-caption')?.value.trim();
+        const file = container.querySelector('#vis-file')?.files[0];
 
-        if (title && file) {
-          const reader = new FileReader();
-          reader.onload = (evt) => {
-            const newVis = {
-              id: 'vis_custom_' + Date.now(),
-              title,
-              category,
-              caption,
-              image: evt.target.result
-            };
-            customVisuals.unshift(newVis);
-            try {
-              localStorage.setItem('smriti_custom_visuals', JSON.stringify(customVisuals));
-            } catch (err) {}
-            if (window.SmritiToast) {
-              window.SmritiToast.show('Custom visual added! 🌿📷', 'success');
-            }
-            visualSubTab = category;
-            render();
-          };
-          reader.readAsDataURL(file);
+        if (!title || !file) {
+          alert('Please enter a photo title and select an image file.');
+          return;
         }
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          userCustomVisuals[cat] = userCustomVisuals[cat] || [];
+          userCustomVisuals[cat].unshift({
+            id: 'custom_vis_' + Date.now(),
+            title,
+            image: evt.target.result,
+            caption: caption || 'Cherished personal memory'
+          });
+
+          try {
+            localStorage.setItem('smriti_user_custom_visuals', JSON.stringify(userCustomVisuals));
+          } catch (err) {}
+
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Nature photo saved! 🌿📸', 'success');
+          }
+
+          visualSubTab = cat;
+          render();
+        };
+        reader.readAsDataURL(file);
       });
     }
   }
@@ -916,7 +945,6 @@ export default function EntertainmentPage(container) {
     cleanup() {
       stopSynthesizer();
       stopQuizAudio();
-      if (TTS) TTS.stop();
     }
   };
 }
