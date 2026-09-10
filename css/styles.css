@@ -1552,3 +1552,61 @@ body.has-nav {
     color: #000000 !important;
   }
 }
+
+/* --- Alarm Modal & Clinical Report Styles --- */
+@keyframes pulseAlarm {
+  0% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.85);
+    transform: scale(1.02);
+  }
+}
+
+/* Specific Medical Document Print Rules */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .app-header,
+  .bottom-nav,
+  .toast-container,
+  .btn-ambient-badge,
+  .btn-voice-badge,
+  .btn-sos-badge,
+  #btn-print-report,
+  #btn-doc-logout,
+  #btn-open-add-note,
+  #inp-doc-search-patient,
+  #btn-doc-search-patient,
+  .modal-overlay,
+  button,
+  input,
+  select {
+    display: none !important;
+  }
+
+  .patient-report-container {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #D1D5DB !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 0.75rem !important;
+    padding: 1rem !important;
+  }
+
+  h1, h2, h3, h4 {
+    color: #111827 !important;
+  }
+}

@@ -19,22 +19,55 @@ export default function EntertainmentPage(container) {
 
   // --- Multimedia Quiz State ---
   let quizMode = 'instrument'; // 'instrument' | 'song' | 'singer'
-  let currentQuestionIndex = 0;
+  let currentQuestion = null;
   let quizScore = 0;
   let isQuizAudioPlaying = false;
   let quizAudioCtx = null;
   let quizInterval = null;
+  
+  // Track asked question IDs per mode so questions never repeat until pool is exhausted
+  const askedQuestions = {
+    instrument: new Set(),
+    song: new Set(),
+    singer: new Set()
+  };
+
+  function getRandomQuestion(mode) {
+    const list = quizData[mode] || quizData.instrument;
+    const asked = askedQuestions[mode];
+    
+    // If all questions in this mode have been asked, reset pool
+    if (asked.size >= list.length) {
+      asked.clear();
+    }
+
+    // Filter remaining unasked questions
+    const available = list.filter(q => !asked.has(q.id));
+    // Pick random from available
+    const chosen = available[Math.floor(Math.random() * available.length)] || list[0];
+    asked.add(chosen.id);
+
+    // Also shuffle options randomly for that question
+    const shuffledOptions = [...chosen.options].sort(() => Math.random() - 0.5);
+    return {
+      ...chosen,
+      options: shuffledOptions
+    };
+  }
+
+  // Initialize first question
+  currentQuestion = getRandomQuestion(quizMode);
 
   // --- Visuals Sub-tab State ---
   let visualSubTab = 'greenery'; // 'greenery' | 'animals' | 'vegetation'
 
-  // Quiz Data with distinct acoustic frequencies & wave patterns
+  // Quiz Data with distinct acoustic frequencies & wave patterns (expanded pool)
   const quizData = {
     instrument: [
       {
         id: 'q_inst_1',
         title: 'Listen carefully to this sweet, high-pitched wind instrument:',
-        notes: [587.33, 659.25, 739.99, 880.00, 987.77, 880.00, 739.99, 659.25], // Bansuri Raga Yaman
+        notes: [587.33, 659.25, 739.99, 880.00, 987.77, 880.00, 739.99, 659.25],
         wave: 'sine',
         tempo: 450,
         options: ['Bansuri (Bamboo Flute) 🪈', 'Tabla (Drums) 🥁', 'Sitar (Strings) 🪕', 'Shehnai 🎺'],
@@ -44,7 +77,7 @@ export default function EntertainmentPage(container) {
       {
         id: 'q_inst_2',
         title: 'Listen to the deep resonant rhythmic beats:',
-        notes: [130.81, 146.83, 164.81, 130.81, 174.61, 146.83, 130.81], // Tabla rhythm
+        notes: [130.81, 146.83, 164.81, 130.81, 174.61, 146.83, 130.81],
         wave: 'triangle',
         tempo: 380,
         options: ['Tabla 🥁', 'Veena 🎼', 'Flute 🪈', 'Harmonium 🎹'],
@@ -54,12 +87,32 @@ export default function EntertainmentPage(container) {
       {
         id: 'q_inst_3',
         title: 'Listen to these delicate acoustic strings with resonating sympathetic buzz:',
-        notes: [261.63, 277.18, 329.63, 349.23, 392.00, 415.30, 493.88], // Sitar Raga Bhairav
+        notes: [261.63, 277.18, 329.63, 349.23, 392.00, 415.30, 493.88],
         wave: 'sawtooth',
         tempo: 500,
         options: ['Sitar 🪕', 'Shehnai 🎺', 'Dholak 🥁', 'Bansuri 🪈'],
         correct: 'Sitar 🪕',
         fact: 'Made world-famous by Pandit Ravi Shankar, the sitar has movable frets and sympathetic buzzing strings.'
+      },
+      {
+        id: 'q_inst_4',
+        title: 'Listen to this festive and auspicious reeded wind melody:',
+        notes: [329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 493.88],
+        wave: 'triangle',
+        tempo: 600,
+        options: ['Shehnai 🎺', 'Sarod 🎻', 'Bansuri 🪈', 'Jal Tarang 🥣'],
+        correct: 'Shehnai 🎺',
+        fact: 'Ustad Bismillah Khan brought the Shehnai from royal courtyards to international concert stages.'
+      },
+      {
+        id: 'q_inst_5',
+        title: 'Listen to the rippling hundred-stringed Himalayan zither:',
+        notes: [349.23, 392.00, 440.00, 523.25, 587.33, 659.25, 523.25],
+        wave: 'square',
+        tempo: 400,
+        options: ['Santoor 🌊', 'Guitar 🎸', 'Sitar 🪕', 'Tanpura 🎶'],
+        correct: 'Santoor 🌊',
+        fact: 'Pandit Shivkumar Sharma transformed the folk Kashmiri Santoor into a premier classical instrument.'
       }
     ],
     song: [
@@ -82,13 +135,43 @@ export default function EntertainmentPage(container) {
         options: ['Pyaar Hua Ikraar Hua ☔', 'Roop Tera Mastana 🔥', 'Ek Ladki Bheegi Bhaagi Si 🌧️', 'Rimjhim Gire Sawan 🌂'],
         correct: 'Pyaar Hua Ikraar Hua ☔',
         fact: 'Featuring Raj Kapoor and Nargis under the black umbrella in Shree 420 (1955).'
+      },
+      {
+        id: 'q_song_3',
+        title: 'Which timeless ghazal melody touches the soul with nostalgia?',
+        notes: [293.66, 329.63, 349.23, 392.00, 440.00, 392.00, 349.23],
+        wave: 'sine',
+        tempo: 600,
+        options: ['Lag Ja Gale 🌸', 'Kabhi Kabhie Mere Dil Mein 📜', 'Tere Bina Zindagi Se 🍁', 'Chaudhvin Ka Chand 🌙'],
+        correct: 'Lag Ja Gale 🌸',
+        fact: 'Composed by Madan Mohan in Woh Kaun Thi? (1964), it remains one of the most loved songs in history.'
+      },
+      {
+        id: 'q_song_4',
+        title: 'Which joyful acoustic strumming track celebrates friendship?',
+        notes: [329.63, 392.00, 440.00, 523.25, 440.00, 392.00, 329.63],
+        wave: 'sawtooth',
+        tempo: 480,
+        options: ['Yeh Dosti Hum Nahi Todenge 🏍️', 'Zindagi Ek Safar Hai Suhana 🚗', 'Mere Samne Wali Khidki 🪟', 'Kishore Ki Baatein 🎙️'],
+        correct: 'Yeh Dosti Hum Nahi Todenge 🏍️',
+        fact: 'From the epic film Sholay (1975), celebrating the eternal bond between Jai and Veeru.'
+      },
+      {
+        id: 'q_song_5',
+        title: 'Which poetic song asks for gentle blessings from the evening breeze?',
+        notes: [261.63, 329.63, 392.00, 440.00, 493.88, 440.00, 392.00],
+        wave: 'sine',
+        tempo: 580,
+        options: ['Chaudhvin Ka Chand Ho 🌙', 'Aap Ki Nazron Ne Samjha 👁️', 'Tere Mere Sapne 🌅', 'Aaja Re Pardesi 🌳'],
+        correct: 'Chaudhvin Ka Chand Ho 🌙',
+        fact: 'Sung by Mohammed Rafi in 1960, earning him the prestigious Filmfare Award.'
       }
     ],
     singer: [
       {
         id: 'q_sing_1',
         title: 'Who was revered as the "Nightingale of India" with timeless melodies?',
-        notes: [440.00, 493.88, 523.25, 587.33, 523.25, 493.88, 440.00], // Lata Nightingale high pure sine
+        notes: [440.00, 493.88, 523.25, 587.33, 523.25, 493.88, 440.00],
         wave: 'sine',
         tempo: 650,
         options: ['Lata Mangeshkar 🕊️', 'Asha Bhosle 🌸', 'Geeta Dutt 📻', 'M. S. Subbulakshmi 🪷'],
@@ -98,12 +181,42 @@ export default function EntertainmentPage(container) {
       {
         id: 'q_sing_2',
         title: 'Which soulful maestro sang "Pal Pal Dil Ke Paas" and "Mere Sapnon Ki Rani"?',
-        notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63], // Kishore rich baritone
+        notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63],
         wave: 'sawtooth',
         tempo: 500,
         options: ['Kishore Kumar 🎙️', 'Mohammed Rafi 🎤', 'Mukesh 🎼', 'Hemant Kumar 🌊'],
         correct: 'Kishore Kumar 🎙️',
         fact: 'Kishore Kumar was an unmatched genius who could switch between soulful ballads and joyful yodeling!'
+      },
+      {
+        id: 'q_sing_3',
+        title: 'Which versatile legend sang "Kya Hua Tera Wada" and "Gulabi Aankhen"?',
+        notes: [293.66, 329.63, 369.99, 440.00, 493.88, 440.00, 369.99],
+        wave: 'triangle',
+        tempo: 520,
+        options: ['Mohammed Rafi 🎤', 'Kishore Kumar 🎙️', 'Manna Dey 🎼', 'Talat Mahmood 📻'],
+        correct: 'Mohammed Rafi 🎤',
+        fact: 'Mohammed Rafi possessed an extraordinary range and sang over 7,000 songs spanning every emotion.'
+      },
+      {
+        id: 'q_sing_4',
+        title: 'Known as the Queen of Indie & Bollywood versatility, singing "Dum Maro Dum":',
+        notes: [329.63, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00],
+        wave: 'sawtooth',
+        tempo: 450,
+        options: ['Asha Bhosle 🌸', 'Lata Mangeshkar 🕊️', 'Alka Yagnik 🌺', 'Anuradha Paudwal 🪷'],
+        correct: 'Asha Bhosle 🌸',
+        fact: 'Asha Bhosle entered the Guinness World Records for the most studio recordings in music history.'
+      },
+      {
+        id: 'q_sing_5',
+        title: 'Who is fondly called the "Voice of Raj Kapoor" for songs like "Jeena Yahan Marna Yahan"?',
+        notes: [261.63, 293.66, 329.63, 392.00, 329.63, 293.66, 261.63],
+        wave: 'triangle',
+        tempo: 560,
+        options: ['Mukesh 🎼', 'Mohammed Rafi 🎤', 'Hemant Kumar 🌊', 'Bhupen Hazarika 🎶'],
+        correct: 'Mukesh 🎼',
+        fact: 'Mukesh had a deeply comforting golden voice that resonated with poignant warmth.'
       }
     ]
   };
@@ -616,7 +729,7 @@ export default function EntertainmentPage(container) {
     container.querySelectorAll('.btn-quiz-mode').forEach(btn => {
       btn.addEventListener('click', () => {
         quizMode = btn.getAttribute('data-mode');
-        currentQuestionIndex = 0;
+        currentQuestion = getRandomQuestion(quizMode);
         stopQuizAudio();
         render();
       });
@@ -626,20 +739,17 @@ export default function EntertainmentPage(container) {
     const quizAudioBtn = container.querySelector('#btn-quiz-audio');
     if (quizAudioBtn) {
       quizAudioBtn.addEventListener('click', () => {
-        const currentList = quizData[quizMode] || quizData.instrument;
-        const q = currentList[currentQuestionIndex % currentList.length];
+        const q = currentQuestion;
         if (q) {
           toggleQuizAudio(q.notes, q.wave, q.tempo);
         }
       });
     }
 
-    // Quiz Options Handlers with safe indexing guard
+    // Quiz Options Handlers with dynamic randomization and no repeats
     container.querySelectorAll('.btn-quiz-opt').forEach(btn => {
       btn.addEventListener('click', () => {
-        const currentList = quizData[quizMode] || quizData.instrument;
-        const safeIndex = currentQuestionIndex % currentList.length;
-        const q = currentList[safeIndex];
+        const q = currentQuestion;
         if (!q) return;
 
         const selected = btn.getAttribute('data-answer');
@@ -682,9 +792,9 @@ export default function EntertainmentPage(container) {
         }
 
         setTimeout(() => {
-          currentQuestionIndex = (currentQuestionIndex + 1) % currentList.length;
+          currentQuestion = getRandomQuestion(quizMode);
           render();
-        }, 2800);
+        }, 2400);
       });
     });
 

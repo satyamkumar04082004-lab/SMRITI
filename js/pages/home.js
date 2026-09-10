@@ -36,82 +36,166 @@ export default function Home(container) {
     timeIcon = '🌙';
   }
 
-  function getMoodAdaptive(moodKey) {
-    const lang = I18n.lang;
-    if (moodKey === 'low' || moodKey === 'worried') {
-      let text = "I see you’re feeling a bit low or worried today. Would you like a gentle breathing exercise or a peaceful memory game to bring calm and warmth?";
-      let bLabel = '🫁 Calming Breathing';
-      let gLabel = '🦅 Gentle Memory Game';
-      let sLabel = '🤖 Talk to Smriti';
-      if (lang === 'hi') {
-        text = "हम समझते हैं कि आज आप थोड़ा उदास महसूस कर रहे हैं। क्या आप एक शांत श्वास व्यायाम या सुखद स्मृति खेल खेलना चाहेंगे?";
-        bLabel = '🫁 शांतिदायक सांस';
-        gLabel = '🦅 शांत स्मृति खेल';
-        sLabel = '🤖 स्मृति से बात करें';
-      } else if (lang === 'bn') {
-        text = "আমরা বুঝতে পারছি আজ আপনার মন কিছুটা ভারী। আপনি কি একটু গভীর নিঃশ্বাস নেওয়ার শান্ত অনুশীলন বা মধুর স্মৃতি খেলা খেলতে চান?";
-        bLabel = '🫁 শান্ত শ্বাস ব্যায়াম';
-        gLabel = '🦅 মধুর স্মৃতি খেলা';
-        sLabel = '🤖 স্মৃতির সাথে কথা বলুন';
-      }
-      return {
-        text,
-        bg: '#FFF7ED',
-        border: '#FED7AA',
-        color: '#9A3412',
+  // Dictionary mapping distinct moods to tailored, empathetic dynamic responses
+  const moodResponseDictionary = {
+    great: {
+      en: {
+        text: "You are feeling wonderful today! Let's celebrate this radiant energy with a joyful cognitive puzzle or share a happy memory with family.",
         actions: [
-          { label: bLabel, route: '#/wellness' },
-          { label: gLabel, route: '#/games/hornbill' },
-          { label: sLabel, route: '#/smriti' }
+          { label: '🎮 Play Bamboo Sequence', route: '#/games/bamboo-sequence' },
+          { label: '📸 Family Memories', route: '#/memories' },
+          { label: '🎭 Music & Melodies', route: '#/entertainment' }
         ]
-      };
-    } else if (moodKey === 'great' || moodKey === 'good') {
-      let text = "Wonderful! Let’s keep this positive, vibrant energy going with today’s mindful activity.";
-      let aLabel = '▶ Start Today’s Game';
-      let sLabel = '📖 Story Recall Game';
-      if (lang === 'hi') {
-        text = "अद्भुत! इस सकारात्मक और ऊर्जावान मन के साथ आज की मानसिक गतिविधि शुरू करें।";
-        aLabel = '▶ आज का खेल शुरू करें';
-        sLabel = '📖 कहानी स्मरण खेल';
-      } else if (lang === 'bn') {
-        text = "চমৎকার! এই সুন্দর মনোভাব নিয়ে চলুন আজকের আনন্দের মনচর্চা খেলা শুরু করি।";
-        aLabel = '▶ আজকের খেলা শুরু করুন';
-        sLabel = '📖 গল্পের স্মৃতি খেলা';
-      }
-      return {
-        text,
-        bg: '#F0FDF4',
-        border: '#BBF7D0',
-        color: '#166534',
+      },
+      hi: {
+        text: "आज आप बहुत ऊर्जावान और प्रसन्न महसूस कर रहे हैं! आइए इस सुनहरे पल को एक आनंददायक खेल या पारिवारिक यादों के साथ साझा करें।",
         actions: [
-          { label: aLabel, route: recommendedGame.route },
-          { label: sLabel, route: '#/games/memory-moments' }
+          { label: '🎮 बांसुरी क्रम खेल', route: '#/games/bamboo-sequence' },
+          { label: '📸 पारिवारिक यादें', route: '#/memories' },
+          { label: '🎭 संगीत और धुनें', route: '#/entertainment' }
         ]
-      };
-    } else { // 'okay'
-      let text = "Steady and peaceful. A gentle brain exercise or browsing fond family memories can bring a pleasant spark to your day.";
-      let aLabel = '▶ Start Mindful Activity';
-      let mLabel = '🖼️ Life Story & Memories';
-      if (lang === 'hi') {
-        text = "शांत और संतुलित। एक हल्का दिमागी अभ्यास या पारिवारिक यादें देखना आपके दिन में आनंद लाएगा।";
-        aLabel = '▶ मन की गतिविधि शुरू करें';
-        mLabel = '🖼️ जीवन की यादें';
-      } else if (lang === 'bn') {
-        text = "শান্ত ও প্রফুল্ল। একটি সুন্দর মনচর্চা বা পরিবারের সোনালী স্মৃতি দেখা আপনার দিনটি সুন্দর করবে।";
-        aLabel = '▶ মনচর্চা শুরু করুন';
-        mLabel = '🖼️ জীবনের মধুর স্মৃতি';
-      }
-      return {
-        text,
-        bg: '#F0FDFA',
-        border: '#99F6E4',
-        color: '#0F766E',
+      },
+      bn: {
+        text: "আজ আপনার মন দারুণ আনন্দে ভরে আছে! চলুন একটি সুন্দর মনের খেলা বা পরিবারের মধুর স্মৃতি দেখে দিনটি উদযাপন করি।",
         actions: [
-          { label: aLabel, route: recommendedGame.route },
-          { label: mLabel, route: '#/memories' }
+          { label: '🎮 স্মৃতি খেলা', route: '#/games/bamboo-sequence' },
+          { label: '📸 পরিবারের স্মৃতি', route: '#/memories' },
+          { label: '🎭 মধুর সুর ও গান', route: '#/entertainment' }
         ]
-      };
+      },
+      bg: '#ECFDF5',
+      border: '#6EE7B7',
+      color: '#065F46'
+    },
+    good: {
+      en: {
+        text: "Glad to see you in good spirits! Engaging your mind now helps build long-term memory resilience.",
+        actions: [
+          { label: '🦅 Play Hornbill Memory', route: '#/games/hornbill' },
+          { label: '📖 Visual Story Recall', route: '#/games/memory-moments' },
+          { label: '🌿 Daily Wellness Guide', route: '#/wellness' }
+        ]
+      },
+      hi: {
+        text: "आपको अच्छे मन में देखकर खुशी हुई! एक हल्का दिमागी खेल आपकी याददाश्त को और मजबूत बनाएगा।",
+        actions: [
+          { label: '🦅 हॉर्नबिल स्मृति खेल', route: '#/games/hornbill' },
+          { label: '📖 कहानी स्मरण', route: '#/games/memory-moments' },
+          { label: '🌿 स्वास्थ्य नियम', route: '#/wellness' }
+        ]
+      },
+      bn: {
+        text: "আপনার ভালো মনের অনুভবে আমরা আনন্দিত! একটি সহজ মনচর্চা আপনার স্মৃতিশক্তিকে আরও সতেজ রাখবে।",
+        actions: [
+          { label: '🦅 স্মৃতি মেলানো খেলা', route: '#/games/hornbill' },
+          { label: '📖 গল্পের স্মৃতি', route: '#/games/memory-moments' },
+          { label: '🌿 মনের যত্ন গাইড', route: '#/wellness' }
+        ]
+      },
+      bg: '#F0FDF4',
+      border: '#BBF7D0',
+      color: '#166534'
+    },
+    okay: {
+      en: {
+        text: "Steady and peaceful. A gentle brain exercise or browsing fond family photographs can bring a comforting spark to your day.",
+        actions: [
+          { label: '👨‍👩‍👧 Familiar Faces Game', route: '#/games/familiar-faces' },
+          { label: '🪈 Relaxing Instrumental', route: '#/entertainment' },
+          { label: '🤖 Talk to Smriti', route: '#/smriti' }
+        ]
+      },
+      hi: {
+        text: "शांत और संतुलित। एक शांत गतिविधि या परिचित चेहरों का खेल आपके दिन में सुखद रोशनी लाएगा।",
+        actions: [
+          { label: '👨‍👩‍👧 परिचित चेहरे खेल', route: '#/games/familiar-faces' },
+          { label: '🪈 शांतिदायक संगीत', route: '#/entertainment' },
+          { label: '🤖 स्मृति से बात करें', route: '#/smriti' }
+        ]
+      },
+      bn: {
+        text: "শান্ত ও স্বাভাবিক। প্রিয়জনদের মুখ চেনার খেলা বা মিষ্টি সুর শোনা আপনার দিনটি মধুর করে তুলবে।",
+        actions: [
+          { label: '👨‍👩‍👧 পরিচিত মুখ চেনা', route: '#/games/familiar-faces' },
+          { label: '🪈 মিষ্টি বাঁশির সুর', route: '#/entertainment' },
+          { label: '🤖 স্মৃতির সাথে কথা বলুন', route: '#/smriti' }
+        ]
+      },
+      bg: '#F0FDFA',
+      border: '#99F6E4',
+      color: '#0F766E'
+    },
+    low: {
+      en: {
+        text: "I'm sorry you're feeling down. Let's try some relaxing music, gentle breathing, or talk together to bring warmth.",
+        actions: [
+          { label: '🫁 4-4 Calming Breathing', route: '#/wellness' },
+          { label: '🎵 Soothing Melodies', route: '#/entertainment' },
+          { label: '🤖 Chat with Smriti', route: '#/smriti' }
+        ]
+      },
+      hi: {
+        text: "मुझे खेद है कि आप उदास महसूस कर रहे हैं। आइए कुछ शांतिदायक संगीत सुनें या गहरी सांसों का अभ्यास करें। आप अकेले नहीं हैं।",
+        actions: [
+          { label: '🫁 शांतिदायक सांस', route: '#/wellness' },
+          { label: '🎵 सुखद धुनें', route: '#/entertainment' },
+          { label: '🤖 स्मृति से बात करें', route: '#/smriti' }
+        ]
+      },
+      bn: {
+        text: "মন খারাপ থাকা স্বাভাবিক, কিন্তু আপনি একা নন। চলুন কিছু শান্ত সুর শুনি বা গভীর নিঃশ্বাসের ব্যায়াম করি।",
+        actions: [
+          { label: '🫁 শান্ত শ্বাস ব্যায়াম', route: '#/wellness' },
+          { label: '🎵 মধুর সঙ্গীত', route: '#/entertainment' },
+          { label: '🤖 স্মৃতির সাথে কথা বলুন', route: '#/smriti' }
+        ]
+      },
+      bg: '#FFF7ED',
+      border: '#FED7AA',
+      color: '#9A3412'
+    },
+    worried: {
+      en: {
+        text: "It is completely okay to feel anxious. Take slow, deep breaths with us or connect with your loved ones right away.",
+        actions: [
+          { label: '📞 Call Loved One', route: '#/emergency' },
+          { label: '🧭 Orientation Guide', route: '#/lost' },
+          { label: '🫁 Guided Calming Breath', route: '#/wellness' }
+        ]
+      },
+      hi: {
+        text: "चिंता महसूस होना स्वाभाविक है। एक गहरी और शांत सांस लें। यदि चाहें तो तुरंत अपने प्रियजन से बात करें।",
+        actions: [
+          { label: '📞 प्रियजन को कॉल करें', route: '#/emergency' },
+          { label: '🧭 सहारा व मार्गदर्शन', route: '#/lost' },
+          { label: '🫁 शांत सांस लें', route: '#/wellness' }
+        ]
+      },
+      bn: {
+        text: "দুশ্চিন্তা হতেই পারে। ধীরে ধীরে শান্ত শ্বাস নিন। আপনি চাইলে এখনি প্রিয়জনকে ফোন করতে পারেন।",
+        actions: [
+          { label: '📞 প্রিয়জনকে কল করুন', route: '#/emergency' },
+          { label: '🧭 সান্ত্বনা ও সাহায্য', route: '#/lost' },
+          { label: '🫁 শান্ত শ্বাস ব্যায়াম', route: '#/wellness' }
+        ]
+      },
+      bg: '#FFF1F2',
+      border: '#FECDD3',
+      color: '#9F1239'
     }
+  };
+
+  function getMoodAdaptive(moodKey) {
+    const lang = I18n.lang || 'en';
+    const entry = moodResponseDictionary[moodKey] || moodResponseDictionary.okay;
+    const localized = entry[lang] || entry.en;
+    return {
+      text: localized.text,
+      actions: localized.actions,
+      bg: entry.bg,
+      border: entry.border,
+      color: entry.color
+    };
   }
 
   function render() {
@@ -494,32 +578,8 @@ export default function Home(container) {
         const curPrefs = Storage.getPreferences();
         const curName = curPrefs.preferredName || (curUser ? curUser.name.split(' ')[0] : 'Friend');
 
-        let spokenMessage = '';
-        if (mood === 'low' || mood === 'worried') {
-          if (lang === 'hi') {
-            spokenMessage = `मैं समझ सकता हूँ कि आप थोड़ा उदास महसूस कर रहे हैं, ${curName}। क्या आप एक आरामदायक सांस का व्यायाम करना चाहेंगे?`;
-          } else if (lang === 'bn') {
-            spokenMessage = `আমি বুঝতে পারছি আজ আপনার মন কিছুটা খারাপ, ${curName}। আপনি কি একটু গভীর শ্বাস নেওয়ার শান্ত অনুশীলন করতে চান?`;
-          } else {
-            spokenMessage = `I see you’re feeling a bit low today, ${curName}. Would you like a gentle breathing exercise?`;
-          }
-        } else if (mood === 'great' || mood === 'good') {
-          if (lang === 'hi') {
-            spokenMessage = `बहुत बढ़िया ${curName}! यह जानकर बहुत खुशी हुई। आइए आज का मनपसंद खेल खेलें।`;
-          } else if (lang === 'bn') {
-            spokenMessage = `অসাধারণ ${curName}! জেনে খুব আনন্দ হলো। চলুন আজকের মনচর্চা শুরু করি।`;
-          } else {
-            spokenMessage = `Wonderful ${curName}! So glad you are feeling good today. Let's enjoy today's mindful activity.`;
-          }
-        } else { // okay
-          if (lang === 'hi') {
-            spokenMessage = `नमस्ते ${curName}। एक शांत और सुखद दिन के लिए हम हमेशा आपके साथ हैं।`;
-          } else if (lang === 'bn') {
-            spokenMessage = `নমস্কার ${curName}। একটি শান্ত ও সুন্দর দিনের জন্য আমরা আপনার সাথেই আছি।`;
-          } else {
-            spokenMessage = `Hello ${curName}. Take it easy and enjoy a peaceful day.`;
-          }
-        }
+        const adaptiveResp = getMoodAdaptive(mood);
+        const spokenMessage = adaptiveResp ? adaptiveResp.text : `Hello ${curName}. Take it easy and enjoy a peaceful day.`;
 
         if (spokenMessage && TTS && TTS.isSupported()) {
           TTS.speak(spokenMessage);
