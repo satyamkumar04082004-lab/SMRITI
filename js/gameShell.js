@@ -357,10 +357,15 @@ class GameController {
   }
 
   /**
-   * Record a wrong answer
+   * Record a wrong answer with penalty deduction
    */
   recordWrong() {
     this.totalQuestions++;
+    Coins.deduct(5, `${this.config.gameId || 'game'} penalty`);
+    Coins.updateBadge();
+    if (window.SmritiToast) {
+      window.SmritiToast.show('−5 🪙 (Keep trying gently!)', 'warning');
+    }
   }
 
   /**

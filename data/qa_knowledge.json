@@ -1,0 +1,113 @@
+{
+  "topics": [
+    {
+      "id": "dementia_definition",
+      "keywords": [
+        "what is dementia",
+        "dementia meaning",
+        "define dementia",
+        "what happens in dementia",
+        "dementia symptoms",
+        "what is alzheimers",
+        "alzheimer"
+      ],
+      "responses": {
+        "en": "Dementia is a gentle medical term describing changes in how our brain processes memories, thoughts, and daily tasks over time. It is not a personal failing, but natural shifts in neuronal connections. With daily loving routines, peaceful surroundings, and cognitive exercises, seniors live comfortably with high dignity! 🌸",
+        "hi": "डिमेंशिया एक चिकित्सीय स्थिति है जिसमें समय के साथ याददाश्त, सोचने और दैनिक कार्यों को करने में बदलाव आते हैं। यह कोई कमजोरी नहीं है, बल्कि मस्तिष्क की प्राकृतिक प्रक्रिया है। नियमित दिनचर्या, प्रेमपूर्ण वातावरण और सरल अभ्यासों से वरिष्ठ नागरिक गरिमा के साथ सुखद जीवन जी सकते हैं! 🌸",
+        "as": "ডিমেনচিয়া হৈছে সময়ৰ লগে লগে মগজুৰ স্মৃতি আৰু চিন্তা প্ৰক্ৰিয়াত হোৱা পৰিৱৰ্তনক বুজোৱা এক চিকিৎসা অৱস্থা। মৰমিয়াল পৰিৱেশ, নিয়মীয়া অভ্যাস আৰু সহজ খেলৰ দ্বাৰা জ্যেষ্ঠসকলে অতি সন্মান আৰু শান্তিত জীয়াই থাকিব পাৰে! 🌸",
+        "bn": "ডিমেনশিয়া হলো সময়ের সাথে সাথে স্মৃতিশক্তি ও চিন্তা প্রক্রিয়ায় কিছু স্বাভাবিক পরিবর্তন। ভালোবাসা, নিয়মিত মৃদু রুটিন এবং মস্তিষ্কের অনুশীলনের মাধ্যমে প্রবীণরা সুস্থ ও মর্যাদাপূর্ণ জীবনযাপন করতে পারেন! 🌸"
+      }
+    },
+    {
+      "id": "memory_exercises",
+      "keywords": [
+        "memory exercise",
+        "brain exercise",
+        "how to improve memory",
+        "exercises for memory",
+        "memory retention",
+        "keep brain active",
+        "cognitive exercises"
+      ],
+      "responses": {
+        "en": "Here are 4 gentle daily exercises to nurture your memory: 1) Play a cognitive game like Hornbill Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 calming deep breathing; 3) Reminisce over a favorite family photo or Life Story memory; 4) Take a fresh morning walk and drink warm water! 🧠✨",
+        "hi": "याददाश्त को स्वस्थ रखने के लिए 4 सरल दैनिक अभ्यास: 1) रोज़ सुबह 10 मिनट हॉर्नबिल या परिचित चेहरे जैसा खेल खेलें; 2) 4-4 लयबद्ध गहरी सांसें लें; 3) परिवार की पुरानी तस्वीर देखकर सुखद यादें साझा करें; 4) सुबह की धूप में टहलें और पर्याप्त पानी पिएं! 🧠✨",
+        "as": "স্মৃতিশক্তি সতেজ কৰি ৰাখিবলৈ ৪টা সহজ নিয়ম: ১) প্ৰতিদিনে পুৱা ধনেশ পক্ষীৰ বাহ বা চিনাকি মুখৰ দৰে খেল ১০ মিনিট খেলক; ২) ৪-৪ শান্তিপূৰ্ণ দীঘল উশাহ লওক; ৩) পৰিয়ালৰ পুৰণি ফটো চাই কথা পাতক; ৪) পুৱা অলপ খোজ কাঢ়ক আৰু পৰ্যাপ্ত পানী খাওক! 🧠✨",
+        "bn": "স্মৃতিশক্তি ভালো রাখার ৪টি সহজ উপায়: ১) প্রতিদিন সকালে ১০ মিনিট কোনো স্মৃতি অনুশীলন খেলুন; ২) শান্তভাবে গভীর শ্বাস-প্রশ্বাসের ব্যায়াম করুন; ৩) পুরনো পারিবারিক ছবি দেখে স্মৃতিচারণ করুন; ৪) সকালে একটু হাঁটুন ও জল পান করুন! 🧠✨"
+      }
+    },
+    {
+      "id": "emergency_help",
+      "keywords": [
+        "emergency",
+        "feeling lost",
+        "i am scared",
+        "help me",
+        "call doctor",
+        "where am i",
+        "sos",
+        "ambulance",
+        "chest pain",
+        "urgent"
+      ],
+      "responses": {
+        "en": "Please stay calm and take a deep breath. You are safe. If this is an urgent health emergency, tap the bright red 🛟 SOS button on top to call Emergency Services (112) or your primary doctor and family caregiver immediately! 🕊️❤️",
+        "hi": "कृपया शांत रहें और गहरी सांस लें। आप सुरक्षित हैं। यदि कोई आपातकालीन स्थिति है, तो तुरंत ऊपर दिए गए लाल 🛟 SOS बटन को दबाकर आपातकालीन सेवा (112), अपने डॉक्टर या परिवार को कॉल करें! 🕊️❤️",
+        "as": "অনুগ্ৰহ কৰি শান্ত থাকক আৰু দীঘলকৈ উশাহ লওক। আপুনি সুৰক্ষিত। জৰুৰী সহায়ৰ প্ৰয়োজন হ’লে ওপৰত থকা ৰঙা 🛟 SOS বুটামটো টিপি জৰুৰীকালীন সেৱা (১১২) বা চিকিৎসকক যোগাযোগ কৰক! 🕊️❤️",
+        "bn": "দয়া করে শান্ত থাকুন এবং গভীর শ্বাস নিন। আপনি সম্পূর্ণ নিরাপদ। কোনো জরুরি পরিস্থিতিতে উপরের লাল 🛟 SOS বোতামটি চেপে জরুরি পরিষেবা (১১২), আপনার ডাক্তার বা পরিবারকে তৎক্ষণাৎ কল করুন! 🕊️❤️"
+      }
+    },
+    {
+      "id": "medicines_routine",
+      "keywords": [
+        "when to take medicine",
+        "my medicines",
+        "medicine routine",
+        "blood pressure medicine",
+        "pills",
+        "tablets",
+        "medicine reminder"
+      ],
+      "responses": {
+        "en": "Your medicine routine is safely kept under Reminders (⏰) and Medicines (💊). Always take your morning doses with a full glass of warm water after light breakfast, and never skip prescribed timing without Dr. Barua's guidance! 💊💧",
+        "hi": "आपकी दवाइयों की दिनचर्या अनुस्मारक (⏰) और दवाइयाँ (💊) में सुरक्षित है। सुबह की दवा हमेशा नाश्ते के बाद एक गिलास गुनगुने पानी के साथ लें, और डॉक्टर की सलाह के बिना समय न बदलें! 💊💧",
+        "as": "আপোনাৰ ঔষধৰ তালিকা অনুস্মাৰক (⏰) আৰু ঔষধ (💊) শিতানত মজুত আছে। পুৱাৰ ঔষধ সদায় পাতল জলপান খাই এগিলাচ কুহুমীয়া পানীৰে খাওক আৰু চিকিৎসকৰ পৰামৰ্শ মানি চলক! 💊💧",
+        "bn": "আপনার ওষুধের সময়সূচি অনুস্মারক (⏰) ও ওষুধ (💊) বিভাগে রয়েছে। সকালের ওষুধ সর্বদা হালকা খাবারের পর ঈষদুষ্ণ জলের সাথে গ্রহণ করুন এবং চিকিৎসকের পরামর্শ মেনে চলুন! 💊💧"
+      }
+    },
+    {
+      "id": "daily_hydration_walk",
+      "keywords": [
+        "drink water",
+        "hydration",
+        "walking",
+        "morning walk",
+        "water intake",
+        "fresh air"
+      ],
+      "responses": {
+        "en": "Drinking 6-8 glasses of water throughout the day keeps brain cells hydrated and alert. A gentle 15-minute stroll in morning sunlight also boosts vitamin D and uplifts your mood naturally! 🚶‍♀️☀️💧",
+        "hi": "दिनभर में 6-8 गिलास पानी पीने से मस्तिष्क की कोशिकाएं सक्रिय और तरोताजा रहती हैं। सुबह की धूप में 15 मिनट टहलने से विटामिन डी मिलता है और मन प्रसन्न रहता है! 🚶‍♀️☀️💧",
+        "as": "দিনটোত ৬-৮ গিলাচ পানী খোৱাটো মগজুৰ বাবে অতি উত্তম। পুৱাৰ কোমল ৰ’দত ১৫ মিনিট খোজ কাঢ়িলে শৰীৰত ভিটামিন ডি বৃদ্ধি পায় আৰু মন শান্ত থাকে! 🚶‍♀️☀️💧",
+        "bn": "সারাদিনে ৬-৮ গ্লাস জল পান করলে মস্তিষ্কের কোষগুলো সতেজ থাকে। সকালের রোদে ১৫ মিনিট হাঁটা ভিটামিন ডি বাড়ায় এবং মনকে প্রফুল্ল রাখে! 🚶‍♀️☀️💧"
+      }
+    },
+    {
+      "id": "sleep_relaxation",
+      "keywords": [
+        "cannot sleep",
+        "insomnia",
+        "sleep trouble",
+        "night rest",
+        "calm mind",
+        "anxious at night"
+      ],
+      "responses": {
+        "en": "For a sound and restful sleep: avoid bright screens 1 hour before bed, sip warm herbal tea, listen to gentle bansuri flute melodies in the Entertainment section, and take slow 4-4 deep breaths. Sleep tight! 🌙🪈",
+        "hi": "अच्छी और शांत नींद के लिए: सोने से एक घंटा पहले फोन से दूर रहें, गुनगुना दूध या हर्बल चाय पिएं, और हमारे मनोरंजन अनुभाग में सुखद बांसुरी की धुन सुनते हुए गहरी सांस लें। शुभ रात्रि! 🌙🪈",
+        "as": "সুন্দৰ আৰু শান্ত টোপনিৰ বাবে: শুৱাৰ এঘণ্টা আগতে স্ক্ৰীন এৰক, এগিলাচ কুহুমীয়া গাখীৰ বা চাহ খাওক, আৰু বাঁহীৰ সুমধুৰ সুৰ শুনি গভীৰ উশাহ লওক। শুভ ৰাত্ৰি! 🌙🪈",
+        "bn": "শান্তিপূর্ণ ঘুমের জন্য: ঘুমানোর ১ ঘণ্টা আগে উজ্জ্বল পর্দা থেকে দূরে থাকুন, ঈষদুষ্ণ দুধ বা হারবাল চা পান করুন এবং মিষ্টি বাঁশির সুর শুনুন। শুভ রাত্রি! 🌙🪈"
+      }
+    }
+  ]
+}

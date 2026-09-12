@@ -230,6 +230,15 @@ export default function SettingsPage(container) {
         </button>
       </div>
 
+      <!-- Rewards & Badges Store Link -->
+      <div class="card card-elevated mb-md" style="padding: 1.25rem; background: linear-gradient(135deg, #FFFDF5, #FEF9C3); border: 2px solid #FDE047;">
+        <h3 style="color: #854D0E; margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">🏆 ${I18n.t('rewardsTitle') || 'Rewards & Badges'}</h3>
+        <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 12px; color: #713F12;">Redeem your coins for milestone badges and physical wellness gifts.</p>
+        <button class="btn btn-primary btn-block" onclick="window.location.hash='#/rewards'" style="background: #D97706; border-color: #B45309; font-weight: 700;">
+          🪙 Visit Rewards Store (${Coins.getBalance()} Coins)
+        </button>
+      </div>
+
 
 
       <!-- Logout -->

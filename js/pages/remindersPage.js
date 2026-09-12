@@ -10,6 +10,7 @@ import I18n from '../i18n.js';
 export default function RemindersPage(container) {
   let reminders = Storage.getReminders();
   let showAddModal = false;
+  let editingReminder = null;
   let activeFilter = 'all'; // all | morning | afternoon | evening | night
 
   function render() {
@@ -126,6 +127,59 @@ export default function RemindersPage(container) {
           </div>
         ` : ''}
 
+        <!-- Edit Modal (Conditional) -->
+        ${editingReminder ? `
+          <div class="card card-elevated mb-md" style="background: #FFFDF9; border: 2px solid #D97706; padding: 1.25rem; border-radius: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; color: #B45309; font-size: 1.2rem;">✏️ Edit Reminder</h3>
+              <button id="btn-close-edit-modal" class="btn btn-ghost btn-sm" style="font-size: 1.2rem;">✕</button>
+            </div>
+            <form id="form-edit-reminder" style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <input type="hidden" id="edit-rem-id" value="${editingReminder.id}" />
+              <div>
+                <label class="form-label" style="font-weight: 600;">Reminder Title</label>
+                <input type="text" id="edit-rem-title" class="form-input" value="${editingReminder.title}" required />
+              </div>
+              
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 130px;">
+                  <label class="form-label" style="font-weight: 600;">Time</label>
+                  <input type="text" id="edit-rem-time" class="form-input" value="${editingReminder.time}" required />
+                </div>
+                <div style="flex: 1; min-width: 130px;">
+                  <label class="form-label" style="font-weight: 600;">Part of Day</label>
+                  <select id="edit-rem-period" class="form-select">
+                    <option value="Morning" ${editingReminder.period === 'Morning' ? 'selected' : ''}>Morning ☀️</option>
+                    <option value="Afternoon" ${editingReminder.period === 'Afternoon' ? 'selected' : ''}>Afternoon 🌤️</option>
+                    <option value="Evening" ${editingReminder.period === 'Evening' ? 'selected' : ''}>Evening 🌆</option>
+                    <option value="Night" ${editingReminder.period === 'Night' ? 'selected' : ''}>Night 🌙</option>
+                  </select>
+                </div>
+                <div style="flex: 1; min-width: 130px;">
+                  <label class="form-label" style="font-weight: 600;">Category</label>
+                  <select id="edit-rem-cat" class="form-select">
+                    <option value="medication" ${editingReminder.category === 'medication' ? 'selected' : ''}>💊 Medicine</option>
+                    <option value="hydration" ${editingReminder.category === 'hydration' ? 'selected' : ''}>💧 Hydration</option>
+                    <option value="activity" ${editingReminder.category === 'activity' ? 'selected' : ''}>🚶 Walk / Activity</option>
+                    <option value="call" ${editingReminder.category === 'call' ? 'selected' : ''}>📞 Family Call</option>
+                    <option value="custom" ${editingReminder.category === 'custom' ? 'selected' : ''}>⭐ General</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label" style="font-weight: 600;">Gentle Instructions / Dose</label>
+                <input type="text" id="edit-rem-notes" class="form-input" value="${editingReminder.notes || ''}" />
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
+                <button type="button" id="btn-cancel-edit-rem" class="btn btn-outline btn-sm">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.6rem 1.5rem; background: #D97706; border-color: #D97706;">Update Reminder</button>
+              </div>
+            </form>
+          </div>
+        ` : ''}
+
         <!-- Reminders List -->
         <div style="display: flex; flex-direction: column; gap: 1rem;">
           ${filtered.length === 0 ? `
@@ -161,7 +215,10 @@ export default function RemindersPage(container) {
                   </div>
 
                   <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <button class="btn btn-ghost btn-sm btn-del-reminder" data-id="${r.id}" title="Delete reminder" style="color: #9CA3AF; padding: 0.25rem 0.5rem;">
+                    <button class="btn btn-ghost btn-sm btn-edit-reminder" data-id="${r.id}" title="Edit reminder" style="color: #0D9488; font-size: 1.1rem; padding: 0.35rem 0.6rem; border: 1px solid #CCFBF1; border-radius: 8px;">
+                      ✏️
+                    </button>
+                    <button class="btn btn-ghost btn-sm btn-del-reminder" data-id="${r.id}" title="Delete reminder" style="color: #9CA3AF; font-size: 1.1rem; padding: 0.35rem 0.6rem; border: 1px solid #F3F4F6; border-radius: 8px;">
                       🗑️
                     </button>
                   </div>
@@ -283,6 +340,62 @@ export default function RemindersPage(container) {
         render();
       });
     });
+
+    // Edit modal triggers
+    container.querySelectorAll('.btn-edit-reminder').forEach(b => {
+      b.addEventListener('click', () => {
+        const id = b.getAttribute('data-id');
+        const found = reminders.find(r => r.id === id);
+        if (found) {
+          editingReminder = { ...found };
+          showAddModal = false;
+          render();
+        }
+      });
+    });
+
+    const btnCloseEdit = container.querySelector('#btn-close-edit-modal');
+    const btnCancelEdit = container.querySelector('#btn-cancel-edit-rem');
+    if (btnCloseEdit) btnCloseEdit.addEventListener('click', () => { editingReminder = null; render(); });
+    if (btnCancelEdit) btnCancelEdit.addEventListener('click', () => { editingReminder = null; render(); });
+
+    // Edit reminder form submit
+    const formEdit = container.querySelector('#form-edit-reminder');
+    if (formEdit) {
+      formEdit.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = container.querySelector('#edit-rem-id').value;
+        const title = container.querySelector('#edit-rem-title').value.trim();
+        const time = container.querySelector('#edit-rem-time').value.trim();
+        const period = container.querySelector('#edit-rem-period').value;
+        const category = container.querySelector('#edit-rem-cat').value;
+        const notes = container.querySelector('#edit-rem-notes').value.trim();
+
+        const iconMap = {
+          medication: '💊',
+          hydration: '💧',
+          activity: '🚶',
+          call: '📞',
+          custom: '⭐'
+        };
+
+        Storage.updateReminder(id, {
+          title,
+          time,
+          period,
+          category,
+          icon: iconMap[category] || '⏰',
+          notes: notes || 'Daily gentle reminder'
+        });
+
+        editingReminder = null;
+        reminders = Storage.getReminders();
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Reminder updated successfully! ✏️✨', 'success');
+        }
+        render();
+      });
+    }
 
     // Delete
     container.querySelectorAll('.btn-del-reminder').forEach(b => {

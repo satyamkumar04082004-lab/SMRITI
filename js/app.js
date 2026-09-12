@@ -31,6 +31,7 @@ import DailyRitualPage from './pages/dailyRitualPage.js';
 import EntertainmentPage from './pages/entertainmentPage.js';
 import SocialPlayPage from './pages/socialPlayPage.js';
 import DoctorPage from './pages/doctorPage.js';
+import RewardsPage from './pages/rewardsPage.js';
 import AmbientAudio from './ambientAudio.js';
 import ReminderScheduler from './reminders.js';
 
@@ -98,6 +99,7 @@ const routes = {
   '#/doctor-report': { page: DoctorPage, auth: true, nav: true },
   '#/reminders': { page: RemindersPage, auth: true, nav: true },
   '#/entertainment': { page: EntertainmentPage, auth: true, nav: true },
+  '#/rewards': { page: RewardsPage, auth: true, nav: true },
   '#/social': { page: SocialPlayPage, auth: true, nav: true },
   '#/ritual': { page: DailyRitualPage, auth: true, nav: true },
   '#/lost': { page: FeelingLostPage, auth: true, nav: false },
@@ -408,7 +410,7 @@ function renderHeader() {
         </div>
 
         <!-- Coin Balance -->
-        <div class="coin-badge" onclick="window.location.hash='#/leaderboard'" style="cursor: pointer;" title="${I18n.t('coins')}">
+        <div class="coin-badge" onclick="window.location.hash='#/rewards'" style="cursor: pointer;" title="Rewards & Badges (🪙 ${Coins.getBalance()})">
           🪙 <span id="coin-balance">${Coins.getBalance()}</span>
         </div>
       </div>

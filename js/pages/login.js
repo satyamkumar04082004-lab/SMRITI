@@ -369,6 +369,14 @@ export default function Login(container) {
           nativePlace: regState.nativePlace,
           foodPreferences: regState.favoriteFood
         });
+        profile.coins = 0; // Explicitly initialize 0 coins for new patient signup
+        profile.gameHistory = [];
+        profile.journeyStats = {
+          totalXP: 0,
+          streak: 1,
+          lastActiveDate: new Date().toISOString().split('T')[0],
+          unlockedBadges: []
+        };
         Storage.savePatientProfile(profile);
         Storage.setPreferences(profile.preferences);
 

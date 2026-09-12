@@ -903,12 +903,35 @@ const Storage = {
   updateReminder(id, patch) {
     const list = this.getReminders().map(r => r.id === id ? { ...r, ...patch } : r);
     this.setReminders(list);
+
+    // Synchronize with medicines list if category is medication
+    const updated = list.find(r => r.id === id);
+    if (updated && updated.category === 'medication') {
+      const profile = this.getPatientProfile();
+      profile.medicines = profile.medicines || [];
+      const medIndex = profile.medicines.findIndex(m => m.id === id || m.name === updated.title);
+      if (medIndex >= 0) {
+        profile.medicines[medIndex] = Object.assign(profile.medicines[medIndex], {
+          name: updated.title,
+          instructions: updated.notes || 'Take as directed',
+          frequency: updated.period || 'Morning'
+        });
+      }
+      this.savePatientProfile(profile);
+    }
     return list;
   },
 
   deleteReminder(id) {
     const list = this.getReminders().filter(r => r.id !== id);
     this.setReminders(list);
+
+    // Also remove from medicines if matched
+    const profile = this.getPatientProfile();
+    if (profile.medicines && Array.isArray(profile.medicines)) {
+      profile.medicines = profile.medicines.filter(m => m.id !== id);
+      this.savePatientProfile(profile);
+    }
     return list;
   },
 
@@ -1237,6 +1260,23 @@ const Storage = {
       users[existingIndex] = Object.assign(users[existingIndex], record);
     } else {
       users.push(record);
+      // Explicitly initialize fresh profile with 0 coins for newly registered patient
+      if (record.role === 'patient') {
+        const freshProfile = createDefaultPatientProfile(record.patientId);
+        freshProfile.patient.name = record.name;
+        freshProfile.patient.preferredName = record.preferredName;
+        freshProfile.patient.phone = record.phone;
+        freshProfile.coins = 0; // Explicit 0 coins for new signup
+        freshProfile.gameHistory = [];
+        freshProfile.journeyStats = {
+          totalXP: 0,
+          streak: 1,
+          lastActiveDate: new Date().toISOString().split('T')[0],
+          unlockedBadges: []
+        };
+        freshProfile.physicalClaims = [];
+        this.savePatientProfile(freshProfile, false);
+      }
     }
     this.set('allUsers', users);
     return record;

@@ -70,6 +70,22 @@ const AIService = {
     const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     const currentLang = I18n.lang || Storage.getLanguage() || 'en';
+    const langNames = {
+      'en': 'English',
+      'hi': 'Hindi (हिन्दी)',
+      'as': 'Assamese (অসমীয়া)',
+      'bn': 'Bengali (বাংলা)',
+      'mni': 'Manipuri / Meitei (মৈতৈলোন্)',
+      'kha': 'Khasi',
+      'lus': 'Mizo',
+      'ta': 'Tamil (தமிழ்)',
+      'te': 'Telugu (తెలుగు)',
+      'mr': 'Marathi (मराठी)',
+      'gu': 'Gujarati (ગુજરાતી)',
+      'kn': 'Kannada (ಕನ್ನಡ)'
+    };
+    const currentLangName = langNames[currentLang] || currentLang;
+
     const contextualPayload = {
       message: userMessage,
       currentDate: todayDate,
@@ -78,6 +94,8 @@ const AIService = {
       role: user.role || 'patient',
       currentLanguage: currentLang,
       language: currentLang,
+      languageName: currentLangName,
+      strictInstruction: `You must translate and respond ONLY in this exact language: ${currentLangName} (${currentLang}).`,
       stream: true
     };
 

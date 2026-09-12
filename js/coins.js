@@ -38,6 +38,21 @@ const Coins = {
   },
 
   /**
+   * Deduct coins with floor at 0
+   * @param {number} amount
+   * @param {string} reason
+   * @returns {number} new balance
+   */
+  deduct(amount, reason = '') {
+    const current = Storage.getCoins();
+    const newBalance = Math.max(0, current - Math.max(0, amount));
+    Storage.setCoins(newBalance);
+    console.log(`🪙 -${amount} coins (${reason}). Balance: ${newBalance}`);
+    this.updateBadge();
+    return newBalance;
+  },
+
+  /**
    * Alias for add()
    */
   addCoins(amount, reason = '') {

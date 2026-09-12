@@ -3,7 +3,8 @@
    Senior-accessible gentle music, Bollywood nostalgia, bhajans,
    short stories, and an interactive multimedia cultural quiz
    ("Guess the Instrument", "Guess the Song", "Identify the Singer")
-   with explicit user Play/Pause controls.
+   with explicit user Play/Pause controls, 10-question sessions,
+   route guard protections, and review screen.
    ============================================================ */
 
 import Storage from '../storage.js';
@@ -11,7 +12,7 @@ import TTS from '../tts.js';
 import I18n from '../i18n.js';
 import Coins from '../coins.js';
 
-// Top-level module-scoped Quiz Data pool (prevents TDZ ReferenceErrors)
+// Top-level module-scoped Quiz Data pool (10 curated questions per category)
 export const quizData = {
   instrument: [
     {
@@ -63,6 +64,56 @@ export const quizData = {
       options: ['Santoor 🌊', 'Guitar 🎸', 'Sitar 🪕', 'Tanpura 🎶'],
       correct: 'Santoor 🌊',
       fact: 'Pandit Shivkumar Sharma transformed the folk Kashmiri Santoor into a premier classical instrument.'
+    },
+    {
+      id: 'q_inst_6',
+      title: 'Listen to the deep resonant drone holding the pitch of classical vocalists:',
+      notes: [196.00, 261.63, 261.63, 130.81],
+      wave: 'sawtooth',
+      tempo: 700,
+      options: ['Tanpura (Tambura) 🎶', 'Harmonium 🎹', 'Sarangi 🎻', 'Mridangam 🥁'],
+      correct: 'Tanpura (Tambura) 🎶',
+      fact: 'The Tanpura provides the continuous harmonic drone (Sa-Pa-Sa) essential for Indian classical meditation.'
+    },
+    {
+      id: 'q_inst_7',
+      title: 'Listen to the folk barrel drum often played at harvest festivals and baithaks:',
+      notes: [146.83, 164.81, 196.00, 146.83],
+      wave: 'triangle',
+      tempo: 320,
+      options: ['Dholak 🪘', 'Sitar 🪕', 'Violin 🎻', 'Bansuri 🪈'],
+      correct: 'Dholak 🪘',
+      fact: 'The Dholak is the soul of rural Indian folk songs, qawwalis, and community celebrations.'
+    },
+    {
+      id: 'q_inst_8',
+      title: 'Listen to the bow gliding across the expressive bowed lute that mimics human voice:',
+      notes: [293.66, 329.63, 369.99, 440.00, 493.88],
+      wave: 'sawtooth',
+      tempo: 520,
+      options: ['Sarangi 🎻', 'Tabla 🥁', 'Flute 🪈', 'Ghatam 🏺'],
+      correct: 'Sarangi 🎻',
+      fact: 'Carved from a single block of wood, the Sarangi has over thirty sympathetic strings mimicking human singing.'
+    },
+    {
+      id: 'q_inst_9',
+      title: 'Listen to the earthen clay pot struck with fingers and thumbs:',
+      notes: [174.61, 220.00, 174.61, 261.63],
+      wave: 'triangle',
+      tempo: 300,
+      options: ['Ghatam 🏺', 'Harmonium 🎹', 'Santoor 🌊', 'Veena 🎼'],
+      correct: 'Ghatam 🏺',
+      fact: 'The Ghatam is an ancient Carnatic percussion pot made of clay mixed with brass or copper filings.'
+    },
+    {
+      id: 'q_inst_10',
+      title: 'Listen to the hand-pumped keyboard instrument accompanying bhajans:',
+      notes: [261.63, 329.63, 392.00, 523.25, 392.00],
+      wave: 'sawtooth',
+      tempo: 480,
+      options: ['Harmonium 🎹', 'Dhol 🥁', 'Sitar 🪕', 'Shehnai 🎺'],
+      correct: 'Harmonium 🎹',
+      fact: 'The harmonium was introduced to India in the 19th century and became an integral part of devotional music.'
     }
   ],
   song: [
@@ -115,6 +166,56 @@ export const quizData = {
       options: ['Chaudhvin Ka Chand Ho 🌙', 'Aap Ki Nazron Ne Samjha 👁️', 'Tere Mere Sapne 🌅', 'Aaja Re Pardesi 🌳'],
       correct: 'Chaudhvin Ka Chand Ho 🌙',
       fact: 'Sung by Mohammed Rafi in 1960, earning him the prestigious Filmfare Award.'
+    },
+    {
+      id: 'q_song_6',
+      title: 'Which classic RD Burman tune begins with glass tinkling and breezy acoustic guitar?',
+      notes: [440.00, 493.88, 523.25, 587.33],
+      wave: 'sawtooth',
+      tempo: 460,
+      options: ['Chura Liya Hai Tumne 🎸', 'Dum Maro Dum 🪕', 'O Mere Dil Ke Chain 📻', 'Piya Tu Ab To Aaja 🎷'],
+      correct: 'Chura Liya Hai Tumne 🎸',
+      fact: 'From Yaadon Ki Baaraat (1973), RD Burman created the glass clink using a spoon and water glass.'
+    },
+    {
+      id: 'q_song_7',
+      title: 'Which soulful Mukesh melody reflects on life with "Kal khel mein hum hon na hon"?',
+      notes: [261.63, 293.66, 329.63, 392.00, 329.63],
+      wave: 'triangle',
+      tempo: 620,
+      options: ['Jeena Yahan Marna Yahan 🎪', 'Kabhi Kabhie Mere Dil Mein 📜', 'Awara Hoon 🎩', 'Mera Joota Hai Japani 👞'],
+      correct: 'Jeena Yahan Marna Yahan 🎪',
+      fact: 'The legendary philosophical song from Raj Kapoor\'s Mera Naam Joker (1970).'
+    },
+    {
+      id: 'q_song_8',
+      title: 'Which song features Rajesh Khanna on an open jeep singing to Sharmila Tagore on a train?',
+      notes: [329.63, 392.00, 440.00, 523.25],
+      wave: 'sine',
+      tempo: 420,
+      options: ['Mere Sapnon Ki Rani 🚂', 'Roop Tera Mastana 🔥', 'Kora Kagaz Tha Yeh Man 📄', 'Yeh Sham Mastani 🌅'],
+      correct: 'Mere Sapnon Ki Rani 🚂',
+      fact: 'From Aradhana (1969), shot on the scenic Darjeeling Himalayan Toy Train.'
+    },
+    {
+      id: 'q_song_9',
+      title: 'Which romantic melody composed by RD Burman features Kishore Kumar expressing calm devotion?',
+      notes: [261.63, 329.63, 392.00, 440.00],
+      wave: 'sine',
+      tempo: 530,
+      options: ['O Mere Dil Ke Chain ☕', 'Yeh Jo Mohabbat Hai 🍷', 'Chingari Koi Bhadke 🕯️', 'Kuch To Log Kahenge 💬'],
+      correct: 'O Mere Dil Ke Chain ☕',
+      fact: 'From Mere Jeevan Saathi (1972), Kishore Kumar\'s velvety vocals won hearts nationwide.'
+    },
+    {
+      id: 'q_song_10',
+      title: 'Which evergreen prayer song begins with "Itni shakti hamein dena data"?',
+      notes: [293.66, 329.63, 349.23, 392.00, 440.00],
+      wave: 'sine',
+      tempo: 640,
+      options: ['Itni Shakti Hamein Dena Data 🕊️', 'Ae Malik Tere Bande Hum 🪷', 'Allah Tero Naam 🌸', 'Tumhi Ho Mata Pita Tumhi Ho 🌅'],
+      correct: 'Itni Shakti Hamein Dena Data 🕊️',
+      fact: 'Composed by Kuldeep Singh for Ankush (1986), now sung in morning assemblies across India.'
     }
   ],
   singer: [
@@ -167,9 +268,69 @@ export const quizData = {
       options: ['Mukesh 🎼', 'Mohammed Rafi 🎤', 'Hemant Kumar 🌊', 'Bhupen Hazarika 🎶'],
       correct: 'Mukesh 🎼',
       fact: 'Mukesh had a deeply comforting golden voice that resonated with poignant warmth.'
+    },
+    {
+      id: 'q_sing_6',
+      title: 'Which legendary singer and composer from Assam sang "Dil Hoom Hoom Kare" and "Ganga Behti Ho Kyun"?',
+      notes: [261.63, 293.66, 349.23, 392.00],
+      wave: 'sine',
+      tempo: 580,
+      options: ['Bhupen Hazarika 🌊', 'Manna Dey 🎼', 'Hemant Kumar 🎙️', 'Kishore Kumar 📻'],
+      correct: 'Bhupen Hazarika 🌊',
+      fact: 'Bharat Ratna Dr. Bhupen Hazarika was the musical bridge between Assam and the rest of the world.'
+    },
+    {
+      id: 'q_sing_7',
+      title: 'Which classical maestro sang "Poocho Na Kaise Maine Rain Bitai" and "Laga Chunari Mein Daag"?',
+      notes: [293.66, 329.63, 369.99, 440.00],
+      wave: 'sawtooth',
+      tempo: 490,
+      options: ['Manna Dey 🎼', 'Mohammed Rafi 🎤', 'Mukesh 📻', 'Talat Mahmood 🌸'],
+      correct: 'Manna Dey 🎼',
+      fact: 'Manna Dey blended intricate Indian classical music with Hindi film playback with unmatched finesse.'
+    },
+    {
+      id: 'q_sing_8',
+      title: 'Which baritone singer had a deep soothing voice in "Yeh Nayan Dare Dare" and "Hai Apna Dil To Aawara"?',
+      notes: [220.00, 261.63, 293.66, 329.63],
+      wave: 'sine',
+      tempo: 590,
+      options: ['Hemant Kumar 🌊', 'Mukesh 🎼', 'Kishore Kumar 🎙️', 'Bhupen Hazarika 🎶'],
+      correct: 'Hemant Kumar 🌊',
+      fact: 'Hemant Kumar was celebrated both as a peerless Rabindra Sangeet exponent and Bollywood composer.'
+    },
+    {
+      id: 'q_sing_9',
+      title: 'Known as the "King of Ghazals", who sang "Hothon Se Chhoo Lo Tum" and "Jhuki Jhuki Si Nazar"?',
+      notes: [261.63, 293.66, 329.63, 349.23],
+      wave: 'sine',
+      tempo: 620,
+      options: ['Jagjit Singh 📜', 'Pankaj Udhas 🍷', 'Ghulam Ali 🌙', 'Talat Mahmood 📻'],
+      correct: 'Jagjit Singh 📜',
+      fact: 'Jagjit Singh made classical Urdu and Hindi ghazals accessible to every Indian household.'
+    },
+    {
+      id: 'q_sing_10',
+      title: 'Which Carnatic classical diva was the first musician to be awarded the Bharat Ratna?',
+      notes: [329.63, 392.00, 440.00, 523.25],
+      wave: 'sine',
+      tempo: 600,
+      options: ['M. S. Subbulakshmi 🪷', 'Lata Mangeshkar 🕊️', 'Kishori Amonkar 🌸', 'Begum Akhtar 📜'],
+      correct: 'M. S. Subbulakshmi 🪷',
+      fact: 'M. S. Subbulakshmi\'s dawn recital of Venkateswara Suprabhatam is heard across millions of homes daily.'
     }
   ]
 };
+
+// Fisher-Yates shuffle helper
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export default function EntertainmentPage(container) {
   let activeTab = 'quiz'; // 'quiz' | 'music' | 'stories' | 'visuals'
@@ -177,50 +338,63 @@ export default function EntertainmentPage(container) {
   let synthAudioCtx = null;
   let synthInterval = null;
 
-  // --- Multimedia Quiz State ---
+  // --- Multimedia Quiz State (10 Question Session) ---
+  const SESSION_LIMIT = 10;
   let quizMode = 'instrument'; // 'instrument' | 'song' | 'singer'
-  let currentQuestion = null;
+  let sessionQuestions = [];
+  let currentQuestionIndex = 0;
   let quizScore = 0;
+  let quizSessionReview = []; // Track { question, chosen, correct, isCorrect }
+  let quizFinished = false;
   let isQuizAudioPlaying = false;
   let quizAudioCtx = null;
   let quizInterval = null;
-  
-  // Track asked question IDs per mode so questions never repeat until pool is exhausted
-  const askedQuestions = {
-    instrument: new Set(),
-    song: new Set(),
-    singer: new Set()
-  };
 
-  function getRandomQuestion(mode) {
-    const list = (quizData && quizData[mode]) || (quizData && quizData.instrument) || [];
-    if (!list || list.length === 0) return null;
-
-    const asked = askedQuestions[mode] || new Set();
-    
-    // If all questions in this mode have been asked, reset pool
-    if (asked.size >= list.length) {
-      asked.clear();
-    }
-
-    // Filter remaining unasked questions
-    const available = list.filter(q => !asked.has(q.id));
-    const chosen = available[Math.floor(Math.random() * available.length)] || list[0];
-    if (chosen && chosen.id) {
-      asked.add(chosen.id);
-    }
-
-    // Also shuffle options randomly for that question
-    const optionsArray = chosen.options ? [...chosen.options] : [];
-    const shuffledOptions = optionsArray.sort(() => Math.random() - 0.5);
-    return {
-      ...chosen,
-      options: shuffledOptions
-    };
+  function initQuizSession(mode) {
+    const pool = (quizData && quizData[mode]) || (quizData && quizData.instrument) || [];
+    const shuffledPool = shuffleArray(pool);
+    sessionQuestions = shuffledPool.slice(0, SESSION_LIMIT).map(q => ({
+      ...q,
+      options: shuffleArray(q.options || [])
+    }));
+    currentQuestionIndex = 0;
+    quizScore = 0;
+    quizSessionReview = [];
+    quizFinished = false;
+    stopQuizAudio();
   }
 
-  // Initialize first question safely
-  currentQuestion = getRandomQuestion(quizMode);
+  // Initialize session
+  initQuizSession(quizMode);
+
+  // --- Route Guard Protection ---
+  let isLeavingConfirmed = false;
+  const handleBeforeUnload = (e) => {
+    if (activeTab === 'quiz' && currentQuestionIndex > 0 && !quizFinished) {
+      e.preventDefault();
+      e.returnValue = 'You have a quiz in progress! Are you sure you want to leave?';
+      return e.returnValue;
+    }
+  };
+
+  const handleHashChange = (e) => {
+    if (activeTab === 'quiz' && currentQuestionIndex > 0 && !quizFinished && !isLeavingConfirmed) {
+      const confirmLeave = window.confirm('You have a quiz in progress! Are you sure you want to leave and forfeit your current progress?');
+      if (!confirmLeave) {
+        // Revert hash
+        window.removeEventListener('hashchange', handleHashChange);
+        window.location.hash = '#/entertainment';
+        setTimeout(() => {
+          window.addEventListener('hashchange', handleHashChange);
+        }, 100);
+      } else {
+        isLeavingConfirmed = true;
+      }
+    }
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  window.addEventListener('hashchange', handleHashChange);
 
   // --- Visuals Sub-tab State ---
   let visualSubTab = 'greenery'; // 'greenery' | 'animals' | 'vegetation'
@@ -249,104 +423,173 @@ export default function EntertainmentPage(container) {
       waveType: 'sawtooth',
       tempo: 550,
       icon: '🪕',
-      desc: 'Resonant acoustic sitar plucks evoking spiritual awakening, temple dawns, and inner stillness.',
+      desc: 'Classic acoustic pluck and resonating sympathetic buzz of morning meditation.',
       defaultCover: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=300&auto=format&fit=crop&q=80'
     },
     {
-      id: 'inst_shehnai',
-      title: 'Shehnai — Mangal Dhwani',
-      notes: [329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 493.88],
-      waveType: 'triangle',
-      tempo: 650,
-      icon: '🎺',
-      desc: 'Traditional auspicious wind melody bringing warmth, festive celebration, and fond family weddings.',
-      defaultCover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80'
-    },
-    {
       id: 'inst_santoor',
-      title: 'Santoor — Kashmiri Waters',
+      title: 'Santoor Ripples — Kashmiri Morning',
       notes: [349.23, 392.00, 440.00, 523.25, 587.33, 659.25, 523.25],
       waveType: 'square',
-      tempo: 400,
+      tempo: 450,
       icon: '🌊',
-      desc: 'Glistening struck zither notes mimicking crystalline Himalayan streams and gentle ripples.',
-      defaultCover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&auto=format&fit=crop&q=80'
+      desc: 'Delicate light wooden hammers dancing over strings like a glistening Dal Lake fountain.',
+      defaultCover: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'inst_veena',
+      title: 'Carnatic Saraswati Veena Harmony',
+      notes: [220.00, 246.94, 277.18, 329.63, 369.99, 440.00],
+      waveType: 'triangle',
+      tempo: 580,
+      icon: '🎼',
+      desc: 'Deep noble resonance grounded in traditional South Indian temple sanctums.',
+      defaultCover: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'inst_tabla',
+      title: 'Gentle Tabla Rhythms — Teentaal 16 Beats',
+      notes: [130.81, 146.83, 164.81, 130.81, 174.61, 146.83, 130.81],
+      waveType: 'triangle',
+      tempo: 420,
+      icon: '🥁',
+      desc: 'Mellow soothing rhythm that grounds the heart and invites peaceful relaxation.',
+      defaultCover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80'
     }
   ];
 
-  // Dynamic Stories List with Refresh
-  const storiesPool = [
+  // 10 Curated Uplifting Nostalgic Stories
+  const allStoriesPool = [
     {
       id: 'story_1',
-      title: 'The Courtyard Jasmine of Jorhat',
-      icon: '🌸',
-      text: 'Every morning in early summer, Dadi would step into the red-brick courtyard with a brass bowl. The fragrant white jasmine blossoms would tumble onto the cool paving stones like stars. She would hum old songs and arrange the flowers by the veranda tea table, filling the entire morning with calm joy.'
+      title: 'The Clay Chai Cup at the Village Station',
+      icon: '☕',
+      duration: '3 min read',
+      moral: 'Simplicity and warmth linger longer in memory than speed.',
+      text: 'Early morning at the quiet railway station was marked by the whistle of the tea vendor. He poured fresh ginger and cardamom tea into unglazed terracotta kulhars. The sweet fragrance of moist clay mingling with boiling milk and crushed cloves brought instant comfort to travelers wrapped in wool shawls. Taking that first warm sip with both hands reminded everyone that life\'s finest moments cost almost nothing and need never be rushed.'
     },
     {
       id: 'story_2',
-      title: 'The Whistling Mountain Train of Darjeeling',
-      icon: '🚂',
-      text: 'The tiny blue train puffed slowly up the misty pine hills, blowing a cheerful steam whistle at every bend. Schoolchildren smiled and waved through open wooden windows as the aroma of roasted peanuts and cardamom tea drifted from the platform stalls into the morning breeze.'
+      title: 'The Courtyard Banyan and Grandmother\'s Tales',
+      icon: '🌳',
+      duration: '4 min read',
+      moral: 'Roots that run deep give shade to many generations.',
+      text: 'Every summer afternoon when the sun warmed the red clay tiles, all the neighborhood children gathered beneath the sprawling banyan tree in Grandmother\'s courtyard. With a gentle brass fan in one hand and roasted grams in the other, she spun tales of brave kings, talking birds of the Brahmaputra, and playful rivers. The rustle of the leaves above sounded like whispers from old friends, assuring everyone that as long as stories are retold, love never fades.'
     },
     {
       id: 'story_3',
-      title: 'The Golden Bihu Kitchen Gathering',
-      icon: '🥥',
-      text: 'The warm aroma of roasted sticky rice and sweet coconut pitha filled every corner of the ancestral home. Three generations gathered around the earthen stove, laughing as sticky hands rolled sesame laddoos and shared memories of harvests celebrated under the clear winter moon.'
+      title: 'The Brass Radio and Sunday Morning Melodies',
+      icon: '📻',
+      duration: '3 min read',
+      moral: 'Music is the time machine that returns us to our youth.',
+      text: 'Grandfather had a sturdy wooden Murphy radio with a shining round dial that glowed like amber. Every Sunday promptly at eight, the warm voice of the announcer introduced classic songs by Lata, Rafi, and Mukesh. Neighbors pausing outside the veranda would nod their heads in rhythm, humming along to every word. A single melody filled the house with joy, proving that harmony in a home begins with listening together.'
     },
     {
       id: 'story_4',
-      title: 'Shillong Cherry Blossoms in Autumn',
-      icon: '🌺',
-      text: 'When November arrived, the hills around Shillong turned into a delicate sea of pink cherry blossoms. Grandfather would bring out his warm woolen shawl, hold a hot cup of Assam tea, and watch the small mountain birds feast happily on the sweet nectar.'
+      title: 'The First Rain and the Dancing Peacocks',
+      icon: '🦚',
+      duration: '3 min read',
+      moral: 'Nature celebrates every new beginning with open feathers.',
+      text: 'After long summer days, the first dark monsoon clouds gathered over the hills. As the first giant raindrops tapped on tin roofs and dusty courtyard earth, the sudden sweet scent of petrichor filled the air. In the nearby meadow, a peacock unfurled its magnificent emerald and sapphire train, turning gracefully in the drizzle. Seeing that dance, everyone forgot their worries, reminded that renewal always arrives right on time.'
+    },
+    {
+      id: 'story_5',
+      title: 'The Golden Marigold Harvest of Bihu & Diwali',
+      icon: '🌼',
+      duration: '4 min read',
+      moral: 'When we string together kindness, we brighten the darkest night.',
+      text: 'In the week preceding the festival of lights, the whole household sat together stringing fresh orange and yellow marigolds onto white cotton threads. Hands turned fragrant with pollen as garlands were draped across doors, brass lamps were polished with tamarind, and small clay diyas were filled with sesame oil. When evening arrived and the flames flickered softly, every face glowed with peace and togetherness.'
+    },
+    {
+      id: 'story_6',
+      title: 'The River Ferry Across the Silver Brahmaputra',
+      icon: '⛵',
+      duration: '4 min read',
+      moral: 'The river carries all burdens gently if we let it flow.',
+      text: 'At sunrise, the wooden ferry pushed away from the riverbank, cutting quietly through morning mist. River dolphins occasionally surfaced with a gentle curve of silver. Old boatmen sang traditional songs celebrating the endless waters, while passengers shared roasted puffed rice and green tea. Watching the ripples broaden toward the horizon brought a profound stillness to every mind.'
+    },
+    {
+      id: 'story_7',
+      title: 'The Fragrant Mango Orchard Picnic',
+      icon: '🥭',
+      duration: '3 min read',
+      moral: 'Sweetness shared with family multiplies with each smile.',
+      text: 'Under the cool canopy of ripe Alphonso and Langra mango trees, white cotton sheets were spread across emerald grass. Elders rested against bolster pillows while children picked fallen raw mangoes to sprinkle with rock salt and roasted cumin. The laughter and sweet juice dripping from fingers made that sunny afternoon unforgettable.'
+    },
+    {
+      id: 'story_8',
+      title: 'The Weaver\'s Loom of Golden Muga Silk',
+      icon: '🧵',
+      duration: '4 min read',
+      moral: 'Patience transforms simple threads into everlasting splendor.',
+      text: 'In the gentle shade of the bamboo grove, the wooden loom clacked in a rhythmic, comforting cadence. Mother\'s deft fingers wove shimmering golden Muga silk, passing the shuttle back and forth like a song without words. With each passing hour, intricate motifs of flowers and hornbill wings appeared upon the cloth, a timeless heirloom created with devotion.'
+    },
+    {
+      id: 'story_9',
+      title: 'The Village Library of Forgotten Treasures',
+      icon: '📚',
+      duration: '3 min read',
+      moral: 'Knowledge and kind words outlive kingdoms.',
+      text: 'The small village library smelled of old paper, sandalwood bookmarks, and rainy day moisture. Master-ji, the retired teacher, would guide anyone who entered to ancient leather-bound books of poetry and geography. In that quiet room, hours slipped away as easily as water, leaving readers filled with wisdom and quiet contentment.'
+    },
+    {
+      id: 'story_10',
+      title: 'The Warm Fireplace on a Winter Hilltop',
+      icon: '🔥',
+      duration: '4 min read',
+      moral: 'The warmest hearth is the circle of compassionate friends.',
+      text: 'When winter winds swept across the pine hills of Shillong, pine cones crackled merrily in the open brick hearth. Family and neighbors huddled close in knitted sweaters, sharing steamed momos and hot ginger honey brew. With no hurry to be anywhere else, the warmth of the fire seeped into their bones, creating an oasis of peace.'
     }
   ];
 
-  let displayStories = [...storiesPool];
+  let visibleStories = allStoriesPool.slice(0, 4);
 
   function shuffleStories() {
-    displayStories = [...storiesPool].sort(() => Math.random() - 0.5);
+    visibleStories = shuffleArray(allStoriesPool).slice(0, 4);
     render();
-    if (window.SmritiToast) {
-      window.SmritiToast.show('Stories refreshed with new nostalgic tales! 📖✨', 'info');
-    }
   }
 
-  // Visuals Gallery Data (Greenery, Animals, Vegetation)
+  // Visuals Gallery: Curated Scenic Calm Nature Imagery
   const defaultVisuals = {
     greenery: [
       {
-        id: 'vis_gr_1',
-        title: 'Misty Tea Slopes of Upper Assam',
-        image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80',
-        caption: 'Endless rolling emerald green tea bushes basking peacefully under early morning sunlight and dew.'
+        id: 'vis_grn_1',
+        title: 'Misty Tea Gardens of Kaziranga',
+        image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&auto=format&fit=crop&q=80',
+        caption: 'Rolling emerald green tea slopes bathed in tranquil morning fog and pure fresh air.'
       },
       {
-        id: 'vis_gr_2',
-        title: 'Lush Bamboo Groves of Majuli',
-        image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&auto=format&fit=crop&q=80',
-        caption: 'Tall bamboo shoots gently swaying to the river breeze, providing cool shade and serenity.'
+        id: 'vis_grn_2',
+        title: 'Lush Bamboo Groves of Meghalaya',
+        image: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=600&auto=format&fit=crop&q=80',
+        caption: 'Tall bamboo stalks whispering softly in the mountain breeze.'
+      },
+      {
+        id: 'vis_grn_3',
+        title: 'Silver Waterfalls of Cherrapunji',
+        image: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=600&auto=format&fit=crop&q=80',
+        caption: 'Gentle cascading crystal waters flowing into a clear jade pool.'
       }
     ],
     animals: [
       {
-        id: 'vis_an_1',
-        title: 'One-Horned Rhinoceros at Kaziranga',
+        id: 'vis_anm_1',
+        title: 'The Great Indian One-Horned Rhinoceros',
         image: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?w=600&auto=format&fit=crop&q=80',
-        caption: 'A magnificent rhino grazing peacefully in the tall golden wetlands of Kaziranga National Park.'
+        caption: 'A majestic rhino grazing peacefully in the tall golden elephant grasses of Kaziranga.'
       },
       {
-        id: 'vis_an_2',
-        title: 'Gentle Elephant Family at Sunset',
-        image: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=600&auto=format&fit=crop&q=80',
-        caption: 'Loving elephant herd walking together under a warm orange evening sky.'
+        id: 'vis_anm_2',
+        title: 'The Great Hornbill of Arunachal',
+        image: 'https://images.unsplash.com/photo-1550853024-fae8dd4be47f?w=600&auto=format&fit=crop&q=80',
+        caption: 'A vibrant yellow and black hornbill perched proudly high up in the dense canopy.'
       }
     ],
     vegetation: [
       {
         id: 'vis_veg_1',
-        title: 'Golden Mustard Fields in Winter',
-        image: 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=600&auto=format&fit=crop&q=80',
+        title: 'Golden Mustard Fields of the Brahmaputra',
+        image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&auto=format&fit=crop&q=80',
         caption: 'Vibrant yellow mustard blooms glowing under the gentle winter morning sun.'
       },
       {
@@ -417,7 +660,7 @@ export default function EntertainmentPage(container) {
     synthInterval = setInterval(playNext, tempo);
   }
 
-  // Audio for Quiz
+  // Audio for Quiz (Strictly for Instrument mode)
   function stopQuizAudio() {
     if (quizInterval) {
       clearInterval(quizInterval);
@@ -523,7 +766,7 @@ export default function EntertainmentPage(container) {
           </div>
         ` : ''}
 
-        <!-- 1. MULTIMEDIA QUIZ TAB (Safeguarded against TDZ ReferenceErrors) -->
+        <!-- 1. MULTIMEDIA QUIZ TAB (10 Questions & Results Screen) -->
         ${activeTab === 'quiz' ? `
           <div class="card card-elevated" style="background: #FFFDF9; border: 2px solid #FDE68A; border-radius: 18px; padding: 1.75rem; margin-bottom: 1.5rem;">
             <!-- Quiz Mode Selectors -->
@@ -536,58 +779,113 @@ export default function EntertainmentPage(container) {
               </div>
             </div>
 
-            <!-- Quiz Card Safeguarded -->
-            ${(() => {
-              const currentList = (quizData && quizData[quizMode]) || (quizData && quizData.instrument) || [];
-              if (!currentList || currentList.length === 0) {
-                return `
-                  <div style="padding: 2rem; text-align: center; color: #64748B;">
-                    <p>Loading cultural quiz questions...</p>
+            <!-- Quiz Body: Finished Screen vs Active Question -->
+            ${quizFinished ? `
+              <div style="background: #FFFFFF; border-radius: 16px; padding: 2rem 1.5rem; border: 1.5px solid #E2E8F0; text-align: center;">
+                <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🏆</div>
+                <h3 style="color: var(--maroon, #9B2C2C); font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">
+                  Quiz Completed!
+                </h3>
+                <p style="color: #64748B; font-size: 1.05rem; margin-bottom: 1.5rem;">
+                  You completed all 10 questions in the ${quizMode.toUpperCase()} challenge!
+                </p>
+
+                <!-- Stats summary cards -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
+                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Score</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #0F766E;">${quizScore} / 100</div>
                   </div>
-                `;
-              }
-
-              const q = currentQuestion || currentList[0];
-              if (!q) {
-                return `
-                  <div style="padding: 2rem; text-align: center; color: #64748B;">
-                    <p>No question available right now.</p>
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
+                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Accuracy</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #2563EB;">
+                      ${Math.round((quizSessionReview.filter(r => r.isCorrect).length / SESSION_LIMIT) * 100)}%
+                    </div>
                   </div>
-                `;
-              }
-
-              const askedCount = (askedQuestions[quizMode] && askedQuestions[quizMode].size) || 1;
-              const optionsToRender = (q.options && q.options.length > 0) ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'];
-
-              return `
-                <div style="background: #FFFFFF; border-radius: 16px; padding: 1.5rem; border: 1.5px solid #E2E8F0; text-align: center;">
-                  <div style="font-size: 0.95rem; font-weight: 700; color: var(--teal-dark, #0F766E); margin-bottom: 0.5rem;">
-                    Question ${askedCount} of ${currentList.length} • Score: ${quizScore} 🪙
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
+                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Coins Earned</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #D97706;">${quizScore} 🪙</div>
                   </div>
-                  <h4 style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1.25rem; line-height: 1.4;">${q.title}</h4>
-
-                  <!-- Explicit Play / Pause Button -->
-                  <div style="margin-bottom: 1.5rem;">
-                    <button id="btn-quiz-audio" class="btn" style="min-height: 56px; min-width: 220px; font-size: 1.15rem; font-weight: 700; border-radius: 999px; background: ${isQuizAudioPlaying ? '#DC2626' : '#0D9488'}; color: #FFFFFF; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                      ${isQuizAudioPlaying ? '⏸️ Pause Sound' : '▶️ Play Sound Clip'}
-                    </button>
-                    <div style="font-size: 0.85rem; color: #64748B; margin-top: 6px;">Tap to listen with headphones or device speakers</div>
-                  </div>
-
-                  <!-- Options Grid -->
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
-                    ${optionsToRender.map(opt => `
-                      <button class="btn btn-outline btn-quiz-opt" data-answer="${opt}" style="min-height: 56px; font-size: 1.05rem; font-weight: 700; border-radius: 12px; padding: 0.75rem; text-align: center;">
-                        ${opt}
-                      </button>
-                    `).join('')}
-                  </div>
-
-                  <!-- Result and Fun Fact Box -->
-                  <div id="quiz-feedback" style="display: none; padding: 12px; border-radius: 10px; margin-top: 1rem; font-weight: 600; font-size: 1rem;"></div>
                 </div>
-              `;
-            })()}
+
+                <!-- Review of all 10 questions -->
+                <h4 style="text-align: left; color: #334155; font-size: 1.15rem; margin-bottom: 0.75rem;">Question Review:</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 240px; overflow-y: auto; text-align: left; margin-bottom: 1.5rem; padding-right: 0.5rem;">
+                  ${quizSessionReview.map((r, i) => `
+                    <div style="padding: 0.75rem; border-radius: 10px; background: ${r.isCorrect ? '#ECFDF5' : '#FEF2F2'}; border: 1px solid ${r.isCorrect ? '#A7F3D0' : '#FECACA'};">
+                      <div style="font-weight: 700; font-size: 0.95rem; color: #1E293B;">
+                        ${i + 1}. ${r.question}
+                      </div>
+                      <div style="font-size: 0.85rem; margin-top: 4px; color: ${r.isCorrect ? '#065F46' : '#991B1B'};">
+                        ${r.isCorrect ? '✅ Correct:' : '❌ Selected: ' + r.chosen + ' | Correct:'} <strong>${r.correct}</strong>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                  <button id="btn-replay-quiz" class="btn btn-primary" style="font-size: 1.05rem; font-weight: 700; padding: 0.75rem 1.5rem; border-radius: 12px;">
+                    🔄 Play Again (10 New Questions)
+                  </button>
+                  <a href="#/games" class="btn btn-outline" style="font-size: 1.05rem; font-weight: 700; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none;">
+                    🎮 Back to Games Hub
+                  </a>
+                </div>
+              </div>
+            ` : `
+              <!-- Active Question View -->
+              ${(() => {
+                const q = sessionQuestions[currentQuestionIndex];
+                if (!q) {
+                  return `
+                    <div style="padding: 2rem; text-align: center; color: #64748B;">
+                      <p>Loading questions...</p>
+                    </div>
+                  `;
+                }
+
+                const optionsToRender = q.options && q.options.length > 0 ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'];
+
+                return `
+                  <div style="background: #FFFFFF; border-radius: 16px; padding: 1.5rem; border: 1.5px solid #E2E8F0; text-align: center;">
+                    <!-- Question Counter & Progress Bar -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; font-weight: 700; color: var(--teal-dark, #0F766E); margin-bottom: 0.5rem;">
+                      <span>Question ${currentQuestionIndex + 1} of ${SESSION_LIMIT}</span>
+                      <span>Score: ${quizScore} 🪙</span>
+                    </div>
+                    
+                    <div style="width: 100%; height: 6px; background: #E2E8F0; border-radius: 999px; margin-bottom: 1.25rem; overflow: hidden;">
+                      <div style="width: ${((currentQuestionIndex + 1) / SESSION_LIMIT) * 100}%; height: 100%; background: #0D9488; transition: width 0.3s ease;"></div>
+                    </div>
+
+                    <h4 style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1.25rem; line-height: 1.4;">${q.title}</h4>
+
+                    <!-- Strict Instrument Audio Button (Only shown in 'instrument' mode) -->
+                    ${quizMode === 'instrument' ? `
+                      <div style="margin-bottom: 1.5rem;">
+                        <button id="btn-quiz-audio" class="btn" style="min-height: 56px; min-width: 220px; font-size: 1.15rem; font-weight: 700; border-radius: 999px; background: ${isQuizAudioPlaying ? '#DC2626' : '#0D9488'}; color: #FFFFFF; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                          ${isQuizAudioPlaying ? '⏸️ Pause Sound' : '▶️ Play Sound Clip'}
+                        </button>
+                        <div style="font-size: 0.85rem; color: #64748B; margin-top: 6px;">Tap to listen with headphones or device speakers</div>
+                      </div>
+                    ` : ''}
+
+                    <!-- Options Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                      ${optionsToRender.map(opt => `
+                        <button class="btn btn-outline btn-quiz-opt" data-answer="${opt}" style="min-height: 56px; font-size: 1.05rem; font-weight: 700; border-radius: 12px; padding: 0.75rem; text-align: center;">
+                          ${opt}
+                        </button>
+                      `).join('')}
+                    </div>
+
+                    <!-- Result and Fun Fact Box -->
+                    <div id="quiz-feedback" style="display: none; padding: 12px; border-radius: 10px; margin-top: 1rem; font-weight: 600; font-size: 1rem;"></div>
+                  </div>
+                `;
+              })()}
+            `}
           </div>
         ` : ''}
 
@@ -598,32 +896,30 @@ export default function EntertainmentPage(container) {
               💡 <strong>Personalize Covers:</strong> You can upload custom album photos or personal nostalgic pictures for any melody using the 📷 button on each card!
             </div>
 
-            ${defaultInstrumentals.map(m => {
-              const coverImg = customCovers[m.id] || m.defaultCover;
+            ${defaultInstrumentals.map(inst => {
+              const coverImg = customCovers[inst.id] || inst.defaultCover;
+              const isPlaying = currentPlayingAudio === inst.title;
               return `
-                <div class="card card-elevated" style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 16px; padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-                  <div style="display: flex; align-items: center; gap: 1rem;">
-                    <!-- Circular Melody Thumbnail with Upload Overlay -->
-                    <div style="position: relative; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; border: 2.5px solid var(--teal, #0D9488); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                      <img src="${coverImg}" alt="${m.title}" style="width: 100%; height: 100%; object-fit: cover;" />
-                      <label title="Upload Custom Melody Cover" style="position: absolute; bottom: 0; right: 0; left: 0; height: 26px; background: rgba(0,0,0,0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer;">
-                        📷
-                        <input type="file" accept="image/*" class="melody-cover-input" data-id="${m.id}" style="display: none;" />
-                      </label>
-                    </div>
-
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-size: 1.3rem;">${m.icon}</span>
-                        <h4 style="margin: 0; font-size: 1.15rem; color: var(--maroon, #9B2C2C);">${m.title}</h4>
-                      </div>
-                      <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #64748B;">${m.desc}</p>
-                    </div>
+                <div class="card card-elevated" style="display: flex; gap: 1.25rem; align-items: center; padding: 1.25rem; border-radius: 16px; border: 1.5px solid #F1F5F9; background: #FFFFFF;">
+                  <!-- Melody Thumbnail with Upload Trigger -->
+                  <div style="position: relative; width: 105px; height: 105px; min-width: 105px; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+                    <img src="${coverImg}" alt="${inst.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <label for="cover-inp-${inst.id}" style="position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.65); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem;" title="Upload custom cover">
+                      📷
+                    </label>
+                    <input type="file" id="cover-inp-${inst.id}" class="melody-cover-input" data-id="${inst.id}" accept="image/*" style="display: none;">
                   </div>
 
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <button class="btn btn-primary btn-play-melody" data-id="${m.id}" style="min-height: 48px; min-width: 110px; font-weight: 700;">
-                      ▶ Play Tune
+                  <!-- Details -->
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                      <span style="font-size: 1.35rem;">${inst.icon}</span>
+                      <h4 style="margin: 0; color: #1E293B; font-size: 1.15rem; font-weight: 700;">${inst.title}</h4>
+                    </div>
+                    <p style="margin: 0 0 0.75rem 0; font-size: 0.92rem; color: #64748B; line-height: 1.4;">${inst.desc}</p>
+                    
+                    <button class="btn btn-sm btn-play-melody ${isPlaying ? 'btn-secondary' : 'btn-primary'}" data-id="${inst.id}" style="min-height: 40px; font-weight: 700; padding: 0.4rem 1.15rem; border-radius: 999px;">
+                      ${isPlaying ? '⏹️ Stop' : '▶️ Play Melody'}
                     </button>
                   </div>
                 </div>
@@ -632,150 +928,156 @@ export default function EntertainmentPage(container) {
           </div>
         ` : ''}
 
-        <!-- 3. STORIES TAB WITH REFRESH BUTTON -->
+        <!-- 3. STORIES TAB WITH READ ALOUD -->
         ${activeTab === 'stories' ? `
-          <div style="display: flex; flex-direction: column; gap: 1.15rem;">
-            <!-- Header with Refresh Stories (⟳) Button -->
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFDF9; padding: 0.85rem 1.25rem; border-radius: 14px; border: 1.5px solid #FDE68A;">
-              <div>
-                <h4 style="margin: 0; color: var(--maroon, #9B2C2C); font-size: 1.2rem;">📖 Heartwarming Short Stories</h4>
-                <div style="font-size: 0.85rem; color: #64748B;">Short, relaxing reminiscence tales tailored for gentle reading or listening.</div>
-              </div>
-              <button id="btn-refresh-stories" class="btn btn-secondary" style="font-weight: 700; font-size: 1.1rem; padding: 0.5rem 1rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px;">
-                ⟳ Refresh Stories
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <h3 style="color: var(--maroon, #9B2C2C); margin: 0; font-size: 1.35rem;">📖 Gentle Cultural Life Stories</h3>
+              <button id="btn-refresh-stories" class="btn btn-outline btn-sm" style="border-radius: 999px; font-weight: 700;">
+                ⟳ More Stories
               </button>
             </div>
 
-            ${displayStories.map(s => `
-              <div class="card card-elevated" style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 16px; padding: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                  <span style="font-size: 2.2rem;">${s.icon}</span>
-                  <h4 style="margin: 0; font-size: 1.25rem; color: var(--maroon, #9B2C2C);">${s.title}</h4>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              ${visibleStories.map(st => `
+                <div class="card card-elevated" style="background: #FFFFFF; border-radius: 16px; border: 1.5px solid #F1F5F9; padding: 1.5rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span style="font-size: 1.5rem;">${st.icon}</span>
+                      <h4 style="margin: 0; color: #0F172A; font-size: 1.2rem; font-weight: 800;">${st.title}</h4>
+                    </div>
+                    <span style="font-size: 0.8rem; background: #F1F5F9; color: #475569; padding: 0.25rem 0.65rem; border-radius: 999px; font-weight: 600;">
+                      ${st.duration}
+                    </span>
+                  </div>
+
+                  <p style="color: #334155; font-size: 1.05rem; line-height: 1.65; margin: 0 0 1rem 0;">
+                    ${st.text}
+                  </p>
+
+                  <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 0.75rem 1rem; border-radius: 4px 8px 8px 4px; margin-bottom: 1rem;">
+                    <span style="font-weight: 700; color: #92400E; font-size: 0.9rem;">Gentle Thought:</span>
+                    <span style="color: #B45309; font-size: 0.95rem;"> "${st.moral}"</span>
+                  </div>
+
+                  <button class="btn btn-outline btn-sm btn-read-story" data-text="${encodeURIComponent(st.text)}" style="border-radius: 999px; font-weight: 700; color: var(--teal-dark, #0F766E); border-color: #99F6E4;">
+                    🔊 Read Story Aloud
+                  </button>
                 </div>
-                <p style="font-size: 1.05rem; line-height: 1.6; color: #334155; margin-bottom: 1rem;">${s.text}</p>
-                <button class="btn btn-secondary btn-read-story" data-text="${encodeURIComponent(s.text)}" style="min-height: 48px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
-                  🔊 Listen Aloud
-                </button>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
           </div>
         ` : ''}
 
-        <!-- 4. VISUALS TAB WITH 3 SUB-TABS (Greenery, Animals, Vegetation) + CUSTOM UPLOAD -->
+        <!-- 4. VISUALS TAB -->
         ${activeTab === 'visuals' ? `
-          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-            <!-- Sub-tabs for Visuals -->
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <!-- Visual sub-tabs -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
               <div style="display: flex; gap: 6px;">
-                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'greenery' ? 'btn-primary' : 'btn-outline'}" data-sub="greenery">🌿 Greenery</button>
-                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'animals' ? 'btn-primary' : 'btn-outline'}" data-sub="animals">🐘 Animals</button>
-                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'vegetation' ? 'btn-primary' : 'btn-outline'}" data-sub="vegetation">🌾 Vegetation</button>
+                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'greenery' ? 'btn-primary' : 'btn-outline'}" data-sub="greenery">🍃 Tea & Forests</button>
+                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'animals' ? 'btn-primary' : 'btn-outline'}" data-sub="animals">🦏 Wildlife</button>
+                <button class="btn btn-sm btn-vis-sub ${visualSubTab === 'vegetation' ? 'btn-primary' : 'btn-outline'}" data-sub="vegetation">🌾 Fields & Flora</button>
               </div>
-              <button id="btn-toggle-upload-vis" class="btn btn-secondary btn-sm" style="font-weight: 700;">
-                + Add Custom Visual Photo
+
+              <button id="btn-toggle-upload-vis" class="btn btn-sm btn-secondary" style="border-radius: 999px; font-weight: 700;">
+                📷 Upload Nature Photo
               </button>
             </div>
 
-            <!-- Upload Custom Photo Panel (Hidden by default) -->
-            <div id="panel-upload-vis" style="display: none; background: #FFFDF9; border: 1.5px dashed var(--teal, #0D9488); border-radius: 14px; padding: 1.25rem;">
-              <h4 style="margin: 0 0 0.75rem 0; color: var(--teal, #0D9488);">Upload Nostalgic Nature Photo</h4>
+            <!-- Upload Custom Visual Panel -->
+            <div id="panel-upload-vis" class="card card-elevated mb-md" style="display: none; background: #F8FAFC; border: 2px dashed #94A3B8; border-radius: 14px; padding: 1.25rem;">
+              <h4 style="margin: 0 0 0.75rem 0; color: #1E293B;">Add a Cherished Personal Nature Photo</h4>
               <form id="form-upload-vis" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <div>
-                  <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Photo Title</label>
-                  <input type="text" id="vis-title" class="form-input" placeholder="e.g. Grandma's Garden Marigolds" required />
-                </div>
-                <div>
-                  <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Category</label>
-                  <select id="vis-cat" class="form-select">
-                    <option value="greenery" ${visualSubTab === 'greenery' ? 'selected' : ''}>🌿 Greenery</option>
-                    <option value="animals" ${visualSubTab === 'animals' ? 'selected' : ''}>🐘 Animals</option>
-                    <option value="vegetation" ${visualSubTab === 'vegetation' ? 'selected' : ''}>🌾 Vegetation</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Comforting Caption</label>
-                  <input type="text" id="vis-caption" class="form-input" placeholder="e.g. Blooming marigolds under morning sunlight" />
-                </div>
-                <div>
-                  <label class="form-label" style="font-size: 0.85rem; font-weight: 700;">Select Photo File</label>
-                  <input type="file" id="vis-file" accept="image/*" class="form-input" required />
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+                <input type="text" id="vis-title" class="form-control" placeholder="Photo Title (e.g., Morning walk at tea garden)" required>
+                <select id="vis-cat" class="form-control">
+                  <option value="greenery">🍃 Tea & Forests</option>
+                  <option value="animals">🦏 Wildlife</option>
+                  <option value="vegetation">🌾 Fields & Flora</option>
+                </select>
+                <input type="text" id="vis-caption" class="form-control" placeholder="Short peaceful caption...">
+                <input type="file" id="vis-file" class="form-control" accept="image/*" required>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
                   <button type="button" id="btn-cancel-visual" class="btn btn-ghost btn-sm">Cancel</button>
-                  <button type="submit" class="btn btn-primary btn-sm">Save Visual</button>
+                  <button type="submit" class="btn btn-primary btn-sm">Save Photo</button>
                 </div>
               </form>
             </div>
 
             <!-- Visual Cards Grid -->
-            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-              ${activeVisualsList.map(v => `
-                <div class="card card-elevated" style="background: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1.5px solid #CBD5E1;">
-                  <img src="${v.image}" alt="${v.title}" style="width: 100%; height: 280px; object-fit: cover; display: block;">
-                  <div style="padding: 1.25rem;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 1.2rem; color: var(--maroon, #9B2C2C);">${v.title}</h4>
-                    <p style="margin: 0; font-size: 1rem; color: #475569;">${v.caption}</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+              ${activeVisualsList.map(item => `
+                <div class="card card-elevated" style="overflow: hidden; border-radius: 16px; border: 1.5px solid #F1F5F9; background: #FFFFFF; padding: 0;">
+                  <div style="width: 100%; height: 210px; overflow: hidden; background: #F1F5F9;">
+                    <img src="${item.image}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" loading="lazy">
+                  </div>
+                  <div style="padding: 1.15rem;">
+                    <h4 style="margin: 0 0 0.4rem 0; color: #1E293B; font-size: 1.1rem; font-weight: 700;">${item.title}</h4>
+                    <p style="margin: 0; color: #64748B; font-size: 0.92rem; line-height: 1.45;">${item.caption}</p>
                   </div>
                 </div>
               `).join('')}
             </div>
           </div>
         ` : ''}
+
       </div>
     `;
 
-    attachEvents();
-  }
+    // --- Wire Event Handlers ---
 
-  function attachEvents() {
-    // Tab buttons
+    // Primary Tabs
     container.querySelectorAll('.ent-tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         activeTab = btn.getAttribute('data-tab');
-        stopQuizAudio();
         stopSynthesizer();
+        stopQuizAudio();
         render();
       });
     });
 
-    // Stop general audio
-    const stopAudioBtn = container.querySelector('#btn-stop-audio');
-    if (stopAudioBtn) {
-      stopAudioBtn.addEventListener('click', () => {
+    // Stop General Audio
+    const btnStopAudio = container.querySelector('#btn-stop-audio');
+    if (btnStopAudio) {
+      btnStopAudio.addEventListener('click', () => {
         stopSynthesizer();
-        stopQuizAudio();
-        if (window.SmritiToast) {
-          window.SmritiToast.show('Audio stopped 🌿', 'info');
-        }
         render();
       });
     }
 
-    // Quiz Mode Selector
+    // Quiz Mode Switchers
     container.querySelectorAll('.btn-quiz-mode').forEach(btn => {
       btn.addEventListener('click', () => {
         quizMode = btn.getAttribute('data-mode');
-        currentQuestion = getRandomQuestion(quizMode);
-        stopQuizAudio();
+        initQuizSession(quizMode);
         render();
       });
     });
 
-    // Quiz Audio Toggle
-    const quizAudioBtn = container.querySelector('#btn-quiz-audio');
-    if (quizAudioBtn) {
-      quizAudioBtn.addEventListener('click', () => {
-        const q = currentQuestion;
+    // Replay Quiz Button
+    const btnReplayQuiz = container.querySelector('#btn-replay-quiz');
+    if (btnReplayQuiz) {
+      btnReplayQuiz.addEventListener('click', () => {
+        initQuizSession(quizMode);
+        render();
+      });
+    }
+
+    // Quiz Audio Button (Strictly instrument mode)
+    const btnQuizAudio = container.querySelector('#btn-quiz-audio');
+    if (btnQuizAudio) {
+      btnQuizAudio.addEventListener('click', () => {
+        const q = sessionQuestions[currentQuestionIndex];
         if (q && q.notes) {
-          toggleQuizAudio(q.notes, q.wave, q.tempo);
+          toggleQuizAudio(q.notes, q.wave || 'sine', q.tempo || 500);
         }
       });
     }
 
-    // Quiz Options Handlers with dynamic randomization and no repeats
+    // Quiz Option Click Handler (With -5 coin deduction on wrong answer)
     container.querySelectorAll('.btn-quiz-opt').forEach(btn => {
       btn.addEventListener('click', () => {
-        const q = currentQuestion;
+        const q = sessionQuestions[currentQuestionIndex];
         if (!q) return;
 
         const selected = btn.getAttribute('data-answer');
@@ -785,7 +1087,15 @@ export default function EntertainmentPage(container) {
 
         stopQuizAudio();
 
-        if (selected === q.correct) {
+        const isCorrect = selected === q.correct;
+        quizSessionReview.push({
+          question: q.title,
+          chosen: selected,
+          correct: q.correct,
+          isCorrect
+        });
+
+        if (isCorrect) {
           btn.style.background = '#0D9488';
           btn.style.color = '#FFFFFF';
           quizScore += 10;
@@ -801,6 +1111,7 @@ export default function EntertainmentPage(container) {
         } else {
           btn.style.background = '#DC2626';
           btn.style.color = '#FFFFFF';
+          Coins.deduct(5, 'Wrong answer in quiz');
           if (feedback) {
             feedback.style.display = 'block';
             feedback.style.background = '#FEF2F2';
@@ -818,7 +1129,11 @@ export default function EntertainmentPage(container) {
         }
 
         setTimeout(() => {
-          currentQuestion = getRandomQuestion(quizMode);
+          if (currentQuestionIndex + 1 >= SESSION_LIMIT || currentQuestionIndex + 1 >= sessionQuestions.length) {
+            quizFinished = true;
+          } else {
+            currentQuestionIndex++;
+          }
           render();
         }, 2400);
       });
@@ -945,6 +1260,8 @@ export default function EntertainmentPage(container) {
     cleanup() {
       stopSynthesizer();
       stopQuizAudio();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('hashchange', handleHashChange);
     }
   };
 }

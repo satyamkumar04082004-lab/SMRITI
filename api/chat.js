@@ -138,9 +138,14 @@ module.exports = async function handler(req, res) {
         'bn': 'Bengali (বাংলা)',
         'mni': 'Manipuri / Meitei (মৈতৈলোন্)',
         'kha': 'Khasi',
-        'lus': 'Mizo'
+        'lus': 'Mizo',
+        'ta': 'Tamil (தமிழ்)',
+        'te': 'Telugu (తెలుగు)',
+        'mr': 'Marathi (मराठी)',
+        'gu': 'Gujarati (ગુજરાતી)',
+        'kn': 'Kannada (ಕನ್ನಡ)'
       };
-      const langName = langNames[activeLang] || activeLang;
+      const langName = data.languageName || langNames[activeLang] || activeLang;
 
       const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
@@ -175,6 +180,58 @@ Directives:
 3. Answer questions about current time, date, family, and progress using the real-time context above.
 4. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
 5. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
+
+      // 1.5 HYBRID LOCAL KNOWLEDGE BASE LOOKUP
+      try {
+        const path = require('path');
+        const fs = require('fs');
+        const qaPath = path.join(__dirname, '../data/qa_knowledge.json');
+        if (fs.existsSync(qaPath)) {
+          const qaData = JSON.parse(fs.readFileSync(qaPath, 'utf8'));
+          const cleanMsg = (message || '').toLowerCase().trim();
+          let matchedTopic = null;
+
+          for (const topic of (qaData.topics || [])) {
+            if (Array.isArray(topic.keywords) && topic.keywords.some(kw => cleanMsg.includes(kw.toLowerCase()))) {
+              matchedTopic = topic;
+              break;
+            }
+          }
+
+          if (matchedTopic) {
+            const topicReply = (matchedTopic.responses && (matchedTopic.responses[activeLang] || matchedTopic.responses.en)) || '';
+            if (topicReply) {
+              if (stream) {
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive'
+                });
+                const words = topicReply.split(' ');
+                let wIdx = 0;
+                const timer = setInterval(() => {
+                  if (wIdx < words.length) {
+                    const chunk = (wIdx > 0 ? ' ' : '') + words[wIdx];
+                    res.write('data: ' + JSON.stringify({ candidates: [{ content: { parts: [{ text: chunk }] } }] }) + '\n\n');
+                    wIdx++;
+                  } else {
+                    clearInterval(timer);
+                    res.write('data: [DONE]\n\n');
+                    res.end();
+                  }
+                }, 30);
+                return;
+              } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ reply: topicReply, source: 'local_qa_knowledge' }));
+                return;
+              }
+            }
+          }
+        }
+      } catch (qaErr) {
+        console.warn('Local QA knowledge match error:', qaErr.message);
+      }
 
       // 2. Google Gemini API Integration (with stream: true SSE support)
       const geminiKey = process.env.GEMINI_API_KEY;

@@ -22,6 +22,17 @@ const translations = {
     confirm: 'Confirm',
     loading: 'Loading...',
     
+    // Rewards Store
+    rewardsTitle: 'Rewards & Badges',
+    rewardsSubtitle: 'Redeem your hard-earned coins for digital achievement badges and physical wellness gifts!',
+    rewardsBadgeStore: 'Digital Milestone Badges',
+    rewardsPhysicalStore: 'Physical Wellness Gifts',
+    rewardsBuy: 'Redeem',
+    rewardsClaimed: 'Unlocked ✓',
+    rewardsNotEnough: 'Keep playing to earn more coins!',
+    rewardsCongratBadge: 'Congratulations! You unlocked the badge:',
+    rewardsCongratGift: 'Wonderful! Your wellness gift claim has been logged for delivery.',
+    
     // Auth
     login: 'Login',
     register: 'Register',
@@ -1050,8 +1061,12 @@ const I18n = {
   },
 
   t(key, vars = {}) {
-    const langDict = translations[this._currentLang];
-    let template = (langDict && langDict[key]) ? langDict[key] : (translations.en[key] || key);
+    if (!key) return '';
+    const activeCode = this._currentLang || 'en';
+    const langDict = translations[activeCode];
+    let template = (langDict && langDict[key] !== undefined && langDict[key] !== null)
+      ? langDict[key]
+      : ((translations.en && translations.en[key] !== undefined) ? translations.en[key] : key);
     
     if (typeof template === 'string' && vars && typeof vars === 'object') {
       Object.keys(vars).forEach(varKey => {

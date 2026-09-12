@@ -550,6 +550,11 @@ export default function Home(container) {
               <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🛟</div>
               <div style="font-weight: 600; font-size: 0.95rem; color: #DC2626;">${lang === 'hi' ? 'आपातकाल' : (lang === 'bn' ? 'জরুরি সাহায্য' : 'Emergency')}</div>
             </div>
+
+            <div class="card card-game home-nav-card" data-route="#/rewards" style="padding: 1rem 0.5rem; cursor: pointer;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🏆</div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: #B45309;">${lang === 'hi' ? 'इनाम व बैज' : (lang === 'bn' ? 'পুরস্কার' : 'Rewards & Badges')}</div>
+            </div>
           </div>
         </div>
 
