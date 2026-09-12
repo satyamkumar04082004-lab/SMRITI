@@ -7,6 +7,7 @@ import Storage from '../storage.js';
 import I18n from '../i18n.js';
 import Auth from '../auth.js';
 import TTS from '../tts.js';
+import Coins from '../coins.js';
 import UserState from '../userState.js';
 
 export default function SettingsPage(container) {
@@ -45,8 +46,8 @@ export default function SettingsPage(container) {
             <div><strong>Role:</strong> <span style="background: #E6F4F1; color: var(--teal-dark); padding: 3px 10px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; text-transform: capitalize;">${user.role}</span></div>
             <div style="border-top: 1px dashed #E2E8F0; margin-top: 6px; padding-top: 8px;">
               <div style="font-size: 0.9rem; color: var(--gray-500); margin-bottom: 4px;">EMERGENCY & MEDICAL CONTACTS:</div>
-              <div><strong>Primary Contact:</strong> ${emergency.primaryName} (${emergency.primaryPhone})</div>
-              <div><strong>Doctor:</strong> ${emergency.doctorName} (${emergency.doctorPhone})</div>
+              <div><strong>Primary Contact:</strong> ${(emergency && emergency.primaryName) || 'Not set'} (${(emergency && emergency.primaryPhone) || 'Not set'})</div>
+              <div><strong>Doctor:</strong> ${(emergency && emergency.doctorName) || 'Not set'} (${(emergency && emergency.doctorPhone) || 'Not set'})</div>
             </div>
           </div>
         ` : `
@@ -80,13 +81,13 @@ export default function SettingsPage(container) {
               <h4 style="margin: 0 0 8px 0; color: #DC2626; font-size: 1.05rem;">🛟 Emergency Contacts</h4>
               
               <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-                <input type="text" id="input-prof-emg-name" class="form-input" style="flex: 1;" placeholder="Primary Contact Name" value="${emergency.primaryName || ''}" />
-                <input type="tel" id="input-prof-emg-phone" class="form-input" style="flex: 1;" placeholder="Phone" value="${emergency.primaryPhone || ''}" />
+                <input type="text" id="input-prof-emg-name" class="form-input" style="flex: 1;" placeholder="Primary Contact Name" value="${(emergency && emergency.primaryName) || ''}" />
+                <input type="tel" id="input-prof-emg-phone" class="form-input" style="flex: 1;" placeholder="Phone" value="${(emergency && emergency.primaryPhone) || ''}" />
               </div>
 
               <div style="display: flex; gap: 10px;">
-                <input type="text" id="input-prof-doc-name" class="form-input" style="flex: 1;" placeholder="Doctor Name" value="${emergency.doctorName || ''}" />
-                <input type="tel" id="input-prof-doc-phone" class="form-input" style="flex: 1;" placeholder="Doctor Phone" value="${emergency.doctorPhone || ''}" />
+                <input type="text" id="input-prof-doc-name" class="form-input" style="flex: 1;" placeholder="Doctor Name" value="${(emergency && emergency.doctorName) || ''}" />
+                <input type="tel" id="input-prof-doc-phone" class="form-input" style="flex: 1;" placeholder="Doctor Phone" value="${(emergency && emergency.doctorPhone) || ''}" />
               </div>
             </div>
 

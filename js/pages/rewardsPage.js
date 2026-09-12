@@ -79,7 +79,10 @@ export default function RewardsPage(container) {
   }
 
   function getCoinsBalance() {
-    return Coins.get();
+    if (typeof Coins !== 'undefined' && typeof Coins.getBalance === 'function') {
+      return Coins.getBalance();
+    }
+    return Storage.getCoins();
   }
 
   function getUnlockedBadges() {

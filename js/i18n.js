@@ -273,6 +273,18 @@ const translations = {
     cancel: 'रद्द करें',
     confirm: 'पुष्टि करें',
     loading: 'लोड हो रहा है...',
+    
+    // Rewards Store
+    rewardsTitle: 'इनाम व बैज',
+    rewardsSubtitle: 'अपने अर्जित सिक्कों को डिजिटल उपलब्धि बैज और स्वास्थ्य उपहारों के लिए रिडीम करें!',
+    rewardsBadgeStore: 'डिजिटल उपलब्धि बैज',
+    rewardsPhysicalStore: 'स्वास्थ्य व उपहार',
+    rewardsBuy: 'रिडीम करें',
+    rewardsClaimed: 'अनलॉक ✓',
+    rewardsNotEnough: 'और सिक्के कमाने के लिए खेल खेलना जारी रखें!',
+    rewardsCongratBadge: 'बधाई हो! आपने बैज अनलॉक किया:',
+    rewardsCongratGift: 'बहुत बढ़िया! आपके उपहार का अनुरोध दर्ज कर लिया गया है।',
+    
     login: 'लॉगिन',
     register: 'रजिस्टर',
     loginTitle: 'स्मृति में आपका स्वागत है',

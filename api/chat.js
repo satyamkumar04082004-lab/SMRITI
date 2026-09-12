@@ -20,8 +20,10 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
   const medicines = (profile && profile.medicines) || [];
   const state = profile?.preferences?.regionalState || patient.state || 'Assam';
 
-  const todayDateStr = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const todayTimeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+  const todayDateStr = new Date().toLocaleDateString('en-IN', istOptionsDate);
+  const todayTimeStr = new Date().toLocaleTimeString('en-IN', istOptionsTime);
 
   // 1. Role-specific clinical or caregiver inquiry
   if (role === 'doctor') {
@@ -32,10 +34,22 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
   }
 
   // 2. Date & Time queries
-  if (text.includes('what time') || text.includes('time is it') || text.includes('current time') || text.includes('clock')) {
+  if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
+    if (lang === 'hi') {
+      return `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`;
+    }
+    if (lang === 'as') {
+      return `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr} (${todayDateStr})। এয়া জিৰণি লোৱাৰ বা স্মৃতিৰ অনুশীলন কৰাৰ উত্তম সময়! ⏰✨`;
+    }
+    if (lang === 'bn') {
+      return `নমস্কার ${firstName}! এখন সময় ${todayTimeStr} (${todayDateStr})। এটি বিশ্রাম নেওয়া বা সহজ স্মৃতিচর্চার খুব সুন্দর সময়! ⏰✨`;
+    }
     return `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. It's a peaceful moment to relax or do a gentle memory exercise! ⏰✨`;
   }
-  if (text.includes('what date') || text.includes('today\'s date') || text.includes('which day') || text.includes('what day is today')) {
+  if (text.includes('what date') || text.includes('today\'s date') || text.includes('which day') || text.includes('what day is today') || text.includes('aaj kaun sa din') || text.includes('aaj ki tarikh')) {
+    if (lang === 'hi') {
+      return `आज की तारीख ${todayDateStr} है। आपका दिन सुखद और शांत रहे! 📅🌸`;
+    }
     return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
   }
 
@@ -145,10 +159,10 @@ module.exports = async function handler(req, res) {
         'gu': 'Gujarati (ગુજરાતી)',
         'kn': 'Kannada (ಕನ್ನಡ)'
       };
-      const langName = data.languageName || langNames[activeLang] || activeLang;
-
-      const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+      const todayDate = data.currentDate || new Date().toLocaleDateString('en-IN', istOptionsDate);
+      const todayTime = data.currentTime || new Date().toLocaleTimeString('en-IN', istOptionsTime);
 
       const patient = patientProfile?.patient || { name: 'Meera Das', state: 'Assam' };
       const games = patientProfile?.gameHistory || [];

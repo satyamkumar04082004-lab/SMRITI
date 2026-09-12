@@ -66,9 +66,11 @@ const AIService = {
     const profile = Storage.getPatientProfile();
     const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
 
-    // Dynamic Context Injection
-    const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    // Dynamic Context Injection (Asia/Kolkata IST)
+    const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+    const todayDate = new Date().toLocaleDateString('en-IN', istOptionsDate);
+    const todayTime = new Date().toLocaleTimeString('en-IN', istOptionsTime);
     const currentLang = I18n.lang || Storage.getLanguage() || 'en';
     const langNames = {
       'en': 'English',
@@ -221,9 +223,33 @@ const AIService = {
     const memories = profile.memories || [];
     const family = profile.familyMembers || [];
     const medicines = profile.medicines || [];
-    const state = profile.preferences?.regionalState || patient.state || 'Assam';
+    const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+    const todayDateStr = new Date().toLocaleDateString('en-IN', istOptionsDate);
+    const todayTimeStr = new Date().toLocaleTimeString('en-IN', istOptionsTime);
 
-    // 0. Specialized Memory & Dementia Knowledge Base
+    // 0. Real-time Date and Time queries
+    if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
+      if (currentLang === 'hi') {
+        return `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`;
+      }
+      if (currentLang === 'as') {
+        return `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr} (${todayDateStr})। এয়া জিৰণি লোৱাৰ বা স্মৃতিৰ অনুশীলন কৰাৰ উত্তম সময়! ⏰✨`;
+      }
+      if (currentLang === 'bn') {
+        return `নমস্কার ${firstName}! এখন সময় ${todayTimeStr} (${todayDateStr})। এটি বিশ্রাম নেওয়া বা সহজ স্মৃতিচর্চার খুব সুন্দর সময়! ⏰✨`;
+      }
+      return `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. It's a peaceful moment to relax or do a gentle memory exercise! ⏰✨`;
+    }
+
+    if (text.includes('what date') || text.includes('today\'s date') || text.includes('which day') || text.includes('what day is today') || text.includes('aaj kaun sa din') || text.includes('aaj ki tarikh')) {
+      if (currentLang === 'hi') {
+        return `आज की तारीख ${todayDateStr} है। आपका दिन सुखद और शांत रहे! 📅🌸`;
+      }
+      return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
+    }
+
+    // 0.5 Specialized Memory & Dementia Knowledge Base
     if (text.includes('dementia') || text.includes('what is dementia')) {
       return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks. It is not a personal failing—it is simply changes in brain connections over time. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
     }

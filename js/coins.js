@@ -68,6 +68,14 @@ const Coins = {
   },
 
   /**
+   * Alias for getBalance()
+   * @returns {number}
+   */
+  get() {
+    return this.getBalance();
+  },
+
+  /**
    * Get encouraging message based on coins earned
    * @param {number} coinsEarned
    * @returns {string}
