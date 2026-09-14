@@ -1,15 +1,17 @@
 /* ============================================================
-   SMRITI — Internationalization (i18n)
-   English default, NER language support, fallback system
+   SMRITI (स्मृति) — Internationalization (i18n)
+   Google Stitch Design System & Antigravity Workflow Engine
+   Supports English (en), Hindi (hi), Bengali (bn), Assamese (as),
+   and Northeastern regional dialects with robust fallback to English.
    ============================================================ */
 
 import Storage from './storage.js';
 
-const translations = {
+export const stitchTranslations = {
   en: {
-    // App
+    // App & Branding
     appName: 'SMRITI',
-    appTagline: 'Cognitive Care & Memory Companion',
+    appTagline: 'Daily Memory & Wellness Sanctuary',
     welcome: 'Welcome',
     hello: 'Hello',
     greeting: "Let's exercise your mind today!",
@@ -21,1058 +23,628 @@ const translations = {
     cancel: 'Cancel',
     confirm: 'Confirm',
     loading: 'Loading...',
-    
-    // Rewards Store
-    rewardsTitle: 'Rewards & Badges',
-    rewardsSubtitle: 'Redeem your hard-earned coins for digital achievement badges and physical wellness gifts!',
-    rewardsBadgeStore: 'Digital Milestone Badges',
-    rewardsPhysicalStore: 'Physical Wellness Gifts',
-    rewardsBuy: 'Redeem',
-    rewardsClaimed: 'Unlocked ✓',
-    rewardsNotEnough: 'Keep playing to earn more coins!',
-    rewardsCongratBadge: 'Congratulations! You unlocked the badge:',
-    rewardsCongratGift: 'Wonderful! Your wellness gift claim has been logged for delivery.',
-    
-    // Auth
-    login: 'Login',
-    register: 'Register',
-    loginTitle: 'Welcome to SMRITI',
-    loginSubtitle: 'Sign in to continue your cognitive care journey',
-    nameLabel: 'Your Name',
-    namePlaceholder: 'Enter your name',
-    phoneLabel: 'Phone Number',
-    phonePlaceholder: 'Enter 10-digit phone number',
-    roleLabel: 'I am a...',
-    rolePatient: 'Patient',
-    rolePatientDesc: 'I want to play cognitive games',
-    roleCaregiver: 'Caregiver / ASHA',
-    roleCaregiverDesc: 'I care for a patient',
-    sendOtp: 'Send OTP',
-    resendOtp: 'Resend OTP',
-    otpSent: 'OTP sent! Check your phone',
-    otpExpired: 'OTP expired. Please request a new one',
-    otpInvalid: 'Invalid OTP. Please try again',
-    otpVerified: 'Verified successfully!',
-    enterOtp: 'Enter the 4-digit OTP',
-    verifyOtp: 'Verify OTP',
-    cooldownMsg: 'Resend in',
-    demoOtp: 'Demo OTP:',
-    
-    // Navigation
-    navHome: 'Home',
-    navGames: 'Games',
-    navLeaderboard: 'Ranks',
-    navHistory: 'History',
-    navDashboard: 'Dashboard',
-    navProfile: 'Profile',
-    
-    // Games Hub
-    gamesTitle: 'Cognitive Games',
-    gamesSubtitle: 'Choose a game to train your mind',
+
+    // Header & Status
+    status: {
+      online: 'Online',
+      offline: 'Offline Mode'
+    },
+    nav: {
+      home: 'Home',
+      games: 'Games',
+      memories: 'Memories',
+      wellness: 'Wellness',
+      progress: 'Progress',
+      settings: 'Settings',
+      caregiver: 'Caregiver',
+      sound: 'Sound',
+      voice: 'Voice',
+      sos: 'SOS'
+    },
     coins: 'Coins',
-    leaderboard: 'Leaderboard',
-    history: 'History',
-    
-    // Game Common & Timer Controls
+    settingsLanguage: 'Language',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'Caregiver Connected',
+      status: 'Raj Das (Son) · Connected',
+      viewReport: 'View Caregiver Report'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'Good morning,',
+      welcome_text: 'Welcome to your daily memory and wellness sanctuary.',
+      tasks_completed: 'Daily Tasks: {completed} of {total} Completed',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'CALL LOVED ONE',
+      son_name: 'Raj Das (Son)',
+      ritual_title: 'DAILY RITUAL',
+      ritual_action: '3-Step Guide →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'SCHEDULED ROUTINE REMINDER',
+      time: '08:30 AM (Morning)',
+      medicine_title: 'Morning Blood Pressure Medicine',
+      medicine_instructions: '1 tablet with a warm glass of water',
+      mark_done: 'Mark as Taken',
+      completed: 'Completed ✓',
+      snooze: 'Snooze 15m',
+      coins_reward: '+10 Coins'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'How are you feeling today?',
+      great: 'Great',
+      good: 'Good',
+      okay: 'Okay',
+      low: 'Low',
+      worried: 'Worried',
+      feedback_title: 'Checked in as {mood}',
+      feedback_great: 'Wonderful to see your bright positive energy! A great mood is the perfect foundation for memory exercises.',
+      feedback_good: 'Glad to see you in good spirits! Engaging your mind now helps build long-term memory resilience.',
+      feedback_okay: 'A calm, quiet day is a true gift. Take a gentle breath and enjoy peaceful moments.',
+      feedback_low: 'We are sending you gentle warmth and care. Take your time; you are deeply cherished and supported.',
+      feedback_worried: 'Take a deep breath with us. You are in a safe, peaceful sanctuary. Would you like to call Raj or listen to soothing music?',
+      chip_hornbill: 'Play Hornbill Memory',
+      chip_story: 'Visual Story Recall',
+      chip_wellness: 'Daily Wellness Guide'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: "TODAY'S PERSONALIZED ACTIVITY",
+      title: 'Bamboo Sequence',
+      category: 'Pattern Attention',
+      description: 'Repeat peaceful glowing bamboo rhythm pads',
+      reason: 'Recommended because of your great positive energy today — challenge your pattern memory with glowing bamboo rhythms!',
+      start_btn: 'START ACTIVITY'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: "Today's Good Thought",
+      badge: 'Affirmation',
+      listen: 'Listen',
+      new: 'New Thought'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'Saathi',
+      title: 'Saathi AI Companion',
+      subtitle: 'Your empathetic voice and memory companion',
+      badge: 'Online & Listening',
+      welcome: 'Hello! I am Saathi, your memory and wellness companion. How can I help brighten your day?',
+      placeholder: 'Ask Saathi anything or tap 🎤...',
+      send: 'Send',
+      listening: 'Listening...',
+      thinking: 'Thinking...',
+      voice_note: '💡 You can speak or type anytime. Saathi speaks responses aloud.',
+      quick_meds: '💊 When is my medicine?',
+      quick_sos: '🚨 Emergency SOS Help',
+      quick_game: '🎋 Play Bamboo Game',
+      quick_tips: '🌻 Good Thought Today'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'Quick Navigation',
+      games: 'Games Hub',
+      lifestory: 'Life Story',
+      entertainment: 'Entertainment',
+      family: 'Family Play',
+      stars: 'Weekly Stars',
+      wellness: 'Wellness',
+      reminders: 'Reminders',
+      medicines: 'Medicines',
+      emergency: 'Emergency',
+      rewards: 'Rewards & Badges'
+    },
+
+    // Games Common
+    gamesTitle: 'Cognitive Games',
+    gamesSubtitle: 'Choose an activity to nourish your mind',
     play: 'Play',
-    playAgain: 'Play Again',
-    exitToHub: 'Back to Games',
     score: 'Score',
-    time: 'Time',
     accuracy: 'Accuracy',
-    level: 'Level',
-    hints: 'Hints',
-    coinsEarned: 'Coins Earned',
     difficulty: 'Difficulty',
     easy: 'Easy',
     medium: 'Medium',
-    hard: 'Hard',
-    readInstruction: '🔊 Read Instruction',
-    startGame: 'Start Game',
-    gameOver: 'Game Complete!',
-    timeLimit: 'Game Time Limit',
-    relaxedMode: 'No Rush 🕊️ (Take your time)',
-    timeAdjustment: 'Adjust Time',
-
-    // Moods & Adaptive
-    howAreYouFeeling: 'How are you feeling today?',
-    moodHappy: 'Happy 🌸',
-    moodCalm: 'Calm 🍃',
-    moodOkay: 'Okay ☀️',
-    moodLow: 'Low 🌧️',
-    moodWorried: 'Worried 🍂',
-    takeDeepBreath: 'Take Deep Breath',
-    playGentleGame: 'Play Gentle Game',
-    talkToCompanion: 'Talk to Companion',
-
-    // Memories & Life Story
-    memories: 'Memories',
-    memoriesTitle: 'Life Story & Memory Gallery',
-    memoriesSubtitle: 'Cherished family moments, photos, and spoken stories',
-    slideshow: 'Slideshow Mode',
-    allMemories: 'All Memories',
-    listenVoiceStory: '🔊 Listen to Voice Story',
-    addMemory: 'Add Memory',
-    uploadPhotoStory: 'Upload Photo Story',
-
-    // Voice & Companion
-    voiceGuide: 'Voice Guidance',
-    voiceNav: 'Voice Navigation',
-    tapToSpeak: 'Tap to Speak',
-    voiceListening: 'Listening...',
-
-    // Mindful Progress Garden
-    mindGarden: 'Your Growing Mind Garden',
-    mindfulStreak: 'Mindfulness Streak',
-    weeklySummary: 'Weekly Positive Summary',
-    gardenSprout: 'Tender Sprout 🌱',
-    gardenSapling: 'Young Sapling 🌿',
-    gardenBlossom: 'Blooming Flower 🌸',
-    gardenSanctuary: 'Serene Sanctuary Tree 🌳',
-
-    // Emergency & Caregiver
-    emergencyHelp: 'Emergency Help 🛟',
-    caregiverHub: 'Caregiver Hub',
-    caregiverNotice: 'Caregiver Caring Notice',
-    dailyReminders: 'Daily Gentle Reminders',
-    
-    // Encouragement
-    excellent: 'Excellent! 🌟',
-    greatJob: 'Great job! 👏',
-    wellDone: 'Well done! 😊',
-    goodEffort: 'Good effort! 💪',
-    keepTrying: "Keep trying, you're doing great! 🌈",
-    tryAgain: "Let's try again!",
-    
-    // Game 1: Hornbill Memory Nest
-    g1Title: 'Hornbill Memory Nest',
-    g1Desc: 'Match pairs of nature cards',
-    g1Tag: 'Memory',
-    g1Instruction: 'Flip two cards to find matching pairs. Remember where each card is!',
-    g1Matches: 'Matches',
-    g1Moves: 'Moves',
-    
-    // Game 2: Memory Moments
-    g2Title: 'Memory Moments',
-    g2Desc: 'Remember the story sequence',
-    g2Tag: 'Memory',
-    g2Instruction: 'Watch the story unfold, then answer questions about what you saw.',
-    g2Remember: 'Remember this sequence...',
-    g2Question: 'Question',
-    
-    // Game 3: Familiar Faces
-    g3Title: 'Familiar Faces',
-    g3Desc: 'Recognise people around you',
-    g3Tag: 'Recognition',
-    g3Instruction: 'Look at the face and tell us who this person is. Use hints if you need help!',
-    g3WhoIsThis: 'Who is this?',
-    g3Hint: 'Get a Hint',
-    
-    // Game 4: Remember My Home
-    g4Title: 'Remember My Home',
-    g4Desc: 'Recall objects in a room',
-    g4Tag: 'Memory',
-    g4Instruction: 'Look at the room carefully, then answer questions about the objects you saw.',
-    g4LookCarefully: 'Look at this room carefully...',
-    g4WhereWas: 'Where was the',
-    g4WhatObjects: 'Which objects were in the room?',
-    
-    // Game 5: My Day
-    g5Title: 'My Day',
-    g5Desc: 'Put your daily routine in order',
-    g5Tag: 'Routine',
-    g5Instruction: 'Arrange the daily activities in the correct order by tapping them.',
-    g5TapOrder: 'Tap the activities in the correct order:',
-    g5Safety: 'This is a practice activity, not medical advice.',
-    g5CheckOrder: 'Check My Order',
-    g5Reset: 'Reset',
-    
-    // Game 6: Listen & Remember
-    g6Title: 'Listen & Remember',
-    g6Desc: 'Listen and answer questions',
-    g6Tag: 'Attention',
-    g6Instruction: 'Listen to the sentence carefully, then answer the question about what you heard.',
-    g6ListenCarefully: 'Listen carefully...',
-    g6PlayAgainAudio: '🔊 Play Again',
-    g6WhatDidYouHear: 'What did you hear?',
-    
-    // Game 7: Bamboo Sequence
-    g7Title: 'Bamboo Sequence',
-    g7Desc: 'Repeat the glowing sequence',
-    g7Tag: 'Attention',
-    g7Instruction: 'Watch the pads light up, then repeat the sequence in the same order.',
-    g7Watch: 'Watch carefully...',
-    g7YourTurn: 'Your turn! Repeat the sequence',
-    g7Level: 'Level',
-    g7BestLevel: 'Best Level',
-    
-    // Leaderboard
-    lbTitle: 'Leaderboard',
-    lbRank: 'Rank',
-    lbPlayer: 'Player',
-    lbCoins: 'Total Coins',
-    lbSessions: 'Sessions',
-    lbBestScore: 'Best Score',
-    lbEmpty: 'Play some games to see rankings!',
-    
-    // History
-    historyTitle: 'Game History',
-    historyEmpty: 'No games played yet. Start playing to see your progress!',
-    historyFilter: 'Filter by game',
-    historyAll: 'All Games',
-    
-    // Dashboard
-    dashTitle: 'Caregiver Dashboard',
-    dashTotalSessions: 'Total Sessions',
-    dashAvgAccuracy: 'Avg Accuracy',
-    dashTotalCoins: 'Total Coins',
-    dashBestGame: 'Best Game',
-    dashRecentActivity: 'Recent Activity',
-    dashCognitiveProfile: 'Cognitive Profile',
-    dashNoData: 'No patient data available yet.',
-    
-    // Personalisation
-    persTitle: 'Cultural Personalisation',
-    persSubtitle: 'Help us personalise your experience',
-    persPreferredName: 'Preferred Name',
-    persNativePlace: 'Native Place',
-    persFestivals: 'Favourite Festivals',
-    persFood: 'Food Preferences',
-    persLanguageNotes: 'Language Notes',
-    persMemoryNotes: 'Memory Notes',
-    persSaved: 'Preferences saved!',
-    
-    // Settings
-    settingsTitle: 'Settings',
-    settingsLanguage: 'Language',
-    settingsProfile: 'Profile',
-    settingsPersonalisation: 'Cultural Personalisation',
-    
-    // Language names
-    langEn: 'English',
-    langHi: 'हिन्दी (Hindi)',
-    langAs: 'অসমীয়া (Assamese)',
-    langBn: 'বাংলা (Bengali)',
-    langMni: 'মৈতৈলোন্ (Manipuri)',
-    langBrx: 'बड़ो (Bodo)',
-    langLus: 'Mizo',
-    langNag: 'Nagamese',
+    hard: 'Hard'
   },
-  
+
   hi: {
-    chatbotTitle: 'स्मृति AI साथी',
-    chatbotSubtitle: 'आपकी स्नेहमयी आवाज़ और स्मृति साथी',
-    chatbotPromptTime: '⏰ क्या समय हुआ है?',
-    chatbotPromptExercises: '🧠 स्मृति अभ्यास',
-    chatbotPromptStory: '📖 एक कहानी सुनाएं',
-    chatbotPromptThought: '🌻 आज का सुविचार',
-    chatbotPromptGame: '🎮 खेल का सुझाव दें',
-    chatbotInputPlaceholder: 'संदेश लिखें या 🎤 दबाकर बोलें...',
-    chatbotSend: 'भेजें',
-    chatbotVoiceNote: '💡 आप कभी भी बोल या लिख सकते हैं। स्मृति उत्तर बोलकर सुनाती है।',
-    chatbotThinking: 'स्मृति सोच रही है...',
+    // App & Branding
     appName: 'स्मृति',
-    appTagline: 'संज्ञानात्मक देखभाल और स्मृति साथी',
-    welcome: 'स्वागत है',
+    appTagline: 'दैनिक स्मृति एवं स्वास्थ्य अभयारण्य',
+    welcome: 'नमस्ते',
     hello: 'नमस्ते',
-    greeting: 'आज अपने दिमाग को व्यायाम दें!',
+    greeting: 'आइए आज अपने मन का अभ्यास करें!',
     logout: 'लॉग आउट',
     settings: 'सेटिंग्स',
     back: 'वापस',
     close: 'बंद करें',
-    save: 'सेव करें',
+    save: 'सहेजें',
     cancel: 'रद्द करें',
     confirm: 'पुष्टि करें',
     loading: 'लोड हो रहा है...',
-    
-    // Rewards Store
-    rewardsTitle: 'इनाम व बैज',
-    rewardsSubtitle: 'अपने अर्जित सिक्कों को डिजिटल उपलब्धि बैज और स्वास्थ्य उपहारों के लिए रिडीम करें!',
-    rewardsBadgeStore: 'डिजिटल उपलब्धि बैज',
-    rewardsPhysicalStore: 'स्वास्थ्य व उपहार',
-    rewardsBuy: 'रिडीम करें',
-    rewardsClaimed: 'अनलॉक ✓',
-    rewardsNotEnough: 'और सिक्के कमाने के लिए खेल खेलना जारी रखें!',
-    rewardsCongratBadge: 'बधाई हो! आपने बैज अनलॉक किया:',
-    rewardsCongratGift: 'बहुत बढ़िया! आपके उपहार का अनुरोध दर्ज कर लिया गया है।',
-    
-    login: 'लॉगिन',
-    register: 'रजिस्टर',
-    loginTitle: 'स्मृति में आपका स्वागत है',
-    loginSubtitle: 'अपनी संज्ञानात्मक देखभाल यात्रा जारी रखने के लिए साइन इन करें',
-    nameLabel: 'आपका नाम',
-    namePlaceholder: 'अपना नाम दर्ज करें',
-    phoneLabel: 'फ़ोन नंबर',
-    phonePlaceholder: '10 अंकों का फ़ोन नंबर दर्ज करें',
-    roleLabel: 'मैं हूँ...',
-    rolePatient: 'मरीज़',
-    rolePatientDesc: 'मैं संज्ञानात्मक खेल खेलना चाहता/चाहती हूँ',
-    roleCaregiver: 'देखभालकर्ता / आशा',
-    roleCaregiverDesc: 'मैं एक मरीज़ की देखभाल करता/करती हूँ',
-    sendOtp: 'OTP भेजें',
-    resendOtp: 'OTP दोबारा भेजें',
-    otpSent: 'OTP भेजा गया! अपना फ़ोन जांचें',
-    otpExpired: 'OTP समाप्त हो गया। कृपया नया अनुरोध करें',
-    otpInvalid: 'गलत OTP। कृपया पुनः प्रयास करें',
-    otpVerified: 'सफलतापूर्वक सत्यापित!',
-    enterOtp: '4 अंकों का OTP दर्ज करें',
-    verifyOtp: 'OTP सत्यापित करें',
-    navHome: 'होम',
-    navGames: 'खेल',
-    navLeaderboard: 'रैंक',
-    navHistory: 'इतिहास',
-    navDashboard: 'डैशबोर्ड',
-    navProfile: 'प्रोफ़ाइल',
-    gamesTitle: 'संज्ञानात्मक खेल',
-    gamesSubtitle: 'अपने दिमाग को प्रशिक्षित करने के लिए एक खेल चुनें',
+
+    // Header & Status
+    status: {
+      online: 'ऑनलाइन',
+      offline: 'ऑफ़लाइन मोड'
+    },
+    nav: {
+      home: 'होम',
+      games: 'खेल',
+      memories: 'यादें',
+      wellness: 'स्वास्थ्य',
+      progress: 'प्रगति',
+      settings: 'सेटिंग्स',
+      caregiver: 'देखभालकर्ता',
+      sound: 'ध्वनि',
+      voice: 'आवाज़',
+      sos: 'आपातकाल'
+    },
     coins: 'सिक्के',
+    settingsLanguage: 'भाषा',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'देखभालकर्ता जुड़े हैं',
+      status: 'राज दास (सुपुत्र) · जुड़े हैं',
+      viewReport: 'देखभाल रिपोर्ट देखें'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'शुभ प्रभात,',
+      welcome_text: 'आपके दैनिक स्मृति एवं स्वास्थ्य अभयारण्य में आपका स्वागत है।',
+      tasks_completed: 'दैनिक कार्य: {total} में से {completed} पूर्ण',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'स्वजन को कॉल करें',
+      son_name: 'राज दास (सुपुत्र)',
+      ritual_title: 'दैनिक नियम',
+      ritual_action: '3-चरणीय मार्गदर्शिका →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'निर्धारित दवा अनुस्मारक',
+      time: 'सुबह 08:30 बजे',
+      medicine_title: 'सुबह की रक्तचाप की दवा',
+      medicine_instructions: 'गुनगुने पानी के साथ 1 गोली लें',
+      mark_done: 'दवा ले ली',
+      completed: 'पूर्ण ✓',
+      snooze: '15 मिनट बाद याद दिलाएं',
+      coins_reward: '+10 सिक्के'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'आज आप कैसा महसूस कर रहे हैं?',
+      great: 'अति प्रसन्न',
+      good: 'अच्छा',
+      okay: 'सामान्य',
+      low: 'उदास',
+      worried: 'चिंतित',
+      feedback_title: '{mood} दर्ज किया गया',
+      feedback_great: 'आपकी सकारात्मक ऊर्जा देखकर मन प्रसन्न हो गया! सुखद मन स्मृति अभ्यास के लिए सर्वोत्तम है।',
+      feedback_good: 'आपको प्रसन्न देखकर खुशी हुई! मन को सक्रिय रखने से याददाश्त मजबूत होती है।',
+      feedback_okay: 'एक शांत और सहज दिन भी अनमोल उपहार है। गहरी सांस लें और शांति का अनुभव करें।',
+      feedback_low: 'हम आपके साथ हैं। धीरे-धीरे सांस लें; आपका परिवार आपसे बहुत स्नेह करता है।',
+      feedback_worried: 'कृपया शांत रहें। आप पूर्णतः सुरक्षित हैं। क्या आप राज से बात करना चाहते हैं या मधुर संगीत सुनना पसंद करेंगे?',
+      chip_hornbill: 'हॉर्नबिल स्मृति खेलें',
+      chip_story: 'कहानी स्मरण खेल',
+      chip_wellness: 'दैनिक स्वास्थ्य मार्गदर्शिका'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: 'आज की विशेष गतिविधि',
+      title: 'बांस अनुक्रम खेल',
+      category: 'पैटर्न ध्यान',
+      description: 'चमकते बांस के पैड्स की लय दोहराएं',
+      reason: 'आपकी आज की ऊर्जा को देखते हुए — बांस के सुरों से अपनी स्मरण शक्ति को जगाएं!',
+      start_btn: 'गतिविधि शुरू करें'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: 'आज का सुविचार',
+      badge: 'शुभ विचार',
+      listen: 'सुनें',
+      new: 'नया विचार'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'साथी',
+      title: 'साथी AI सहायक',
+      subtitle: 'आपकी स्नेहमयी आवाज़ और स्मृति साथी',
+      badge: 'ऑनलाइन एवं तत्पर',
+      welcome: 'नमस्ते! मैं साथी हूँ, आपका स्मृति और स्वास्थ्य मित्र। आज मैं आपकी क्या सेवा करूँ?',
+      placeholder: 'साथी से कुछ भी पूछें या 🎤 दबाएं...',
+      send: 'भेजें',
+      listening: 'सुन रहा हूँ...',
+      thinking: 'सोच रहा हूँ...',
+      voice_note: '💡 आप कभी भी बोल या लिख सकते हैं। साथी बोलकर उत्तर देता है।',
+      quick_meds: '💊 मेरी दवा का समय क्या है?',
+      quick_sos: '🚨 आपातकालीन SOS सहायता',
+      quick_game: '🎋 बांस खेल खेलें',
+      quick_tips: '🌻 आज का सुविचार'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'त्वरित नेविगेशन',
+      games: 'खेल केंद्र',
+      lifestory: 'जीवन कथा',
+      entertainment: 'मनोरंजन',
+      family: 'पारिवारिक खेल',
+      stars: 'साप्ताहिक सितारे',
+      wellness: 'स्वास्थ्य',
+      reminders: 'अनुस्मारक',
+      medicines: 'दवाइयाँ',
+      emergency: 'आपातकाल',
+      rewards: 'पुरस्कार एवं बैज'
+    },
+
+    // Games Common
+    gamesTitle: 'संज्ञानात्मक खेल',
+    gamesSubtitle: 'अपने मस्तिष्क को सक्रिय रखने के लिए खेल चुनें',
     play: 'खेलें',
-    playAgain: 'फिर से खेलें',
-    exitToHub: 'खेलों पर वापस जाएं',
-    score: 'स्कोर',
-    time: 'समय',
+    score: 'अंक',
     accuracy: 'सटीकता',
     difficulty: 'कठिनाई',
-    easy: 'आसान',
+    easy: 'सरल',
     medium: 'मध्यम',
-    hard: 'कठिन',
-    readInstruction: '🔊 निर्देश सुनें',
-    startGame: 'खेल शुरू करें',
-    gameOver: 'खेल पूरा!',
-    excellent: 'उत्कृष्ट! 🌟',
-    greatJob: 'बहुत अच्छा! 👏',
-    wellDone: 'शाबाश! 😊',
-    goodEffort: 'अच्छा प्रयास! 💪',
-    keepTrying: 'कोशिश जारी रखें, आप बहुत अच्छा कर रहे हैं! 🌈',
-    tryAgain: 'फिर से कोशिश करें!',
-    g1Title: 'हॉर्नबिल मेमोरी नेस्ट',
-    g1Desc: 'प्रकृति कार्ड जोड़ी मिलाएं',
-    g1Tag: 'स्मृति',
-    g1Instruction: 'मिलान जोड़ी खोजने के लिए दो कार्ड पलटें। याद रखें हर कार्ड कहाँ है!',
-    g2Title: 'मेमोरी मोमेंट्स',
-    g2Desc: 'कहानी क्रम याद रखें',
-    g2Tag: 'स्मृति',
-    g2Instruction: 'कहानी देखें, फिर आपने जो देखा उसके बारे में सवालों के जवाब दें।',
-    g3Title: 'परिचित चेहरे',
-    g3Desc: 'अपने आसपास के लोगों को पहचानें',
-    g3Tag: 'पहचान',
-    g3Instruction: 'चेहरा देखें और बताएं कि यह व्यक्ति कौन है। ज़रूरत हो तो संकेत लें!',
-    g4Title: 'मेरा घर याद करें',
-    g4Desc: 'कमरे की वस्तुओं को याद करें',
-    g4Tag: 'स्मृति',
-    g4Instruction: 'कमरे को ध्यान से देखें, फिर वस्तुओं के बारे में सवालों के जवाब दें।',
-    g5Title: 'मेरा दिन',
-    g5Desc: 'दैनिक दिनचर्या को क्रम में रखें',
-    g5Tag: 'दिनचर्या',
-    g5Instruction: 'दैनिक गतिविधियों को सही क्रम में टैप करके व्यवस्थित करें।',
-    g5Safety: 'यह एक अभ्यास गतिविधि है, चिकित्सा सलाह नहीं।',
-    g6Title: 'सुनें और याद रखें',
-    g6Desc: 'सुनें और सवालों के जवाब दें',
-    g6Tag: 'ध्यान',
-    g6Instruction: 'वाक्य ध्यान से सुनें, फिर सवाल का जवाब दें।',
-    g7Title: 'बांस अनुक्रम',
-    g7Desc: 'चमकते अनुक्रम को दोहराएं',
-    g7Tag: 'ध्यान',
-    g7Instruction: 'पैड को जलते देखें, फिर उसी क्रम में अनुक्रम दोहराएं।',
-    timeLimit: 'खेल की समय सीमा',
-    relaxedMode: 'आराम से 🕊️ (कोई जल्दबाजी नहीं)',
-    timeAdjustment: 'समय समायोजित करें',
-
-    // Moods & Adaptive
-    howAreYouFeeling: 'आज आप कैसा महसूस कर रहे हैं?',
-    moodHappy: 'प्रसन्न 🌸',
-    moodCalm: 'शांत 🍃',
-    moodOkay: 'ठीक-ठाक ☀️',
-    moodLow: 'उदास 🌧️',
-    moodWorried: 'चिंतित 🍂',
-    takeDeepBreath: 'गहरी सांस लें',
-    playGentleGame: 'हल्का खेल खेलें',
-    talkToCompanion: 'साथी से बात करें',
-
-    // Memories & Life Story
-    memories: 'यादें',
-    memoriesTitle: 'जीवन की यादें और फोटो संग्रह',
-    memoriesSubtitle: 'परिवार के अनमोल पल, तस्वीरें और मधुर कहानियां',
-    slideshow: 'स्लाइडशो मोड',
-    allMemories: 'सभी यादें',
-    listenVoiceStory: '🔊 कहानी सुनें',
-    addMemory: 'नई याद जोड़ें',
-    uploadPhotoStory: 'फोटो कहानी अपलोड करें',
-
-    // Voice & Companion
-    voiceGuide: 'आवाज मार्गदर्शन',
-    voiceNav: 'आवाज नेविगेशन',
-    tapToSpeak: 'बोलने के लिए टैप करें',
-    voiceListening: 'सुन रहे हैं...',
-
-    // Mindful Progress Garden
-    mindGarden: 'आपका बढ़ता विचार बगीचा',
-    mindfulStreak: 'माइंडफुलनेस निरंतरता',
-    weeklySummary: 'साप्ताहिक सकारात्मक सारांश',
-    gardenSprout: 'कोमल अंकुर 🌱',
-    gardenSapling: 'छोटा पौधा 🌿',
-    gardenBlossom: 'खिला हुआ फूल 🌸',
-    gardenSanctuary: 'विशाल शांत वृक्ष 🌳',
-
-    // Emergency & Caregiver
-    emergencyHelp: 'आपातकालीन सहायता 🛟',
-    caregiverHub: 'देखभालकर्ता हब',
-    caregiverNotice: 'देखभालकर्ता सूचना',
-    dailyReminders: 'दैनिक कोमल अनुस्मारक',
-
-    lbTitle: 'लीडरबोर्ड',
-    historyTitle: 'खेल इतिहास',
-    historyEmpty: 'अभी तक कोई खेल नहीं खेला। अपनी प्रगति देखने के लिए खेलना शुरू करें!',
-    dashTitle: 'देखभालकर्ता डैशबोर्ड',
-    dashTotalSessions: 'कुल सत्र',
-    dashAvgAccuracy: 'औसत सटीकता',
-    dashTotalCoins: 'कुल सिक्के',
-    persTitle: 'सांस्कृतिक व्यक्तिगतकरण',
-    settingsTitle: 'सेटिंग्स',
-    settingsLanguage: 'भाषा',
+    hard: 'कठिन'
   },
 
   bn: {
-    chatbotTitle: 'স্মৃতি AI সঙ্গী',
-    chatbotSubtitle: 'আপনার প্রিয় কণ্ঠ ও স্মৃতি সঙ্গী',
-    chatbotPromptTime: '⏰ এখন কটা বাজে?',
-    chatbotPromptExercises: '🧠 স্মৃতি অনুশীলন',
-    chatbotPromptStory: '📖 একটি গল্প বলুন',
-    chatbotPromptThought: '🌻 আজকের শুভ ভাবনা',
-    chatbotPromptGame: '🎮 খেলার পরামর্শ দিন',
-    chatbotInputPlaceholder: 'বার্তা লিখুন অথবা 🎤 চেপে বলুন...',
-    chatbotSend: 'পাঠান',
-    chatbotVoiceNote: '💡 আপনি যেকোনো সময় বলতে বা লিখতে পারেন। স্মৃতি পড়ে শোনাবে।',
-    chatbotThinking: 'স্মৃতি ভাবছে...',
+    // App & Branding
     appName: 'স্মৃতি',
-    appTagline: 'জ্ঞানীয় যত্ন ও স্মৃতি সহায়ক',
+    appTagline: 'দৈনিক স্মৃতি ও সুস্থতা আশ্রয়স্থল',
     welcome: 'স্বাগতম',
     hello: 'নমস্কার',
-    greeting: 'আজ আপনার মনকে সতেজ ও সক্রিয় রাখুন!',
-    logout: 'লগআউট',
+    greeting: 'আসুন আজ মন সতেজ করার চর্চা করি!',
+    logout: 'লগ আউট',
     settings: 'সেটিংস',
     back: 'ফিরে যান',
     close: 'বন্ধ করুন',
-    save: 'সংরক্ষণ করুন',
-    cancel: 'বাতিল করুন',
-    confirm: 'নিশ্চিত করুন',
+    save: 'সংরক্ষণ',
+    cancel: 'বাতিল',
+    confirm: 'নিশ্চিত',
     loading: 'লোড হচ্ছে...',
-    login: 'লগইন',
-    register: 'নিবন্ধন',
-    loginTitle: 'স্মৃতি অ্যাপে স্বাগতম',
-    loginSubtitle: 'আপনার জ্ঞানীয় স্বাস্থ্য ও স্মৃতি যত্ন চালিয়ে যেতে সাইন ইন করুন',
-    nameLabel: 'আপনার নাম',
-    namePlaceholder: 'আপনার পুরো নাম লিখুন',
-    phoneLabel: 'ফোন নম্বর',
-    phonePlaceholder: '১০ অঙ্কের মোবাইল নম্বর লিখুন',
-    roleLabel: 'আমি একজন...',
-    rolePatient: 'বয়োজ্যেষ্ঠ / রোগী',
-    rolePatientDesc: 'আমি স্মৃতি খেলা ও মনচর্চা করতে চাই',
-    roleCaregiver: 'পরিচর্যাকারী / পরিবার',
-    roleCaregiverDesc: 'আমি পরিবারের বয়োজ্যেষ্ঠের দেখাশোনা করি',
-    sendOtp: 'OTP পাঠান',
-    resendOtp: 'আবার OTP পাঠান',
-    otpSent: 'OTP পাঠানো হয়েছে! মোবাইল দেখুন',
-    otpExpired: 'OTP মেয়াদ শেষ। নতুন অনুরোধ করুন',
-    otpInvalid: 'ভুল OTP। আবার চেষ্টা করুন',
-    otpVerified: 'সফলভাবে যাচাই করা হয়েছে!',
-    enterOtp: '৪ অঙ্কের OTP লিখুন',
-    verifyOtp: 'OTP যাচাই করুন',
-    navHome: 'হোম',
-    navGames: 'খেলাধুলো',
-    navLeaderboard: 'র‍্যাঙ্ক',
-    navHistory: 'ইতিহাস',
-    navDashboard: 'ড্যাশবোর্ড',
-    navProfile: 'প্রোফাইল',
-    gamesTitle: 'স্মৃতি ও বুদ্ধির খেলা',
-    gamesSubtitle: 'মনকে সক্রিয় রাখতে একটি প্রিয় খেলা বেছে নিন',
+
+    // Header & Status
+    status: {
+      online: 'অনলাইন',
+      offline: 'অফলাইন মোড'
+    },
+    nav: {
+      home: 'হোম',
+      games: 'খেলা',
+      memories: 'স্মৃতি',
+      wellness: 'সুস্থতা',
+      progress: 'অগ্রগতি',
+      settings: 'সেটিংস',
+      caregiver: 'তত্ত্বাবধায়ক',
+      sound: 'সুর',
+      voice: 'কণ্ঠ',
+      sos: 'জরুরি'
+    },
     coins: 'কয়েন',
+    settingsLanguage: 'ভাষা',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'তত্ত্বাবধায়ক সংযুক্ত',
+      status: 'রাজ দাস (পুত্র) · সংযুক্ত',
+      viewReport: 'যত্ন রিপোর্ট দেখুন'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'সুপ্রভাত,',
+      welcome_text: 'আপনার দৈনিক স্মৃতি ও সুস্থতার আলয়ে স্বাগতম।',
+      tasks_completed: 'দৈনিক কাজ: {total}-এর মধ্যে {completed} সম্পন্ন',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'প্রিয়জনকে কল করুন',
+      son_name: 'রাজ দাস (পুত্র)',
+      ritual_title: 'দৈনিক নিয়ম',
+      ritual_action: '৩-ধাপের নির্দেশিকা →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'নির্ধারিত ওষুধের সময়সূচি',
+      time: 'সকাল ০৮:৩০ টা',
+      medicine_title: 'সকালের রক্তচাপের ওষুধ',
+      medicine_instructions: 'ঈষদুষ্ণ জলের সাথে ১টি ট্যাবলেট গ্রহণ করুন',
+      mark_done: 'ওষুধ খেয়েছি',
+      completed: 'সম্পন্ন ✓',
+      snooze: '১৫ মিনিট পর স্মরণ করান',
+      coins_reward: '+১০ কয়েন'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'আজ আপনার কেমন লাগছে?',
+      great: 'খুব ভালো',
+      good: 'ভালো',
+      okay: 'স্বাভাবিক',
+      low: 'মন খারাপ',
+      worried: 'উদ্বিগ্ন',
+      feedback_title: '{mood} হিসেবে চিহ্নিত',
+      feedback_great: 'আপনার হাসিখুশি মন দেখে আনন্দিত হলাম! প্রফুল্ল মন স্মৃতিচর্চার জন্য শ্রেষ্ঠ।',
+      feedback_good: 'আপনার ভালো লাগা দেখে শান্তি পেলাম! মন সক্রিয় রাখলে স্মৃতি সতেজ থাকে।',
+      feedback_okay: 'একটি শান্ত স্নিগ্ধ দিনও ঈশ্বরের আশীর্বাদ। ধীরে শ্বাস নিন ও বিশ্রাম করুন।',
+      feedback_low: 'আমরা আপনার পাশে আছি। কোনো চিন্তা করবেন না; আপনার পরিবার আপনাকে খুব ভালোবাসে।',
+      feedback_worried: 'শান্তভাবে গভীর শ্বাস নিন। আপনি সম্পূর্ণ নিরাপদ। আপনি কি রাজের সাথে কথা বলতে চান?',
+      chip_hornbill: 'হর্নবিল স্মৃতি খেলুন',
+      chip_story: 'গল্প স্মরণ খেলা',
+      chip_wellness: 'দৈনিক সুস্থতা নির্দেশিকা'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: 'আজকের বিশেষ মানসিক অনুশীলন',
+      title: 'বাঁশের সুর অনুক্রম',
+      category: 'মনোযোগ ও প্যাটার্ন',
+      description: 'উজ্জ্বল বাঁশের প্যাডের ছন্দ অনুসরণ করুন',
+      reason: 'আপনার প্রফুল্ল মনের জন্য — বাঁশির মিষ্টি ছন্দে আপনার স্মৃতিচর্চা করুন!',
+      start_btn: 'অনুশীলন শুরু করুন'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: 'আজকের শুভ ভাবনা',
+      badge: 'অনুপ্রেরণা',
+      listen: 'শুনুন',
+      new: 'নতুন ভাবনা'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'সাথী',
+      title: 'সাথী AI সহায়ক',
+      subtitle: 'আপনার প্রিয় কণ্ঠ ও স্মৃতি সঙ্গী',
+      badge: 'অনলাইন ও প্রস্তুত',
+      welcome: 'নমস্কার! আমি সাথী, আপনার স্মৃতি ও সুস্থতার বন্ধু। আজ আপনাকে কীভাবে সাহায্য করতে পারি?',
+      placeholder: 'সাথীকে কিছু জিজ্ঞাসা করুন বা 🎤 চাপুন...',
+      send: 'পাঠান',
+      listening: 'শুনছি...',
+      thinking: 'ভাবছি...',
+      voice_note: '💡 আপনি যেকোনো সময় বলতে বা লিখতে পারেন। সাথী পড়ে শোনাবে।',
+      quick_meds: '💊 আমার ওষুধের সময় কখন?',
+      quick_sos: '🚨 জরুরি SOS সাহায্য',
+      quick_game: '🎋 বাঁশের সুর খেলুন',
+      quick_tips: '🌻 আজকের শুভ চিন্তা'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'দ্রুত নেভিগেশন',
+      games: 'খেলার কেন্দ্র',
+      lifestory: 'জীবন কথা',
+      entertainment: 'বিনোদন',
+      family: 'পারিবারিক খেলা',
+      stars: 'সাপ্তাহিক তারা',
+      wellness: 'সুস্থতা',
+      reminders: 'স্মারক',
+      medicines: 'ওষুধপত্র',
+      emergency: 'জরুরি সাহায্য',
+      rewards: 'পুরস্কার ও ব্যাজ'
+    },
+
+    // Games Common
+    gamesTitle: 'মানসিক খেলা',
+    gamesSubtitle: 'মন সতেজ রাখতে একটি খেলা বেছে নিন',
     play: 'খেলুন',
-    playAgain: 'আবার খেলুন',
-    exitToHub: 'খেলায় ফিরে যান',
     score: 'স্কোর',
-    time: 'সময়',
-    accuracy: 'সঠিকতা',
+    accuracy: 'নির্ভুলতা',
     difficulty: 'কঠিনতা',
     easy: 'সহজ',
     medium: 'মাঝারি',
-    hard: 'কঠিন',
-    readInstruction: '🔊 নির্দেশ শুনুন',
-    startGame: 'খেলা শুরু করুন',
-    gameOver: 'খেলা সমাপ্ত!',
-    timeLimit: 'খেলার সময়সীমা',
-    relaxedMode: 'ধীরেসুস্থে 🕊️ (কোনো তাড়াহুড়ো নেই)',
-    timeAdjustment: 'সময় পরিবর্তন করুন',
-    howAreYouFeeling: 'আজ আপনার মন কেমন আছে?',
-    moodHappy: 'আনন্দিত 🌸',
-    moodCalm: 'শান্ত 🍃',
-    moodOkay: 'মোটামুটি ☀️',
-    moodLow: 'মন খারাপ 🌧️',
-    moodWorried: 'চিন্তিত 🍂',
-    takeDeepBreath: 'গভীর শ্বাস নিন',
-    playGentleGame: 'সহজ খেলা খেলুন',
-    talkToCompanion: 'স্মৃতি সাথীর সাথে কথা বলুন',
-    memories: 'স্মৃতিমালা',
-    memoriesTitle: 'জীবনের স্মৃতি ও ছবির গল্প',
-    memoriesSubtitle: 'পরিবারের অমূল্য মুহূর্ত, ছবি ও অডিও গল্প',
-    slideshow: 'স্লাইডশো গল্প',
-    allMemories: 'সব স্মৃতি',
-    listenVoiceStory: '🔊 অডিও গল্প শুনুন',
-    addMemory: 'নতুন স্মৃতি যোগ করুন',
-    uploadPhotoStory: 'ছবির গল্প আপলোড করুন',
-    voiceGuide: 'কণ্ঠ নির্দেশনা',
-    voiceNav: 'ভয়েস নেভিগেশন',
-    tapToSpeak: 'বলতে ট্যাপ করুন',
-    voiceListening: 'শুনছি...',
-    mindGarden: 'আপনার মনের সবুজ বাগান',
-    mindfulStreak: 'ধারাবাহিক যত্ন',
-    weeklySummary: 'সাপ্তাহিক ইতিবাচক সারাংশ',
-    gardenSprout: 'কচি অঙ্কুর 🌱',
-    gardenSapling: 'ছোট চারা 🌿',
-    gardenBlossom: 'ফোটা ফুল 🌸',
-    gardenSanctuary: 'শান্ত বিশাল বটবৃক্ষ 🌳',
-    emergencyHelp: 'জরুরি সহায়তা 🛟',
-    caregiverHub: 'পরিচর্যাকারী কেন্দ্র',
-    caregiverNotice: 'পরিবারের নোটিশ',
-    dailyReminders: 'প্রতিদিনের যত্নশীল অনুস্মারক',
-    excellent: 'চমৎকার! 🌟',
-    greatJob: 'খুব ভালো! 👏',
-    wellDone: 'সাবাশ! 😊',
-    goodEffort: 'ভালো চেষ্টা! 💪',
-    keepTrying: 'চালিয়ে যান, আপনি দারুণ করছেন! 🌈',
-    tryAgain: 'আবার চেষ্টা করুন!',
-    g1Title: 'ধনেশ পাখির বাসা',
-    g1Desc: 'প্রকৃতির ছবির জোড়া মেলান',
-    g1Tag: 'স্মৃতি',
-    g1Instruction: 'দুটি করে কার্ড উল্টে একই রকম ছবি মেলান। মনে রাখুন কোন কার্ডটি কোথায়!',
-    g2Title: 'স্মৃতিময় মুহূর্ত',
-    g2Desc: 'গল্পের ক্রম মনে রাখুন',
-    g2Tag: 'স্মৃতি',
-    g2Instruction: 'গল্পের ছবিগুলো পরপর দেখুন, তারপর প্রশ্নের উত্তর দিন।',
-    g3Title: 'পরিচিত মুখ',
-    g3Desc: 'কাছের মানুষকে চিনুন',
-    g3Tag: 'চিনতে পারা',
-    g3Instruction: 'ছবিটি দেখুন এবং বলুন ইনি কে। দরকার হলে ক্লু নিন!',
-    g4Title: 'আমার চেনা ঘর',
-    g4Desc: 'ঘরের জিনিসপত্র মনে রাখুন',
-    g4Tag: 'স্মৃতি',
-    g4Instruction: 'ঘরটি মনোযোগ দিয়ে দেখুন, তারপর প্রশ্নের উত্তর দিন।',
-    g5Title: 'আমার দৈনন্দিন দিন',
-    g5Desc: 'প্রতিদিনের কাজ পর পর সাজান',
-    g5Tag: 'নিয়মানুবর্তিতা',
-    g5Instruction: 'সঠিক ক্রমে কাজগুলোতে ট্যাপ করে সাজান।',
-    g5Safety: 'এটি একটি মানসিক চর্চা, ডাক্তারি পরামর্শ নয়।',
-    g6Title: 'শুনুন এবং মনে রাখুন',
-    g6Desc: 'মন দিয়ে শুনে উত্তর দিন',
-    g6Tag: 'মনোযোগ',
-    g6Instruction: 'বাক্যটি মন দিয়ে শুনুন, তারপর প্রশ্নের উত্তর দিন।',
-    g7Title: 'বাঁশের সুর ক্রম',
-    g7Desc: 'আলোকিত ক্রমটি পুনরাবৃত্তি করুন',
-    g7Tag: 'মনোযোগ',
-    g7Instruction: 'প্যাডগুলো যেভাবে জ্বলবে, ঠিক সেই ক্রমে চাপুন।',
-    lbTitle: 'লিডারবোর্ড',
-    historyTitle: 'খেলার ইতিহাস',
-    historyEmpty: 'এখনো কোনো খেলা হয়নি। অগ্রগতি দেখতে খেলা শুরু করুন!',
-    dashTitle: 'পরিচর্যাকারী ড্যাশবোর্ড',
-    dashTotalSessions: 'মোট সেশন',
-    dashAvgAccuracy: 'গড় সঠিকতা',
-    dashTotalCoins: 'মোট অর্জিত কয়েন',
-    persTitle: 'ব্যক্তিগত পছন্দ ও স্মৃতি',
-    settingsTitle: 'সেটিংস',
-    settingsLanguage: 'ভাষা',
+    hard: 'কঠিন'
   },
-  ta: {
-    appName: 'SMRITI',
-    welcome: 'வணக்கம்',
-    navHome: 'முகப்பு',
-    navGames: 'விளையாட்டுகள்',
-    navLeaderboard: 'முன்னேற்றம்',
-    navDashboard: 'பராமரிப்பாளர்',
-    settings: 'அமைப்புகள்',
-    settingsLanguage: 'மொழி',
-    wellness: 'நல்வாழ்வு',
-    play: 'தொடங்கு',
-    g1Title: 'ஹார்ன்பில் நினைவகம்',
-    g1Desc: 'இயற்கை அட்டை ஜோடிகளை பொருத்தவும்',
-    g2Title: 'நினைவு தருணங்கள்',
-    g3Title: 'அறிந்த முகங்கள்',
-    g4Title: 'என் வீடு நினைவு',
-    g5Title: 'என் நாள்',
-    g6Title: 'கேட்டு நினைவில் கொள்',
-    g7Title: 'மூங்கில் வரிசை',
-    lbTitle: 'தரவரிசை',
-    coins: 'நாணயங்கள்',
-    historyTitle: 'வரலாறு'
-  },
-  te: {
-    appName: 'SMRITI',
-    welcome: 'స్వాగతం',
-    navHome: 'హోమ్',
-    navGames: 'ఆటలు',
-    navLeaderboard: 'పురోగతి',
-    navDashboard: 'సంరక్షకుడు',
-    settings: 'సెట్టింగ్‌లు',
-    settingsLanguage: 'భాష',
-    wellness: 'ఆరోగ్యం',
-    play: 'ప్రారంభించు',
-    g1Title: 'హార్న్‌బిల్ జ్ఞాపకశక్తి',
-    g1Desc: 'ప్రకృతి కార్డుల జతలను సరిపోల్చండి',
-    g2Title: 'జ్ఞాపకాల క్షణాలు',
-    g3Title: 'పరిచయమైన ముఖాలు',
-    g4Title: 'నా ఇల్లు జ్ఞాపకం',
-    g5Title: 'నా రోజు',
-    g6Title: 'విని గుర్తుంచుకోండి',
-    g7Title: 'వెదురు క్రమం',
-    lbTitle: 'ర్యాంకులు',
-    coins: 'నాణేలు',
-    historyTitle: 'చరిత్ర'
-  },
-  mr: {
-    appName: 'SMRITI',
-    welcome: 'सुस्वागतम',
-    navHome: 'मुख्यपृष्ठ',
-    navGames: 'खेळ',
-    navLeaderboard: 'प्रगती',
-    navDashboard: 'काळजीवाहू',
-    settings: 'सेटिंग्ज',
-    settingsLanguage: 'भाषा',
-    wellness: 'आरोग्य',
-    play: 'सुरू करा',
-    g1Title: 'हॉर्नबिल मेमरी नेस्ट',
-    g1Desc: 'निसर्गाची कार्डे जुळवा',
-    g2Title: 'आठवणींचे क्षण',
-    g3Title: 'ओळखीचे चेहरे',
-    g4Title: 'माझे घर आठवा',
-    g5Title: 'माझा दिवस',
-    g6Title: 'ऐका आणि लक्षात ठेवा',
-    g7Title: 'बांबू क्रम',
-    lbTitle: 'गुणवत्ता यादी',
-    coins: 'नाणी',
-    historyTitle: 'इतिहास'
-  },
-  gu: {
-    appName: 'SMRITI',
-    welcome: 'સ્વાગત છે',
-    navHome: 'મુખ્ય પૃષ્ઠ',
-    navGames: 'રમતો',
-    navLeaderboard: 'પ્રગતિ',
-    navDashboard: 'સંભાળ રાખનાર',
-    settings: 'સેટિંગ્સ',
-    settingsLanguage: 'ભાષા',
-    wellness: 'સ્વાસ્થ્ય',
-    play: 'શરૂ કરો',
-    g1Title: 'હોર્નબિલ મેમરી',
-    g1Desc: 'કુદરતી કાર્ડ જોડીઓ મેળવો',
-    g2Title: 'યાદોની ક્ષણો',
-    g3Title: 'જાણીતા ચહેરાઓ',
-    g4Title: 'મારું ઘર યાદ રાખો',
-    g5Title: 'મારો દિવસ',
-    g6Title: 'સાંભળો અને યાદ રાખો',
-    g7Title: 'વાંસ ક્રમ',
-    lbTitle: 'રેન્ક',
-    coins: 'સિક્કા',
-    historyTitle: 'ઇતિહાસ'
-  },
+
   as: {
-    chatbotTitle: 'স্মৃতি AI সংগী',
-    chatbotSubtitle: 'আপোনাৰ মৰমিয়াল কণ্ঠ আৰু স্মৃতিৰ সংগী',
-    chatbotPromptTime: '⏰ এতিয়া কিমান সময়?',
-    chatbotPromptExercises: '🧠 স্মৃতিৰ অনুশীলন',
-    chatbotPromptStory: '📖 এটা সাধু কওক',
-    chatbotPromptThought: '🌻 আজিৰ শুভ চিন্তা',
-    chatbotPromptGame: '🎮 খেলৰ পৰামৰ্শ দিয়ক',
-    chatbotInputPlaceholder: 'বাৰ্তা লিখক বা 🎤 টিপি কওক...',
-    chatbotSend: 'প্ৰেৰণ কৰক',
-    chatbotVoiceNote: '💡 আপুনি যিকোনো সময়তে ক’ব বা লিখিব পাৰে। স্মৃতিয়ে মাত মাতি উত্তৰ দিয়ে।',
-    chatbotThinking: 'স্মৃতিয়ে ভাবি আছে...',
+    // App & Branding
     appName: 'স্মৃতি',
-    appTagline: 'জ্ঞানীয় যত্ন আৰু স্মৃতি সহযোগী',
+    appTagline: 'দৈনিক স্মৃতি আৰু সুস্থতাৰ আশ্ৰয়স্থল',
     welcome: 'স্বাগতম',
     hello: 'নমস্কাৰ',
-    greeting: 'আহক আজি আপোনাৰ মনটোক সজীৱ কৰি তোলোঁ!',
-    logout: 'লগআউট',
+    greeting: 'আহক আজি মনটো সতেজ কৰোঁ!',
+    logout: 'লগ আউট',
     settings: 'ছেটিংছ',
     back: 'উভতি যাওক',
     close: 'বন্ধ কৰক',
-    save: 'সংৰক্ষণ কৰক',
-    cancel: 'বাতিল কৰক',
-    confirm: 'নিশ্চিত কৰক',
+    save: 'সংৰক্ষণ',
+    cancel: 'বাতিল',
+    confirm: 'নিশ্চিত',
     loading: 'লোড হৈ আছে...',
-    login: 'লগইন',
-    register: 'পঞ্জীয়ন',
-    loginTitle: 'স্মৃতিলৈ স্বাগতম',
-    loginSubtitle: 'আপোনাৰ স্মৃতি যত্ন যাত্ৰা অব্যাহত ৰাখিবলৈ সোমাওক',
-    nameLabel: 'আপোনাৰ নাম',
-    namePlaceholder: 'আপোনাৰ নাম লিখক',
-    phoneLabel: 'ফোন নম্বৰ',
-    phonePlaceholder: '১০-অংকৰ ফোন নম্বৰ দিয়ক',
-    roleLabel: 'মই হৈছোঁ...',
-    rolePatient: 'ৰোগী / জ্যেষ্ঠজন',
-    rolePatientDesc: 'মই আনন্দদায়ক স্মৃতি খেল খেলিব বিচাৰোঁ',
-    roleCaregiver: 'যত্নশীল / আশা কৰ্মী',
-    roleCaregiverDesc: 'মই জ্যেষ্ঠজনৰ যত্ন লওঁ',
-    sendOtp: 'অ’টিপি প্ৰেৰণ কৰক',
-    resendOtp: 'অ’টিপি পুনৰ পঠিয়াওক',
-    otpSent: 'অ’টিপি পঠোৱা হ’ল! ফোন পৰীক্ষা কৰক',
-    otpExpired: 'অ’টিপি ম্যাদ শেষ হৈছে। নতুন এটা অনুৰোধ কৰক',
-    otpInvalid: 'ভুল অ’টিপি। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক',
-    otpVerified: 'সফলভাৱে সত্যায়িত হ’ল!',
-    enterOtp: '৪-অংকৰ অ’টিপি দিয়ক',
-    verifyOtp: 'অ’টিপি পৰীক্ষা কৰক',
-    navHome: 'ঘৰ',
-    navGames: 'খেলসমূহ',
-    navLeaderboard: 'প্ৰগতি',
-    navHistory: 'ইতিহাস',
-    navDashboard: 'যত্নশীল ডেশ্বব’ৰ্ড',
-    navProfile: 'প্ৰফাইল',
-    gamesTitle: 'জ্ঞানীয় খেলসমূহ',
-    gamesSubtitle: 'মন সজীৱ কৰিবলৈ এটা খেল বাছক',
+
+    // Header & Status
+    status: {
+      online: 'অনলাইন',
+      offline: 'অফলাইন মোড'
+    },
+    nav: {
+      home: 'ঘৰ',
+      games: 'খেল',
+      memories: 'স্মৃতি',
+      wellness: 'সুস্থতা',
+      progress: 'অগ্ৰগতি',
+      settings: 'ছেটিংছ',
+      caregiver: 'তত্ত্বাৱধায়ক',
+      sound: 'সুৰ',
+      voice: 'মাত',
+      sos: 'জৰুৰী'
+    },
     coins: 'মুদ্ৰা',
+    settingsLanguage: 'ভাষা',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'তত্ত্বাৱধায়ক সংযুক্ত',
+      status: 'ৰাজ দাস (পুত্ৰ) · সংযুক্ত',
+      viewReport: 'তত্ত্বাৱধান প্ৰতিবেদন চাওক'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'শুভ প্ৰভাত,',
+      welcome_text: 'আপোনাৰ দৈনিক স্মৃতি আৰু সুস্থতাৰ আশ্ৰয়স্থললৈ স্বাগতম।',
+      tasks_completed: 'দৈনিক কাম: {total} টাৰ ভিতৰত {completed} টা সম্পন্ন',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'আপোনজনক কল কৰক',
+      son_name: 'ৰাজ দাস (পুত্ৰ)',
+      ritual_title: 'দৈনিক নিয়ম',
+      ritual_action: '৩-ধাপৰ নিয়মিকা →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'নিৰ্ধাৰিত ঔষধৰ সোঁৱৰণী',
+      time: 'পুৱা ০৮:৩০ বজাত',
+      medicine_title: 'পুৱাৰ ৰক্তচাপৰ ঔষধ',
+      medicine_instructions: 'কুহুমীয়া পানীৰে ১টা বড়ি খাওক',
+      mark_done: 'ঔষধ খালোঁ',
+      completed: 'সম্পন্ন ✓',
+      snooze: '১৫ মিনিট পাছত মনত পেলাব',
+      coins_reward: '+১০ মুদ্ৰা'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'আজি আপোনাৰ মনটো কেনে আছে?',
+      great: 'অতি উত্তম',
+      good: 'ভাল',
+      okay: 'সাধাৰণ',
+      low: 'মন মৰা',
+      worried: 'চিন্তিত',
+      feedback_title: '{mood} হিচাপে চিহ্নিত',
+      feedback_great: 'আপোনাৰ মুখৰ হাঁহি দেখি বৰ আনন্দ পালোঁ! সতেজ মন স্মৃতি অনুশীলনৰ বাবে অতি উত্তম।',
+      feedback_good: 'আপোনাৰ মনটো ভাল দেখি শান্তি পালোঁ! মগজু সক্ৰিয় ৰাখিলে স্মৃতিশক্তি সুদৃঢ় হয়।',
+      feedback_okay: 'এটা শান্ত আৰু সহজ দিনো ঈশ্বৰৰ আশীৰ্বাদ। শান্তভাৱে দীঘলকৈ উশাহ লওক।',
+      feedback_low: 'আমি আপোনাৰ কাষতে আছোঁ। চিন্তা নকৰিব; আপোনাৰ পৰিয়ালে আপোনাক বৰ মৰম কৰে।',
+      feedback_worried: 'অনুগ্ৰহ কৰি শান্ত থাকক। আপুনি সম্পূৰ্ণ সুৰক্ষিত। আপুনি ৰাজৰ লগত কথা পাতিব নেকি?',
+      chip_hornbill: 'ধনেশ পক্ষীৰ খেল',
+      chip_story: 'কাহিনী স্মৰণ খেল',
+      chip_wellness: 'দৈনিক সুস্থতা নিয়ম'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: 'আজিৰ বিশেষ মানসিক অনুশীলন',
+      title: 'বাঁহৰ সুৰ অনুক্ৰম',
+      category: 'মনোযোগ আৰু বিন্যাস',
+      description: 'উজ্বল বাঁহৰ ছন্দ অনুসৰণ কৰক',
+      reason: 'আপোনাৰ আনন্দময় মনৰ বাবে — বাঁহীৰ সুমধুৰ সুৰেৰে স্মৃতি সতেজ কৰক!',
+      start_btn: 'অনুশীলন আৰম্ভ কৰক'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: 'আজিৰ শুভ চিন্তা',
+      badge: 'অনুভৱ',
+      listen: 'শুনক',
+      new: 'নতুন চিন্তা'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'সাথী',
+      title: 'সাথী AI সহায়ক',
+      subtitle: 'আপোনাৰ মৰমিয়াল কণ্ঠ আৰু স্মৃতি সংগী',
+      badge: 'অনলাইন আৰু প্ৰস্তুত',
+      welcome: 'নমস্কাৰ! মই সাথী, আপোনাৰ মৰমৰ সংগী। আজি আপোনাক কেনেকৈ সহায় কৰিব পাৰোঁ?',
+      placeholder: 'সাথীক কিবা সোধক বা 🎤 টিপক...',
+      send: 'প্ৰেৰণ',
+      listening: 'শুনি আছোঁ...',
+      thinking: 'ভাবি আছোঁ...',
+      voice_note: '💡 আপুনি যিকোনো সময়তে ক’ব বা লিখিব পাৰে। সাথীয়ে মাত মাতি উত্তৰ দিয়ে।',
+      quick_meds: '💊 মোৰ ঔষধৰ সময় কেতিয়া?',
+      quick_sos: '🚨 জৰুৰীকালীন SOS সহায়',
+      quick_game: '🎋 বাঁহৰ খেল খেলক',
+      quick_tips: '🌻 আজিৰ শুভ চিন্তা'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'দ্ৰুত দিশনিৰ্দেশ',
+      games: 'খেলৰ কেন্দ্ৰ',
+      lifestory: 'জীৱন কাহিনী',
+      entertainment: 'মনোৰঞ্জন',
+      family: 'পৰিয়ালৰ খেল',
+      stars: 'সাপ্তাহিক তৰা',
+      wellness: 'সুস্থতা',
+      reminders: 'সোঁৱৰণী',
+      medicines: 'ঔষধপাতি',
+      emergency: 'জৰুৰী সহায়',
+      rewards: 'পুৰস্কাৰ আৰু বেজ'
+    },
+
+    // Games Common
+    gamesTitle: 'মানসিক খেল',
+    gamesSubtitle: 'মন সতেজ ৰাখিবলৈ খেল বাছক',
     play: 'খেলক',
-    playAgain: 'আকৌ খেলক',
-    exitToHub: 'খেললৈ উভতি যাওক',
-    score: 'নম্বৰ',
-    time: 'সময়',
-    accuracy: 'সঠিকতা',
-    level: 'স্তৰ',
-    hints: 'ইংগিত',
-    coinsEarned: 'অৰ্জিত মুদ্ৰা',
+    score: 'স্ক’ৰ',
+    accuracy: 'শুদ্ধতা',
     difficulty: 'কঠিনতা',
     easy: 'সহজ',
-    medium: 'মধ্যম',
-    hard: 'কঠিন',
-    readInstruction: '🔊 নিৰ্দেশনা শুনক',
-    startGame: 'খেল আৰম্ভ কৰক',
-    gameOver: 'খেল সমাপ্ত!',
-    g1Title: 'ধনেশ পক্ষীৰ বাহ',
-    g1Desc: 'প্ৰকৃতিৰ কাৰ্ডৰ জোৰা মেলাওক',
-    g1Tag: 'স্মৃতি',
-    g1Instruction: 'দুখন কাৰ্ড ওলোটাই জোৰা মিলাওক। কাৰ্ডবোৰ ক’ত আছে মনত ৰাখক!',
-    g2Title: 'স্মৃতিৰ ক্ষণ',
-    g2Desc: 'কাহিনীৰ ক্ৰম মনত ৰাখক',
-    g2Tag: 'স্মৃতি',
-    g2Instruction: 'কাহিনীটো মনোযোগেৰে চাওক আৰু তাৰ পাছত প্ৰশ্নৰ উত্তৰ দিয়ক।',
-    g3Title: 'চিনাকি মুখ',
-    g3Desc: 'আপোন মানুহক চিনাক্ত কৰক',
-    g3Tag: 'চিনাক্তকৰণ',
-    g3Instruction: 'মুখখন চাওক আৰু কওক এইজন কোন। সহায় লাগিলে ইংগিত লওক!',
-    g4Title: 'মোৰ চিনাকি ঘৰ',
-    g4Desc: 'কোঠাৰ সামগ্ৰী মনত পেলাওক',
-    g4Tag: 'স্মৃতি',
-    g5Title: 'মোৰ দিনলিপি',
-    g5Desc: 'দৈনন্দিন কামবোৰ ক্ৰমত সজাওক',
-    g5Tag: 'নিয়ম',
-    g6Title: 'শুনক আৰু মনত ৰাখক',
-    g6Desc: 'মন দি শুনি উত্তৰ দিয়ক',
-    g6Tag: 'মনোযোগ',
-    g7Title: 'বাঁহৰ ছন্দ ক্ৰম',
-    g7Desc: 'আলোকিত ক্ৰমটো অনুসৰণ কৰক',
-    g7Tag: 'মনোযোগ',
-    lbTitle: 'প্ৰগতি তালিকা',
-    historyTitle: 'খেলৰ ইতিহাস',
-    dashTitle: 'যত্নশীল ডেশ্বব’ৰ্ড',
-    persTitle: 'সাংস্কৃতিক ব্যক্তিগতকৰণ',
-    settingsTitle: 'ছেটিংছ',
-    settingsLanguage: 'ভাষা',
-    wellness: 'স্বাস্থ্য আৰু শান্তি'
-  },
-  mni: {
-    appName: 'স্মৃতি (SMRITI)',
-    appTagline: 'ৱাখল খঙবা অমসুং নীংশিংবা পাউতাক',
-    welcome: 'তরাম্না ওকচরি',
-    hello: 'খুরুমজরি',
-    greeting: 'ঙসি ঐখোয়গী ৱাখলবু নৌনা থৌনা হাপসি!',
-    logout: 'থোকপা',
-    settings: 'সেটিংস',
-    back: 'হন্থবা',
-    close: 'থিংবা',
-    save: 'কনবা',
-    cancel: 'তোকথোকপা',
-    confirm: 'য়াবা',
-    loading: 'লোদ তৌরি...',
-    login: 'লোভগিন',
-    register: 'রেজিষ্টর',
-    loginTitle: 'স্মৃতিদা তরাম্না ওকচরি',
-    loginSubtitle: 'নীংশিং থৌওং মখা চত্থনবা চঙবীয়ু',
-    nameLabel: 'নহাক্কী মমিং',
-    namePlaceholder: 'নহাক্কী মমিং ইরকউ',
-    phoneLabel: 'ফোন নম্বর',
-    phonePlaceholder: '১০-মশিংগী ফোন নম্বর',
-    roleLabel: 'ঐহাক...',
-    rolePatient: 'অনাবা / অহল',
-    rolePatientDesc: 'ঐহাক নুংঙাইবা নীংশিং শান্নপোৎ শান্ননিংই',
-    roleCaregiver: 'য়েন্থোকপীবা / আশা',
-    roleCaregiverDesc: 'ঐহাক অহল অমবু য়েংশিল্লি',
-    sendOtp: 'ওটিপি থাবা',
-    resendOtp: 'ওটিপি অমুক থাবা',
-    otpSent: 'ওটিপি থাখ্রে! ফোন য়েংবীয়ু',
-    otpExpired: 'ওটিপি মতম লোইখ্রে',
-    otpInvalid: 'ওটিপি চুমদে',
-    otpVerified: 'চুম্না লোইশিনখ্রে!',
-    enterOtp: '৪-মশিংগী ওটিপি ইরকউ',
-    verifyOtp: 'ওটিপি য়েংশিনবা',
-    navHome: 'য়ুম',
-    navGames: 'শান্নপোৎ',
-    navLeaderboard: 'মর্যাদা',
-    navHistory: 'পুৱারি',
-    navDashboard: 'য়েংশিনবগী বোর্দ',
-    navProfile: 'প্রোফাইল',
-    gamesTitle: 'ৱাখলগী শান্নপোৎ',
-    gamesSubtitle: 'ৱাখল নীংথিনা থম্নবা শান্নপোৎ অমা খনবীয়ু',
-    coins: 'শেনয়েক',
-    play: 'শান্নবা',
-    playAgain: 'অমুক শান্নবা',
-    exitToHub: 'শান্নপোৎতা হল্লকপা',
-    score: 'স্কোর',
-    time: 'মতম',
-    accuracy: 'চুম্বা',
-    level: 'থাক',
-    hints: 'ইন্তিলেক',
-    coinsEarned: 'ফংলবা শেনয়েক',
-    difficulty: 'লূবা',
-    easy: 'লায়বা',
-    medium: 'ময়ায় ওইবা',
-    hard: 'লূবা',
-    readInstruction: '🔊 পাউতাক তাবীয়ু',
-    startGame: 'শান্নবা হৌবা',
-    gameOver: 'শান্নপোৎ লোইরে!',
-    g1Title: 'উচেক হর্নবিল নীংশিং',
-    g1Desc: 'মহৌশাগী কাৰ্দ পরিং তান্নবা',
-    g1Tag: 'নীংশিংবা',
-    g2Title: 'ৱারীবু নীংশিংবা',
-    g2Desc: 'ৱারীগী মতুং ইনবা',
-    g2Tag: 'নীংশিংবা',
-    g3Title: 'খঙনবা মশক',
-    g3Desc: 'নক্নবা মীওইবু খঙদোকপা',
-    g3Tag: 'মশক খঙবা',
-    g4Title: 'ঐগী য়ুম নীংশিংবা',
-    g4Desc: 'কাগী পোৎলমশিং নীংশিংবা',
-    g4Tag: 'নীংশিংবা',
-    g5Title: 'ঐগী নুমিৎ',
-    g5Desc: 'নুমিৎ খুদিংগী থবক ক্ৰম তান্নবা',
-    g5Tag: 'নিয়ম',
-    g6Title: 'তাবা অমসুং নীংশিংবা',
-    g6Desc: 'নীংথিনা তাদুনা পাউখুম পীবীয়ু',
-    g6Tag: 'ৱাখল থম্বা',
-    g7Title: 'ৱাগী ছন্দ ক্ৰম',
-    g7Desc: 'ঙাল্লকপা ক্ৰম অদু মতুং ইনবা',
-    g7Tag: 'ৱাখল থম্বা',
-    lbTitle: 'মর্যাদা পরিং',
-    historyTitle: 'শান্নখিবগী পুৱারি',
-    dashTitle: 'য়েংশিনবগী বোর্দ',
-    persTitle: 'সংস্কৃতিগী ওইবা মশক',
-    settingsTitle: 'সেটিংস',
-    settingsLanguage: 'লোন',
-    wellness: 'হকচাং ফবা অমসুং শান্তিবু'
-  },
-  kha: {
-    appName: 'SMRITI',
-    appTagline: 'Ka jingiarap jingkynmaw bad pynshait jingmut',
-    welcome: 'Pdiang sngewbha',
-    hello: 'Khublei',
-    greeting: 'To ngin pynshait ia ka jingmut mynta ka sngi!',
-    logout: 'Mih noh',
-    settings: 'Ki Jingbuh',
-    back: 'Kynran dien',
-    close: 'Khang',
-    save: 'Kynshew',
-    cancel: 'Sangeh',
-    confirm: 'Pynskhem',
-    loading: 'Dang pynkhreh...',
-    login: 'rung',
-    register: 'Rejishta',
-    loginTitle: 'Pdiang sngewbha sha SMRITI',
-    loginSubtitle: 'Rung ban bteng ia ka jingpynshait jingmut',
-    nameLabel: 'Kyrteng jong phi',
-    namePlaceholder: 'Thep ia ka kyrteng',
-    phoneLabel: 'Nombar Phone',
-    phonePlaceholder: 'Thep 10 digit phone nombar',
-    roleLabel: 'Nga dei...',
-    rolePatient: 'U/Ka Nongpang / Tymmen',
-    rolePatientDesc: 'Nga kwah ban ialehkai ki jingialehkai jingkynmaw',
-    roleCaregiver: 'Nongsumar / ASHA',
-    roleCaregiverDesc: 'Nga sumar ia u/ka tymmen',
-    sendOtp: 'Phah OTP',
-    resendOtp: 'Phah biang OTP',
-    otpSent: 'La phah ia ka OTP! Peit ha phone',
-    otpExpired: 'Ka OTP ka la kut por',
-    otpInvalid: 'OTP bakla. Pyrshang biang',
-    otpVerified: 'La pynskhem beit!',
-    enterOtp: 'Thep 4 digit OTP',
-    verifyOtp: 'Pynskhem OTP',
-    navHome: 'Ing',
-    navGames: 'Jingialehkai',
-    navLeaderboard: 'Kyrdan',
-    navHistory: 'Jingiathuhkhana',
-    navDashboard: 'Dashboard Nongsumar',
-    navProfile: 'Profile',
-    gamesTitle: 'Jingialehkai Jingmut',
-    gamesSubtitle: 'Jied jingialehkai ban pynshait jingkynmaw',
-    coins: 'Tyngka',
-    play: 'Ialehkai',
-    playAgain: 'Ialehkai Biang',
-    exitToHub: 'Phai sha Jingialehkai',
-    score: 'Score',
-    time: 'Por',
-    accuracy: 'Ka Jingbiang',
-    level: 'Kyrdan',
-    hints: 'Jingiarap',
-    coinsEarned: 'Tyngka ba ioh',
-    difficulty: 'Jingeh',
-    easy: 'Suk',
-    medium: 'Pdeng',
-    hard: 'Eh',
-    readInstruction: '🔊 Sngap ia ki jingbatai',
-    startGame: 'Sdang Jingialehkai',
-    gameOver: 'La dep ka jingialehkai!',
-    g1Title: 'Hornbill Memory Nest',
-    g1Desc: 'Pyniahap ia ki dur mariang',
-    g1Tag: 'Jingkynmaw',
-    g2Title: 'Kynmaw Jingiathuhkhana',
-    g2Desc: 'Bud ia ka jingiathuhkhana',
-    g2Tag: 'Jingkynmaw',
-    g3Title: 'Khmat ba la Iathuh',
-    g3Desc: 'Ithuh ia ki baha-ing hasem',
-    g3Tag: 'Jingithuh',
-    g4Title: 'Kynmaw ia ka Ing',
-    g4Desc: 'Kynmaw ki mar ha kamra',
-    g4Tag: 'Jingkynmaw',
-    g5Title: 'Ka Sngi Jong Nga',
-    g5Desc: 'Buh ryntih ki kam man ka sngi',
-    g5Tag: 'Ryntih',
-    g6Title: 'Sngap bad Kynmaw',
-    g6Desc: 'Sngap bha bad jubab',
-    g6Tag: 'Jingsngap',
-    g7Title: 'Shylliah Siej Sequence',
-    g7Desc: 'Bud ia ka jingthaba',
-    g7Tag: 'Jingsngap',
-    lbTitle: 'Kyrdan Jingialehkai',
-    historyTitle: 'Jingiathuhkhana Jingialehkai',
-    dashTitle: 'Dashboard Nongsumar',
-    persTitle: 'Jingpynwandur tynrai',
-    settingsTitle: 'Ki Jingbuh',
-    settingsLanguage: 'Ktien',
-    wellness: 'Jingsuk bad Jingkoit'
-  },
-  lus: {
-    appName: 'SMRITI',
-    appTagline: 'Hriatna tichak leh enkawltu thian',
-    welcome: 'Chibai leh lo lut rawh',
-    hello: 'Chibai',
-    greeting: 'Vawiin chu i rilru i tiharh thar ang u le!',
-    logout: 'Chhuak rawh',
-    settings: 'Siamthatna',
-    back: 'Kir leh',
-    close: 'Khar rawh',
-    save: 'Vawng tha rawh',
-    cancel: 'Thulh leh rawh',
-    confirm: 'Pawm rawh',
-    loading: 'A inbuatsaih mek...',
-    login: 'Lut rawh',
-    register: 'Inziak lut rawh',
-    loginTitle: 'SMRITI-ah lo lut rawh le',
-    loginSubtitle: 'I hriatna sawizawi chhunzawm turin lo lut rawh',
-    nameLabel: 'I Hming',
-    namePlaceholder: 'I hming ziak lut rawh',
-    phoneLabel: 'Phone Nombar',
-    phonePlaceholder: '10 digit phone nombar ziak rawh',
-    roleLabel: 'Ka nihna chu...',
-    rolePatient: 'Damlo / Pitar Putar',
-    rolePatientDesc: 'Hriatna tichak tur infiamna khelh ka duh',
-    roleCaregiver: 'Enkawltu / ASHA',
-    roleCaregiverDesc: 'Pitar putar ka enkawl mek a ni',
-    sendOtp: 'OTP Thawn rawh',
-    resendOtp: 'OTP Thawn nawn leh rawh',
-    otpSent: 'OTP thawn a ni tawh! I phone en rawh',
-    otpExpired: 'OTP a rualrem tawh lo',
-    otpInvalid: 'OTP dik lo. Ti nawn leh rawh',
-    otpVerified: 'Hlawhtling taka tihfel a ni!',
-    enterOtp: '4 digit OTP chhu lut rawh',
-    verifyOtp: 'OTP nemnghet rawh',
-    navHome: 'In lam',
-    navGames: 'Infiamna',
-    navLeaderboard: 'Dinhmun',
-    navHistory: 'Chanchin',
-    navDashboard: 'Enkawltu Dashboard',
-    navProfile: 'Profile',
-    gamesTitle: 'Rilru Sawizawina',
-    gamesSubtitle: 'I rilru tiharh turin infiamna thlang rawh',
-    coins: 'Pawisa',
-    play: 'Khel rawh',
-    playAgain: 'Khel nawn leh rawh',
-    exitToHub: 'Infiamna lamah kir leh rawh',
-    score: 'Score',
-    time: 'Hun',
-    accuracy: 'Dikna',
-    level: 'Level',
-    hints: 'Puihna',
-    coinsEarned: 'Pawisa hmuh',
-    difficulty: 'Harsa zawng',
-    easy: 'Awlsam',
-    medium: 'Laihawl',
-    hard: 'Harsa',
-    readInstruction: '🔊 Zirtirna ngaithla rawh',
-    startGame: 'Infiam tan rawh',
-    gameOver: 'Infiam a zo ta!',
-    g1Title: 'Hornbill Hriatna Bu',
-    g1Desc: 'Nungcha thlalak inmil zawng rawh',
-    g1Tag: 'Hriatna',
-    g2Title: 'Thawnthu Hriatrengna',
-    g2Desc: 'Thawnthu indawt dan hria rawh',
-    g2Tag: 'Hriatna',
-    g3Title: 'Hmel Hriat Sa',
-    g3Desc: 'Chhungkhat thian hmel hria rawh',
-    g3Tag: 'Hmelhriatna',
-    g4Title: 'Ka In Hriat Chhuah',
-    g4Desc: 'Room chhung thil awm hria rawh',
-    g4Tag: 'Hriatna',
-    g5Title: 'Ka Nitin Hun Hman',
-    g5Desc: 'Nitin tih tur indawtin rem rawh',
-    g5Tag: 'Indawt dan',
-    g6Title: 'Ngaithla la Hria rawh',
-    g6Desc: 'Ngaihnawm taka ngaithlain chhang rawh',
-    g6Tag: 'Ngaihvenna',
-    g7Title: 'Mau Thawnthu Sequence',
-    g7Desc: 'Eng indawt dan zui rawh',
-    g7Tag: 'Ngaihvenna',
-    lbTitle: 'Dinhmun Te',
-    historyTitle: 'Infiam Chanchin',
-    dashTitle: 'Enkawltu Dashboard',
-    persTitle: 'Hnam Dan Duhtheihna',
-    settingsTitle: 'Siamthatna',
-    settingsLanguage: 'Tawng',
-    wellness: 'Hriselna leh Thlamuanna'
-  },
-  kn: {
-    appName: 'SMRITI',
-    welcome: 'ಸ್ವಾಗತ',
-    navHome: 'ಮುಖಪುಟ',
-    navGames: 'ಆಟಗಳು',
-    navLeaderboard: 'ಪ್ರಗತಿ',
-    navDashboard: 'ಆರೈಕೆದಾರ',
-    settings: 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
-    settingsLanguage: 'ಭಾಷೆ',
-    wellness: 'ಆರೋಗ್ಯ',
-    play: 'ಪ್ರಾರಂಭಿಸಿ',
-    g1Title: 'ಹಾರ್ನ್‌ಬಿಲ್ ಸ್ಮರಣೆ',
-    g1Desc: 'ಪ್ರಕೃತಿಯ ಕಾರ್ಡ್ ಜೋಡಿಗಳನ್ನು ಹೊಂದಿಸಿ',
-    g2Title: 'ನೆನಪಿನ ಕ್ಷಣಗಳು',
-    g3Title: 'ಪರಿಚಿತ ಮುಖಗಳು',
-    g4Title: 'ನನ್ನ ಮನೆ ನೆನಪು',
-    g5Title: 'ನನ್ನ ದಿನ',
-    g6Title: 'ಕೇಳಿ ನೆನಪಿಡಿ',
-    g7Title: 'ಬಿದಿರಿನ ಅನುಕ್ರಮ',
-    lbTitle: 'ಶ್ರೇಯಾಂಕ',
-    coins: 'ನಾಣ್ಯಗಳು',
-    historyTitle: 'ಇತಿಹಾಸ'
+    medium: 'মজলীয়া',
+    hard: 'টান'
   }
 };
+
+function getNested(obj, path) {
+  if (!obj || !path) return undefined;
+  if (obj[path] !== undefined) return obj[path];
+  const parts = path.split('.');
+  let curr = obj;
+  for (const part of parts) {
+    if (curr && typeof curr === 'object' && part in curr) {
+      curr = curr[part];
+    } else {
+      return undefined;
+    }
+  }
+  return curr;
+}
 
 const I18n = {
   _currentLang: 'en',
 
   init() {
     this._currentLang = Storage.getLanguage() || 'en';
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = this._currentLang;
+      document.body.setAttribute('data-lang', this._currentLang);
+    }
     this.applyCulturalTheme(this._currentLang);
   },
 
@@ -1095,11 +667,9 @@ const I18n = {
     if (typeof document === 'undefined') return;
     const regionMap = {
       as: 'Assam',
-      mni: 'Manipur',
-      kha: 'Meghalaya',
-      lus: 'Mizoram',
       hi: 'National',
-      bn: 'Bengal'
+      bn: 'Bengal',
+      en: 'Assam'
     };
     const targetRegion = regionMap[lang] || Storage.getPreferences()?.regionalState || 'Assam';
     document.body.setAttribute('data-region', targetRegion);
@@ -1108,11 +678,21 @@ const I18n = {
   t(key, vars = {}) {
     if (!key) return '';
     const activeCode = this._currentLang || 'en';
-    const langDict = translations[activeCode];
-    let template = (langDict && langDict[key] !== undefined && langDict[key] !== null)
-      ? langDict[key]
-      : ((translations.en && translations.en[key] !== undefined) ? translations.en[key] : key);
     
+    // Check in active language stitchTranslations
+    let val = getNested(stitchTranslations[activeCode], key);
+    
+    // Fallback to English stitchTranslations
+    if (val === undefined || val === null) {
+      val = getNested(stitchTranslations.en, key);
+    }
+
+    if (val === undefined || val === null) {
+      val = key;
+    }
+
+    let template = typeof val === 'string' ? val : key;
+
     if (typeof template === 'string' && vars && typeof vars === 'object') {
       Object.keys(vars).forEach(varKey => {
         const regex = new RegExp('{ *' + varKey + ' *}', 'g');
@@ -1126,32 +706,29 @@ const I18n = {
     if (typeof document === 'undefined') return;
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
-      el.textContent = this.t(key);
+      const text = this.t(key);
+      if (text && text !== key) {
+        el.textContent = text;
+      }
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
       const key = el.getAttribute('data-i18n-placeholder');
       el.placeholder = this.t(key);
     });
-    window.dispatchEvent(new CustomEvent('smriti:languageChanged', { detail: { lang: this._currentLang } }));
-    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: this._currentLang } }));
+
+    const eventPayload = { lang: this._currentLang, language: this._currentLang };
+    window.dispatchEvent(new CustomEvent('smriti:languageChanged', { detail: eventPayload }));
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: eventPayload }));
   },
 
   getAvailableLanguages() {
     return [
-      { code: 'en', name: 'English' },
-      { code: 'as', name: 'অসমীয়া (Assamese - NER)' },
-      { code: 'mni', name: 'মৈতৈলোন্ (Manipuri/Meitei - NER)' },
-      { code: 'kha', name: 'Khasi (Meghalaya - NER)' },
-      { code: 'lus', name: 'Mizo (Mizoram - NER)' },
-      { code: 'hi', name: 'हिन्दी (Hindi)' },
-      { code: 'bn', name: 'বাংলা (Bengali)' },
-      { code: 'ta', name: 'தமிழ் (Tamil)' },
-      { code: 'te', name: 'తెలుగు (Telugu)' },
-      { code: 'mr', name: 'मराठी (Marathi)' },
-      { code: 'gu', name: 'ગુજરાતી (Gujarati)' },
-      { code: 'kn', name: 'ಕನ್ನಡ (Kannada)' },
+      { code: 'en', name: 'English', native: 'English' },
+      { code: 'as', name: 'অসমীয়া (Assamese)', native: 'অসমীয়া' },
+      { code: 'hi', name: 'हिन्दी (Hindi)', native: 'हिन्दी' },
+      { code: 'bn', name: 'বাংলা (Bengali)', native: 'বাংলা' }
     ];
-  },
+  }
 };
 
 export default I18n;

@@ -2,45 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SMRITI (स्मृति) — Cognitive Care & Memory Companion</title>
-  <meta name="description" content="AI-Powered Cognitive Care & Memory Companion for Elderly — Cognitive training games, memory aids, and multilingual support.">
-  <meta name="theme-color" content="#9B2C2C">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>SMRITI (स्मृति) — Daily Memory & Wellness Sanctuary</title>
+  <meta name="description" content="SMRITI — AI-Powered Cognitive Care & Memory Sanctuary for Elderly. High-contrast, multilingual, accessible daily routine companion.">
+  <meta name="theme-color" content="#800020">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="css/icon-192.svg">
   <link rel="apple-touch-icon" href="css/icon-192.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Lexend for WCAG high legibility -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Design System Stylesheets -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/style.css">
+
   <script>
-    // Global error catcher — shows JS errors on screen
+    // Global error catcher — shows JS errors on screen in debug environments
     window.onerror = function(msg, src, line, col, err) {
-      document.getElementById('root').innerHTML =
-        '<div style="padding:20px;color:red;font-family:monospace;white-space:pre-wrap;">' +
-        '<h2>JS Error:</h2>' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col +
-        (err && err.stack ? '\n\nStack:\n' + err.stack : '') + '</div>';
+      console.error('SMRITI Global Error:', msg, src, line, col, err);
+      const root = document.getElementById('root');
+      if (root && !root.hasChildNodes()) {
+        root.innerHTML =
+          '<div style="padding:24px;color:#800020;font-family:monospace;white-space:pre-wrap;background:#FFF5F5;border:2px solid #FEB2B2;border-radius:16px;margin:16px;">' +
+          '<h3>Application Error:</h3>' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col +
+          (err && err.stack ? '\n\nStack:\n' + err.stack : '') + '</div>';
+      }
     };
     window.addEventListener('unhandledrejection', function(e) {
-      document.getElementById('root').innerHTML =
-        '<div style="padding:20px;color:red;font-family:monospace;white-space:pre-wrap;">' +
-        '<h2>Promise Error:</h2>' + (e.reason ? (e.reason.message || e.reason) : 'Unknown') +
-        (e.reason && e.reason.stack ? '\n\nStack:\n' + e.reason.stack : '') + '</div>';
+      console.warn('SMRITI Unhandled Promise Rejection:', e.reason);
     });
   </script>
 </head>
-<body>
-  <div id="root"><p style="padding:20px;font-size:1.2rem;color:#666;">Loading SMRITI...</p></div>
+<body class="min-h-screen flex flex-col justify-between" data-region="Assam" data-lang="en">
+  <!-- Accessibility Skip Link -->
+  <a href="#page-content" class="skip-link sr-only focus:not-sr-only">Skip to main content</a>
 
-  <!-- App entry — imports everything it needs -->
+  <!-- Main Application Root Landmark -->
+  <div id="root" class="app-root min-h-screen flex flex-col justify-between">
+    <div class="loading-state" style="padding: 40px 20px; text-align: center; color: #800020; font-family: 'Plus Jakarta Sans', sans-serif;">
+      <div style="font-size: 3rem; margin-bottom: 12px; animation: gentlePulse 2s infinite ease-in-out;">🧠</div>
+      <p style="font-size: 1.25rem; font-weight: 700; margin: 0;">Loading SMRITI Sanctuary...</p>
+      <p style="font-size: 0.95rem; color: #64748B; margin-top: 6px;">Daily Memory & Wellness Companion</p>
+    </div>
+  </div>
+
+  <!-- Accessible Modals & Slide-over Drawers Container Mount Points -->
+  <div id="modal-container" aria-live="polite"></div>
+
+  <!-- App Entry Point -->
   <script type="module" src="js/app.js"></script>
 
-  <!-- Service Worker registration for offline support -->
+  <!-- Service Worker Registration for Offline & Edge Resilience -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('SMRITI ServiceWorker registered:', reg.scope))
-          .catch((err) => console.warn('SMRITI ServiceWorker registration failed:', err));
+          .then((reg) => console.log('SMRITI ServiceWorker registered with scope:', reg.scope))
+          .catch((err) => console.warn('SMRITI ServiceWorker registration warning:', err));
       });
     }
   </script>
