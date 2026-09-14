@@ -117,6 +117,19 @@ export default function RewardsPage(container) {
     }
     Storage.savePatientProfile(profile);
 
+    // Persist redeemed flag & dispatch sync event
+    try {
+      localStorage.setItem('smriti_reward_redeemed', JSON.stringify({
+        badgeId: badge.id,
+        name: badge.name,
+        type: 'badge',
+        timestamp: Date.now()
+      }));
+      window.dispatchEvent(new CustomEvent('smriti:rewardRedeemed', { detail: { badgeId: badge.id, name: badge.name } }));
+    } catch (e) {
+      console.warn('Error persisting reward redeemed flag:', e);
+    }
+
     if (window.SmritiToast) {
       window.SmritiToast.show(`🎉 ${I18n.t('rewardsCongratBadge') || 'You unlocked:'} ${badge.name}!`, 'success');
     }
@@ -152,6 +165,19 @@ export default function RewardsPage(container) {
       status: 'Processing Dispatch'
     });
     Storage.savePatientProfile(profile);
+
+    // Persist redeemed flag & dispatch sync event
+    try {
+      localStorage.setItem('smriti_reward_redeemed', JSON.stringify({
+        giftId: gift.id,
+        name: gift.name,
+        type: 'gift',
+        timestamp: Date.now()
+      }));
+      window.dispatchEvent(new CustomEvent('smriti:rewardRedeemed', { detail: { giftId: gift.id, name: gift.name } }));
+    } catch (e) {
+      console.warn('Error persisting reward redeemed flag:', e);
+    }
 
     if (window.SmritiToast) {
       window.SmritiToast.show(`🎁 ${I18n.t('rewardsCongratGift') || 'Wellness gift claim logged!'} ${gift.name}`, 'success');

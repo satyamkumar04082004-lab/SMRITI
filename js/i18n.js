@@ -42,6 +42,9 @@ export const stitchTranslations = {
       sos: 'SOS'
     },
     coins: 'Coins',
+    redeemed: '✨ Redeemed',
+    navSettings: 'Settings',
+    navSettingsDesc: 'Adjust language, audio, and caregiver options',
     settingsLanguage: 'Language',
 
     // Caregiver Banner
@@ -146,7 +149,8 @@ export const stitchTranslations = {
       reminders: 'Reminders',
       medicines: 'Medicines',
       emergency: 'Emergency',
-      rewards: 'Rewards & Badges'
+      rewards: 'Rewards & Badges',
+      settings: 'Settings'
     },
 
     // Games Common
@@ -195,6 +199,9 @@ export const stitchTranslations = {
       sos: 'आपातकाल'
     },
     coins: 'सिक्के',
+    redeemed: '✨ रिडीम किया गया',
+    navSettings: 'सेटिंग्स',
+    navSettingsDesc: 'भाषा, ध्वनि एवं प्राथमिकताओं को व्यवस्थित करें',
     settingsLanguage: 'भाषा',
 
     // Caregiver Banner
@@ -299,7 +306,8 @@ export const stitchTranslations = {
       reminders: 'अनुस्मारक',
       medicines: 'दवाइयाँ',
       emergency: 'आपातकाल',
-      rewards: 'पुरस्कार एवं बैज'
+      rewards: 'पुरस्कार एवं बैज',
+      settings: 'सेटिंग्स'
     },
 
     // Games Common
@@ -348,6 +356,9 @@ export const stitchTranslations = {
       sos: 'জরুরি'
     },
     coins: 'কয়েন',
+    redeemed: '✨ রিডিম করা হয়েছে',
+    navSettings: 'সেটিংস',
+    navSettingsDesc: 'ভাষা, শব্দ ও ব্যক্তিগত পছন্দ পরিবর্তন করুন',
     settingsLanguage: 'ভাষা',
 
     // Caregiver Banner
@@ -452,7 +463,8 @@ export const stitchTranslations = {
       reminders: 'স্মারক',
       medicines: 'ওষুধপত্র',
       emergency: 'জরুরি সাহায্য',
-      rewards: 'পুরস্কার ও ব্যাজ'
+      rewards: 'পুরস্কার ও ব্যাজ',
+      settings: 'সেটিংস'
     },
 
     // Games Common
@@ -501,6 +513,9 @@ export const stitchTranslations = {
       sos: 'জৰুৰী'
     },
     coins: 'মুদ্ৰা',
+    redeemed: '✨ ৰিডিম কৰা হ\'ল',
+    navSettings: 'ছেটিংছ',
+    navSettingsDesc: 'ভাষা, মাত আৰু পছন্দসমূহ সলনি কৰক',
     settingsLanguage: 'ভাষা',
 
     // Caregiver Banner
@@ -605,7 +620,8 @@ export const stitchTranslations = {
       reminders: 'সোঁৱৰণী',
       medicines: 'ঔষধপাতি',
       emergency: 'জৰুৰী সহায়',
-      rewards: 'পুৰস্কাৰ আৰু বেজ'
+      rewards: 'পুৰস্কাৰ আৰু বেজ',
+      settings: 'ছেটিংছ'
     },
 
     // Games Common

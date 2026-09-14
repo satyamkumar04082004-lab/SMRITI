@@ -326,18 +326,25 @@ function renderHeader() {
 
   const currentLangCode = (I18n.lang || 'en').toUpperCase();
   const regionalDate = getFormattedRegionalDate();
+  const hasRedeemedReward = !!localStorage.getItem('smriti_reward_redeemed');
 
   headerEl = document.createElement('header');
   headerEl.className = 'stitch-header';
   headerEl.setAttribute('data-purpose', 'site-header');
   headerEl.innerHTML = `
     <div class="stitch-header-inner">
-      <!-- Brand Logo, Online Dot & Regional Date -->
+      <!-- Brand Logo, Redeemed Badge, Online Dot & Regional Date -->
       <div style="display: flex; align-items: center; gap: 0.65rem; flex-shrink: 0;">
         <div class="stitch-brand" id="app-brand" title="SMRITI Sanctuary Home">
           <span class="brand-logo" id="app-logo">🧠</span>
           <span class="brand-name">SMRITI</span>
         </div>
+        ${hasRedeemedReward ? `
+          <div id="header-redeemed-badge" class="stitch-redeemed-badge" title="Reward Claimed! Tap to view Rewards & Badges" onclick="window.location.hash='#/rewards'">
+            <span>✨</span>
+            <span>${I18n.t('redeemed') || 'Redeemed'}</span>
+          </div>
+        ` : ''}
         <span class="stitch-online-badge" id="header-sync-status" title="Connection Status">
           <span class="stitch-online-dot"></span>
           <span id="sync-text">${navigator.onLine ? I18n.t('status.online') : I18n.t('status.offline')}</span>
@@ -888,6 +895,18 @@ function init() {
 
   window.addEventListener('smriti:languageChanged', handleLangRefresh);
   window.addEventListener('languageChanged', handleLangRefresh);
+
+  // Synchronize dynamic header redeemed badge and coins across tabs/components
+  const handleRewardRedeemed = () => {
+    Coins.updateBadge();
+    renderHeader();
+  };
+  window.addEventListener('smriti:rewardRedeemed', handleRewardRedeemed);
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'smriti_reward_redeemed' || e.key === 'smriti_coins') {
+      handleRewardRedeemed();
+    }
+  });
 
   navigate();
 }

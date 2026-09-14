@@ -352,9 +352,9 @@ export default function Home(container) {
               <span style="font-size: 1.8rem;">💊</span>
               <span style="font-size: 0.85rem; font-weight: 800; color: #1F2937;">${I18n.t('grid.medicines')}</span>
             </button>
-            <button class="stitch-grid-card" id="btn-grid-sos" style="border: 1.5px solid #FECDD3; background: #FFF5F5; border-radius: 14px; padding: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer;">
-              <span style="font-size: 1.8rem;">🛟</span>
-              <span style="font-size: 0.85rem; font-weight: 800; color: #DC2626;">${I18n.t('grid.emergency')}</span>
+            <button class="stitch-grid-card" onclick="window.location.hash='#/settings'" style="background: #FDFBF7; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <span style="font-size: 1.8rem;">⚙️</span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: #1F2937;">${I18n.t('navSettings') || I18n.t('grid.settings') || 'Settings'}</span>
             </button>
           </div>
 
@@ -494,7 +494,7 @@ export default function Home(container) {
       });
     }
 
-    // Emergency Grid Trigger
+    // Emergency Grid Trigger (if element present)
     const gridSosBtn = container.querySelector('#btn-grid-sos');
     if (gridSosBtn) {
       gridSosBtn.addEventListener('click', () => {

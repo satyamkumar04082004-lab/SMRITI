@@ -227,6 +227,39 @@ function generateContextualResponse(message, profile, role, lang = 'en', todayDa
   const medicines = (profile && profile.medicines) || [];
   const state = profile?.preferences?.regionalState || patient.state || 'Assam';
 
+  // 1. Safety, Crisis & Urgent Distress Handling
+  if (text.includes('sos') || text.includes('emergency') || text.includes('help me') || text.includes('fall') || text.includes('chest pain') || text.includes('breathing problem') || text.includes('i am lost') || text.includes('lost')) {
+    if (lang === 'hi') {
+      return `कृपया शांत रहें ${firstName}, आप पूर्णतः सुरक्षित हैं। यदि आपको तुरंत सहायता चाहिए, तो ऊपर दिए गए लाल 🛟 SOS बटन को दबाएं या अपने बेटे राज दास को कॉल करें। हम हमेशा आपके साथ हैं। 🕊️❤️`;
+    }
+    if (lang === 'as') {
+      return `অনুগ্ৰহ কৰি শান্ত থাকক ${firstName}, আপুনি সুৰক্ষিত। জৰুৰী সহায়ৰ বাবে ওপৰৰ ৰঙা 🛟 SOS বুটামটো টিপক বা পুত্ৰ ৰাজ দাসক যোগাযোগ কৰক। 🕊️❤️`;
+    }
+    if (lang === 'bn') {
+      return `দয়া করে শান্ত থাকুন ${firstName}, আপনি নিরাপদ। জরুরি প্রয়োজনে ওপরের লাল 🛟 SOS বোতামটি চেপে আপনার পরিবার বা জরুরি সেবাকে জানান। 🕊️❤️`;
+    }
+    return `Please stay calm ${firstName}, you are completely safe. If you need immediate assistance, tap the bright red 🛟 SOS button on top to notify Emergency Services (112) or call your caregiver Raj Das right away. We are right here beside you. 🕊️❤️`;
+  }
+
+  // 2. Cognitive & Behavioral De-escalation (Validation Therapy over harsh reality-checking)
+  if (text.includes('where is my mother') || text.includes('where is my father') || text.includes('where is my husband') || text.includes('where is my wife') || text.includes('i want to see my mother') || text.includes('where is mom') || text.includes('where is dad') || text.includes('maa kahan') || text.includes('pitaji kahan') || text.includes('dead') || text.includes('deceased')) {
+    if (lang === 'hi') {
+      return `आपकी बातें सुनकर बहुत अच्छा लगा ${firstName}। वे आपसे कितना अपार स्नेह करते थे! क्या आप मुझे उनके बारे में कुछ मीठी यादें सुनाना पसंद करेंगे? या हम साथ में बांसुरी का मधुर संगीत सुनें? 🌸✨`;
+    }
+    if (lang === 'as') {
+      return `তেওঁলোকৰ কথা শুনি মনটো মৰমেৰে ভৰি পৰিল ${firstName}। তেওঁলোকে আপোনাক কিমান মৰম কৰিছিল! আপুনি তেওঁলোকৰ এটা সুন্দৰ স্মৃতি ক’ব নেকি বা আমি বাঁহীৰ সুৰ শুনো? 🌸✨`;
+    }
+    if (lang === 'bn') {
+      return `তাদের কথা ভেবে মনটা ভালো হয়ে গেল ${firstName}। তারা আপনাকে কতটা ভালোবাসতেন! আপনি কি তাদের কোনো সুন্দর স্মৃতির কথা বলবেন, নাকি আমরা একসাথে মিষ্টি গান শুনব? 🌸✨`;
+    }
+    return `It brings so much warmth to hear you speak of them, ${firstName}. They loved you so very deeply. Would you like to share a sweet memory of them with me, or shall we listen to some calming bansuri music together? 🌸✨`;
+  }
+
+  // 3. Medical Liability Prevention
+  if (text.includes('diagnose') || text.includes('cure') || text.includes('stop taking medicine') || text.includes('what disease do i have') || text.includes('dawa chhod')) {
+    return `Dear ${firstName}, SMRITI is an assistive memory and cognitive companion, not a diagnostic or medical replacement system. Please consult your physician Dr. Barua before making any changes to your medication or healthcare plan! 🩺💊`;
+  }
+
   // Role-specific clinical inquiry
   if (role === 'doctor') {
     return `Clinical Overview for ${patient.name} (${patient.stage || 'Mild MCI'}): ${totalGames} cognitive sessions recorded with ${avgAcc}% overall accuracy as of ${todayDateStr}. Adherence to prescribed routine is stable with ${medicines.length} active prescriptions. Recommended focus: episodic recall and gentle morning stimulation.`;
@@ -365,7 +398,7 @@ module.exports = async function handler(req, res) {
       const latestMood = moods.length > 0 ? moods[moods.length - 1].mood : 'good';
 
       // EXACT SYSTEM PROMPT REQUIRED BY ARCHITECTURE SPECIFICATION
-      const systemPrompt = `You are SMRITI SAATHI, the AI companion of the SMRITI cognitive memory assistance platform. Answer questions about SMRITI, its website, games, memory vault, routines, reminders, accessibility, multilingual features, voice interaction, caregiver features, insights, AI architecture, RAG, SIH problem statement and project implementation. When connected to application functions, use real application data and function calls rather than inventing information. Never fabricate a user's family member, routine, score, reminder, medical condition or game result. For dementia-related questions, provide general educational information and clearly state that SMRITI is not a diagnostic, treatment or medical replacement system. If the user asks something outside the available knowledge, say that you do not have verified information rather than hallucinating. Keep responses simple, warm, respectful and elderly-friendly. You must translate and respond ONLY in this exact language: ${activeLangName}. Never silently switch languages. When the user asks to perform an application action, use the appropriate function instead of merely explaining how to do it.
+      const systemPrompt = `You are SMRITI SAATHI, the AI companion of the SMRITI cognitive memory assistance platform. Answer questions about SMRITI, its website, games, memory vault, routines, reminders, accessibility, multilingual features, voice interaction, caregiver features, insights, AI architecture, RAG, SIH problem statement and project implementation. When connected to application functions, use real application data and function calls rather than inventing information. Never fabricate a user's family member, routine, score, reminder, medical condition or game result. For dementia-related questions, provide general educational information and clearly state that SMRITI is not a diagnostic, treatment or medical replacement system. Follow validation therapy principles: never harshly contradict, argue, or shock the senior (for example, if they ask about deceased loved ones, validate their deep emotional bond and gently redirect to comforting memories or peaceful music). For urgent emergencies, immediately reassure them and trigger triggerSOS or advise calling caregiver Raj Das. If the user asks something outside the available knowledge, say that you do not have verified information rather than hallucinating. Keep responses simple, warm, respectful and elderly-friendly. You must translate and respond ONLY in this exact language: ${activeLangName}. Never silently switch languages. When the user asks to perform an application action, use the appropriate function instead of merely explaining how to do it.
 
 Real-Time Platform Context:
 - Current Date & Time (IST): ${todayDate}, ${todayTime}

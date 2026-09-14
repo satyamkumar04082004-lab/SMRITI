@@ -391,6 +391,26 @@ const AIService = {
     const todayDateStr = new Date().toLocaleDateString('en-IN', istOptionsDate);
     const todayTimeStr = new Date().toLocaleTimeString('en-IN', istOptionsTime);
 
+    // Safety & Crisis Handling
+    if (text.includes('sos') || text.includes('emergency') || text.includes('help me') || text.includes('fall') || text.includes('chest pain') || text.includes('breathing problem') || text.includes('lost')) {
+      if (currentLang === 'hi') {
+        return `कृपया शांत रहें ${firstName}, आप पूर्णतः सुरक्षित हैं। तुरंत सहायता के लिए ऊपर दिए गए लाल 🛟 SOS बटन को दबाएं या राज दास को कॉल करें। हम आपके साथ हैं। 🕊️❤️`;
+      }
+      return `Please stay calm ${firstName}, you are safe. If this is an emergency, tap the bright red 🛟 SOS button on top to notify Emergency Services (112) or call your caregiver Raj Das immediately! 🕊️❤️`;
+    }
+
+    // Cognitive & Behavioral De-escalation (Validation over reality-checking)
+    if (text.includes('mother') || text.includes('father') || text.includes('husband') || text.includes('wife') || text.includes('mom') || text.includes('dad') || text.includes('maa') || text.includes('pitaji')) {
+      if (text.includes('where') || text.includes('want to see') || text.includes('kahan') || text.includes('dead') || text.includes('call')) {
+        return `It brings so much warmth to hear you speak of them, ${firstName}. They loved you so very deeply. Would you like to share a sweet story of them with me, or shall we listen to some calming music together? 🌸✨`;
+      }
+    }
+
+    // Medical Liability Prevention
+    if (text.includes('diagnose') || text.includes('cure') || text.includes('stop medicine')) {
+      return `Dear ${firstName}, SMRITI is an assistive companion, not a medical diagnostic or treatment system. Please consult your physician Dr. Barua before making any changes to your medications! 🩺💊`;
+    }
+
     // Real-time Date and Time
     if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
       if (currentLang === 'hi') {
