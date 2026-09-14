@@ -444,11 +444,12 @@ export default function WellnessPage(container) {
     }
   }
 
-  // Reactive listener to languageChanged event
+  // Reactive listener to languageChanged and smriti:languageChanged events
   const langChangeHandler = () => {
     render();
   };
   window.addEventListener('languageChanged', langChangeHandler);
+  window.addEventListener('smriti:languageChanged', langChangeHandler);
 
   render();
 
@@ -456,6 +457,7 @@ export default function WellnessPage(container) {
     cleanup() {
       if (breathInterval) clearTimeout(breathInterval);
       window.removeEventListener('languageChanged', langChangeHandler);
+      window.removeEventListener('smriti:languageChanged', langChangeHandler);
       TTS.stop();
     }
   };

@@ -1,6 +1,44 @@
 {
   "topics": [
     {
+      "id": "sih_project_scope",
+      "keywords": [
+        "sih",
+        "smart india hackathon",
+        "problem statement",
+        "project implementation",
+        "what is smriti",
+        "about smriti",
+        "mission",
+        "purpose of smriti"
+      ],
+      "responses": {
+        "en": "SMRITI (Smart Memory Retention & Interactive Therapy Interface) is an AI-powered cognitive care and memory companion built for Smart India Hackathon (SIH 2026). It supports seniors and individuals with Mild Cognitive Impairment (MCI) and early dementia through non-pharmacological cognitive therapy, culturally resonant games, life story reminiscence, routine reminders, and caregiver oversight.",
+        "hi": "स्मृति (SMRITI) स्मार्ट इंडिया हैकथॉन (SIH 2026) के लिए विकसित एक AI-संचालित संज्ञानात्मक स्वास्थ्य और स्मृति सहायक मंच है। यह माइल्ड कॉग्निटिव इम्पेयरमेंट (MCI) और शुरुआती डिमेंशिया से पीड़ित वरिष्ठ नागरिकों को सांस्कृतिक खेलों, जीवन संस्मरण, समय पर दवाइयों की याद और परिजनों की देखरेख द्वारा सहायता प्रदान करता है।",
+        "as": "স্মৃতি (SMRITI) হৈছে স্মাৰ্ট ইণ্ডিয়া হেকাথন (SIH 2026) ৰ বাবে নিৰ্মিত এটা AI-চালিত স্মৃতি সহায়ক মঞ্চ। ই জ্যেষ্ঠ নাগৰিকসকলক স্মৃতি সতেজ ৰখা খেল, জীৱন কাহিনী স্মৰণ, নিয়মীয়া ঔষধৰ সোঁৱৰণী আৰু পৰিয়ালৰ তত্ত্বাৱধানৰ জৰিয়তে মৰম আৰু যত্ন প্ৰদান কৰে।",
+        "bn": "স্মৃতি (SMRITI) হলো স্মার্ট ইন্ডিয়া হ্যাকাথন (SIH 2026)-এর জন্য নির্মিত একটি এআই-চালিত স্মৃতি যত্ন প্ল্যাটফর্ম। এটি মৃদু স্মৃতিভ্রংশ এবং ডিমেনশিয়ায় আক্রান্ত প্রবীণদের সাংস্কৃতিক খেলা, স্মৃতিচারণ এবং সময়মতো ওষুধ সেবনের মাধ্যমে সাহায্য করে।"
+      }
+    },
+    {
+      "id": "ai_architecture_rag",
+      "keywords": [
+        "ai architecture",
+        "rag",
+        "retrieval augmented generation",
+        "how ai works",
+        "model",
+        "technology stack",
+        "offline mode",
+        "serverless"
+      ],
+      "responses": {
+        "en": "SMRITI features an offline-first hybrid AI architecture combining local client RAG (Retrieval-Augmented Generation) from verified medical and platform knowledge bases with serverless multi-tier LLM fallbacks (Tier 1: Local Knowledge RAG, Tier 2: OpenAI gpt-4o-mini with 16 Function Tools, Tier 3: Google Gemini 1.5 Flash, Tier 4: Contextual Synthesis Engine). This guarantees zero downtime and total data privacy.",
+        "hi": "स्मृति एक हाइब्रिड AI आर्किटेक्चर पर आधारित है, जिसमें स्थानीय RAG (ज्ञानकोष मिलान), OpenAI gpt-4o-mini, Google Gemini 1.5 Flash और ऑफ़लाइन इंजन शामिल हैं। यह 16 विशेष टूल्स के साथ रोगी की दिनचर्या, खेल प्रगति और आपातकालीन कॉलिंग को बिना किसी रुकावट के संचालित करता है।",
+        "as": "স্মৃতিৰ AI আৰ্কিটেকচাৰত স্থানীয় RAG, OpenAI gpt-4o-mini, আৰু Gemini অন্তৰ্ভুক্ত। ই ১৬টা কাৰ্যক্ষম সঁজুলিৰ জৰিয়তে ৰোগীৰ দিনচৰ্যা আৰু স্মৃতিৰ তথ্য সুৰক্ষিতভাৱে পৰিচালনা কৰে।",
+        "bn": "স্মৃতির প্রযুক্তিগত পরিকাঠামোয় রয়েছে মাল্টি-টিয়ার ফলব্যাক এআই—স্থানীয় জ্ঞানভাণ্ডার (RAG), OpenAI gpt-4o-mini এবং Gemini 1.5 Flash, যা নিরবচ্ছিন্ন স্বাস্থ্যসেবা নিশ্চিত করে।"
+      }
+    },
+    {
       "id": "dementia_definition",
       "keywords": [
         "what is dementia",
@@ -9,13 +47,14 @@
         "what happens in dementia",
         "dementia symptoms",
         "what is alzheimers",
-        "alzheimer"
+        "alzheimer",
+        "mci"
       ],
       "responses": {
-        "en": "Dementia is a gentle medical term describing changes in how our brain processes memories, thoughts, and daily tasks over time. It is not a personal failing, but natural shifts in neuronal connections. With daily loving routines, peaceful surroundings, and cognitive exercises, seniors live comfortably with high dignity! 🌸",
-        "hi": "डिमेंशिया एक चिकित्सीय स्थिति है जिसमें समय के साथ याददाश्त, सोचने और दैनिक कार्यों को करने में बदलाव आते हैं। यह कोई कमजोरी नहीं है, बल्कि मस्तिष्क की प्राकृतिक प्रक्रिया है। नियमित दिनचर्या, प्रेमपूर्ण वातावरण और सरल अभ्यासों से वरिष्ठ नागरिक गरिमा के साथ सुखद जीवन जी सकते हैं! 🌸",
-        "as": "ডিমেনচিয়া হৈছে সময়ৰ লগে লগে মগজুৰ স্মৃতি আৰু চিন্তা প্ৰক্ৰিয়াত হোৱা পৰিৱৰ্তনক বুজোৱা এক চিকিৎসা অৱস্থা। মৰমিয়াল পৰিৱেশ, নিয়মীয়া অভ্যাস আৰু সহজ খেলৰ দ্বাৰা জ্যেষ্ঠসকলে অতি সন্মান আৰু শান্তিত জীয়াই থাকিব পাৰে! 🌸",
-        "bn": "ডিমেনশিয়া হলো সময়ের সাথে সাথে স্মৃতিশক্তি ও চিন্তা প্রক্রিয়ায় কিছু স্বাভাবিক পরিবর্তন। ভালোবাসা, নিয়মিত মৃদু রুটিন এবং মস্তিষ্কের অনুশীলনের মাধ্যমে প্রবীণরা সুস্থ ও মর্যাদাপূর্ণ জীবনযাপন করতে পারেন! 🌸"
+        "en": "Dementia is a gentle medical term describing changes in how our brain processes memories, thoughts, and daily tasks over time. It is not a personal failing, but natural shifts in neuronal connections. SMRITI provides non-pharmacological cognitive stimulation and routine guidance. Note: SMRITI is an assistive companion, not a diagnostic or medical replacement system.",
+        "hi": "डिमेंशिया एक चिकित्सीय स्थिति है जिसमें समय के साथ याददाश्त, सोचने और दैनिक कार्यों को करने में बदलाव आते हैं। यह कोई कमजोरी नहीं है, बल्कि मस्तिष्क की प्राकृतिक प्रक्रिया है। ध्यान दें: स्मृति एक सहायक साथी है, यह किसी चिकित्सीय निदान या इलाज का विकल्प नहीं है।",
+        "as": "ডিমেনচিয়া হৈছে সময়ৰ লগে লগে মগজুৰ স্মৃতি আৰু চিন্তা প্ৰক্ৰিয়াত হোৱা পৰিৱৰ্তনক বুজোৱা এক চিকিৎসা অৱস্থা। মনত ৰাখিব: স্মৃতি সহায়ক সঁহাৰিহে, ই কোনো ডাক্তৰী নিদান বা চিকিৎসাৰ বিকল্প নহয়।",
+        "bn": "ডিমেনশিয়া হলো সময়ের সাথে সাথে স্মৃতিশক্তি ও চিন্তা প্রক্রিয়ায় কিছু স্বাভাবিক পরিবর্তন। লক্ষ্য রাখবেন: স্মৃতি একটি সহায়ক সঙ্গী, এটি কোনো চিকিৎসাগত রোগ নির্ণয় বা চিকিৎসার বিকল্প নয়।"
       }
     },
     {
@@ -30,10 +69,58 @@
         "cognitive exercises"
       ],
       "responses": {
-        "en": "Here are 4 gentle daily exercises to nurture your memory: 1) Play a cognitive game like Hornbill Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 calming deep breathing; 3) Reminisce over a favorite family photo or Life Story memory; 4) Take a fresh morning walk and drink warm water! 🧠✨",
-        "hi": "याददाश्त को स्वस्थ रखने के लिए 4 सरल दैनिक अभ्यास: 1) रोज़ सुबह 10 मिनट हॉर्नबिल या परिचित चेहरे जैसा खेल खेलें; 2) 4-4 लयबद्ध गहरी सांसें लें; 3) परिवार की पुरानी तस्वीर देखकर सुखद यादें साझा करें; 4) सुबह की धूप में टहलें और पर्याप्त पानी पिएं! 🧠✨",
-        "as": "স্মৃতিশক্তি সতেজ কৰি ৰাখিবলৈ ৪টা সহজ নিয়ম: ১) প্ৰতিদিনে পুৱা ধনেশ পক্ষীৰ বাহ বা চিনাকি মুখৰ দৰে খেল ১০ মিনিট খেলক; ২) ৪-৪ শান্তিপূৰ্ণ দীঘল উশাহ লওক; ৩) পৰিয়ালৰ পুৰণি ফটো চাই কথা পাতক; ৪) পুৱা অলপ খোজ কাঢ়ক আৰু পৰ্যাপ্ত পানী খাওক! 🧠✨",
-        "bn": "স্মৃতিশক্তি ভালো রাখার ৪টি সহজ উপায়: ১) প্রতিদিন সকালে ১০ মিনিট কোনো স্মৃতি অনুশীলন খেলুন; ২) শান্তভাবে গভীর শ্বাস-প্রশ্বাসের ব্যায়াম করুন; ৩) পুরনো পারিবারিক ছবি দেখে স্মৃতিচারণ করুন; ৪) সকালে একটু হাঁটুন ও জল পান করুন! 🧠✨"
+        "en": "Here are 4 gentle daily exercises to nurture your memory: 1) Play a cognitive game like Hornbill Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 calming deep breathing; 3) Reminisce over a favorite family photo in the Memory Vault; 4) Take a fresh morning walk and drink warm water! 🧠✨",
+        "hi": "याददाश्त को स्वस्थ रखने के लिए 4 सरल दैनिक अभ्यास: 1) रोज़ सुबह 10 मिनट हॉर्नबिल या परिचित चेहरे जैसा खेल खेलें; 2) 4-4 लयबद्ध गहरी सांसें लें; 3) स्मृति वॉल्ट में परिवार की पुरानी तस्वीर देखकर सुखद यादें साझा करें; 4) सुबह की धूप में टहलें और पर्याप्त पानी पिएं! 🧠✨",
+        "as": "স্মৃতিশক্তি সতেজ কৰি ৰাখিবলৈ ৪টা সহজ নিয়ম: ১) প্ৰতিদিনে পুৱা ধনেশ পক্ষীৰ বাহ বা চিনাকি মুখৰ দৰে খেল ১০ মিনিট খেলক; ২) ৪-৪ শান্তিপূৰ্ণ দীঘল উশাহ লওক; ৩) স্মৃতি ভঁৰালত পৰিয়ালৰ পুৰণি ফটো চাওক; ৪) পুৱা অলপ খোজ কাঢ়ক আৰু পৰ্যাপ্ত পানী খাওক! 🧠✨",
+        "bn": "স্মৃতিশক্তি ভালো রাখার ৪টি সহজ উপায়: ১) প্রতিদিন সকালে ১০ মিনিট কোনো স্মৃতি অনুশীলন খেলুন; ২) শান্তভাবে গভীর শ্বাস-প্রশ্বাসের ব্যায়াম করুন; ৩) স্মৃতি ভল্টে পুরনো পারিবারিক ছবি দেখুন; ৪) সকালে একটু হাঁটুন ও জল পান করুন! 🧠✨"
+      }
+    },
+    {
+      "id": "game_rules_hornbill",
+      "keywords": [
+        "hornbill",
+        "hornbill memory nest",
+        "rules hornbill",
+        "how to play hornbill",
+        "game rules"
+      ],
+      "responses": {
+        "en": "Hornbill Memory Nest is a visual working memory game! Flip two cards to find matching Northeastern nature icons (like orchids, butterflies, and the Great Hornbill). Matching pairs stay face up. Complete all pairs to earn reward coins!",
+        "hi": "हॉर्नबिल मेमोरी नेस्ट (Hornbill Memory Nest) एक दृश्य स्मृति खेल है। दो कार्डों को पलटकर पूर्वोत्तर के प्राकृतिक प्रतीकों (जैसे आर्किड, तितली और हॉर्नबिल) के समान जोड़े खोजें। सभी जोड़े मिलाने पर सिक्के मिलते हैं!",
+        "as": "ধনেশ পক্ষীৰ বাহ (Hornbill Memory Nest) হৈছে দৃষ্টি স্মৃতিৰ খেল। দুখন কাৰ্ড লুটিয়াই একে প্ৰকৃতিৰ ছবিৰ যোৰ মিলাওক আৰু পুৰস্কাৰ লাভ কৰক!",
+        "bn": "হর্নবিল মেমোরি নেস্ট হলো একটি ভিজ্যুয়াল মেমোরি গেম। দুটি করে কার্ড উল্টে একই রকম প্রাকৃতিক ছবি মিলিয়ে সম্পূর্ণ করুন এবং কয়েন জিতে নিন!"
+      }
+    },
+    {
+      "id": "game_rules_familiar_faces",
+      "keywords": [
+        "familiar faces",
+        "face recognition",
+        "rules familiar faces",
+        "how to play familiar faces"
+      ],
+      "responses": {
+        "en": "Familiar Faces trains social recognition and semantic recall. Look at the friendly family or community face and pick their relationship or name. You can use gentle progressive hints if you need a little reminder!",
+        "hi": "परिचित चेहरे (Familiar Faces) सामाजिक पहचान और चेहरे याद रखने का खेल है। तस्वीर देखकर सही रिश्ते या नाम का चुनाव करें। आवश्यकता पड़ने पर आप संकेत (Hint) भी ले सकते हैं!",
+        "as": "চিনাকি মুখ (Familiar Faces) খেলখনত পৰিয়াল বা সমাজৰ ব্যক্তিৰ ছবি চাই তেওঁলোকৰ নাম বা সম্বন্ধ চিনাক্ত কৰক। প্ৰয়োজন হ'লে সহায়ক ইংগিত লওক!",
+        "bn": "পরিচিত মুখ খেলাটিতে পরিবারের সদস্য বা ঘনিষ্ঠ ব্যক্তিদের ছবি দেখে সঠিক নাম ও সম্পর্ক নির্বাচন করুন।"
+      }
+    },
+    {
+      "id": "memory_vault",
+      "keywords": [
+        "memory vault",
+        "family photos",
+        "life story",
+        "vault",
+        "cherished memories",
+        "photo album"
+      ],
+      "responses": {
+        "en": "The Family Memory Vault is a warm space where your cherished photos, family moments, voice recordings, and life milestones are safely stored. Reminiscing over these photos stimulates episodic memory and fosters deep emotional comfort.",
+        "hi": "फैमिली मेमोरी वॉल्ट (Family Memory Vault) आपके पारिवारिक चित्रों, जीवन की मधुर कथाओं और पुरानी यादों का सुरक्षित संग्रह है। यह पुरानी सुखद स्मृतियों को जगाने और मन को शांति देने के लिए बहुत लाभकारी है।",
+        "as": "পৰিয়ালৰ স্মৃতি ভঁৰাল হৈছে আপোনাৰ প্ৰিয় পুৰণি ফটো, কণ্ঠস্বৰ আৰু জীৱনৰ সোণালী মুহূৰ্তবোৰ সুৰক্ষিতভাৱে সাঁচি ৰখা এখন মৰমৰ ঠাই।",
+        "bn": "ফ্যামিলি মেমোরি ভল্ট হলো আপনার জীবনের প্রিয় স্মৃতি, পারিবারিক ছবি এবং সুন্দর মুহূর্তগুলো নিরাপদে ধরে রাখার বিশেষ স্থান।"
       }
     },
     {
@@ -66,7 +153,8 @@
         "blood pressure medicine",
         "pills",
         "tablets",
-        "medicine reminder"
+        "medicine reminder",
+        "routine"
       ],
       "responses": {
         "en": "Your medicine routine is safely kept under Reminders (⏰) and Medicines (💊). Always take your morning doses with a full glass of warm water after light breakfast, and never skip prescribed timing without Dr. Barua's guidance! 💊💧",

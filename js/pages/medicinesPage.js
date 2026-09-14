@@ -334,7 +334,16 @@ export default function MedicinesPage(container) {
     }
   }
 
+  const onLangChange = () => render();
+  window.addEventListener('smriti:languageChanged', onLangChange);
+  window.addEventListener('languageChanged', onLangChange);
+
   render();
 
-  return { cleanup() {} };
+  return {
+    cleanup() {
+      window.removeEventListener('smriti:languageChanged', onLangChange);
+      window.removeEventListener('languageChanged', onLangChange);
+    }
+  };
 }

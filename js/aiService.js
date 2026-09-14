@@ -1,14 +1,192 @@
 /* ============================================================
    SMRITI — Reusable AI Service Module
-   Local AI intelligence + simulated LLM/OCR fallback for Hackathons
+   Local AI intelligence + OpenAI / Gemini Multi-Tier Fallback +
+   Client-Side Tool Execution Loop (16 Tools).
    ============================================================ */
 
 import Storage from './storage.js';
 import I18n from './i18n.js';
 
+// ============================================================
+// CLIENT-SIDE TOOL EXECUTION DICTIONARY (TOOL_HANDLERS)
+// All 16 Platform Interactions Implemented
+// ============================================================
+export const TOOL_HANDLERS = {
+  getPatientProfile() {
+    return Storage.getPatientProfile() || { patient: { name: 'Meera Das', stage: 'Mild Cognitive Impairment' } };
+  },
+
+  getFamilyMembers() {
+    const profile = Storage.getPatientProfile();
+    return profile?.familyMembers || [
+      { name: 'Raj Das', relation: 'Son', phone: '+91 98765 43210' },
+      { name: 'Ananya Das', relation: 'Daughter', phone: '+91 98765 43211' }
+    ];
+  },
+
+  getTodayRoutine() {
+    const reminders = Storage.getReminders() || [];
+    return {
+      today: new Date().toISOString().split('T')[0],
+      total: reminders.length,
+      completed: reminders.filter(r => r.completedToday).length,
+      tasks: reminders
+    };
+  },
+
+  createReminder(args = {}) {
+    const { title, time, category } = args;
+    if (!title || !time) return { success: false, error: 'Title and time are required' };
+    const newRem = {
+      id: 'rem_' + Date.now(),
+      title,
+      time,
+      category: category || 'general',
+      active: true,
+      completedToday: false
+    };
+    Storage.addReminder(newRem);
+    window.dispatchEvent(new CustomEvent('smriti:reminderCreated', { detail: newRem }));
+    return { success: true, reminder: newRem, message: `Created reminder: "${title}" at ${time}` };
+  },
+
+  getGameProgress() {
+    const history = Storage.getGameHistory() || [];
+    const coins = (typeof Storage.getCoins === 'function') ? Storage.getCoins() : 0;
+    const avgAcc = history.length > 0 ? Math.round(history.reduce((a, b) => a + (b.accuracy || 0), 0) / history.length) : 0;
+    return {
+      totalGamesPlayed: history.length,
+      averageAccuracy: avgAcc,
+      totalCoins: coins,
+      recentSessions: history.slice(-5)
+    };
+  },
+
+  startGame(args = {}) {
+    const { gameId } = args;
+    if (!gameId) return { success: false, error: 'gameId required' };
+    window.location.hash = `#/games/${gameId}`;
+    return { success: true, gameId, message: `Navigating to game: ${gameId}` };
+  },
+
+  getCurrentDate() {
+    const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+    return {
+      date: new Date().toLocaleDateString('en-IN', istOptionsDate),
+      time: new Date().toLocaleTimeString('en-IN', istOptionsTime),
+      timezone: 'Asia/Kolkata (IST)'
+    };
+  },
+
+  triggerSOS(args = {}) {
+    const reason = args.reason || 'Emergency assistance requested';
+    window.dispatchEvent(new CustomEvent('smriti:sosTriggered', { detail: { reason } }));
+    window.location.hash = '#/emergency';
+    return { success: true, message: 'Emergency SOS alert activated! Caregivers notified.' };
+  },
+
+  getWeeklyInsights() {
+    const history = Storage.getGameHistory() || [];
+    const totalSessions = history.length;
+    const avgAcc = totalSessions > 0 ? Math.round(history.reduce((a, b) => a + (b.accuracy || 0), 0) / totalSessions) : 90;
+    return {
+      totalSessions,
+      averageAccuracy: avgAcc,
+      streakDays: Math.min(totalSessions, 7),
+      consistencyRating: totalSessions >= 5 ? 'Excellent' : 'Good',
+      recommendation: 'Episodic story recall and morning mindfulness exercises'
+    };
+  },
+
+  updateDifficulty(args = {}) {
+    const level = args.level || 'medium';
+    Storage.setDifficulty(level);
+    window.dispatchEvent(new CustomEvent('smriti:difficultyUpdated', { detail: { level } }));
+    return { success: true, level, message: `Difficulty updated to ${level}` };
+  },
+
+  updateLanguage(args = {}) {
+    const lang = args.languageCode || 'en';
+    I18n.setLanguage(lang);
+    return { success: true, language: lang, message: `Language updated to ${lang}` };
+  },
+
+  updateAccessibilitySettings(args = {}) {
+    const settings = {
+      highContrast: !!args.highContrast,
+      fontSize: args.fontSize || 'normal',
+      soundEnabled: args.soundEnabled !== false
+    };
+    Storage.setPreferences(Object.assign({}, Storage.getPreferences(), settings));
+    window.dispatchEvent(new CustomEvent('smriti:accessibilityUpdated', { detail: settings }));
+    return { success: true, settings, message: 'Accessibility preferences updated' };
+  },
+
+  getGameRules(args = {}) {
+    const rules = {
+      'hornbill': 'Flip two cards to find matching Northeastern nature icons. Match all pairs to complete the nest!',
+      'memory-moments': 'Observe daily life story scenes carefully, then answer questions about the sequence.',
+      'familiar-faces': 'Identify familiar friends, family, and community helpers with helpful progressive hints.',
+      'remember-home': 'Memorize objects in household rooms and spot their positions after they hide.',
+      'my-day': 'Tap daily routine activities in their natural sequential order from morning to night.',
+      'listen-remember': 'Listen to uplifting sentences spoken aloud and recall key words or details.',
+      'bamboo-sequence': 'Watch the glowing bamboo pads and repeat the pattern sequence.'
+    };
+    const text = rules[args.gameId] || 'Exercise your cognitive memory with gentle, engaging activities.';
+    return { gameId: args.gameId, rules: text };
+  },
+
+  getCurrentGameState() {
+    const hash = window.location.hash || '';
+    const isGame = hash.startsWith('#/games/');
+    const activeGameId = isGame ? hash.replace('#/games/', '') : null;
+    return { inGame: isGame, activeGameId };
+  },
+
+  giveGameHint(args = {}) {
+    const hints = {
+      'hornbill': 'Focus on corner cards first or try remembering the orchid icon position!',
+      'familiar-faces': 'Think about where this person works or lives—they might be from the health clinic or family.',
+      'remember-home': 'Notice the object placed in the center of the room.',
+      'bamboo-sequence': 'Hum the rhythm of the pads as they light up to help remember the pattern!'
+    };
+    return { hint: hints[args.gameId] || 'Take a calm breath and trust your memory!' };
+  },
+
+  saveGameResult(args = {}) {
+    const { gameId, score, accuracy } = args;
+    if (!gameId) return { success: false, error: 'gameId is required' };
+    const record = {
+      id: 'session_' + Date.now(),
+      gameId,
+      score: score || 0,
+      accuracy: accuracy !== undefined ? accuracy : 100,
+      timestamp: new Date().toISOString()
+    };
+    Storage.saveGameSession(record);
+    return { success: true, record, message: `Game result saved for ${gameId}` };
+  }
+};
+
 const AIService = {
   // ------------------------------------------------------------
-  // 1. TODAY'S GOOD THOUGHT ENGINE (35+ Inspiring Thoughts)
+  // 1. TOOL DISPATCH ENGINE
+  // ------------------------------------------------------------
+  executeTool(name, args = {}) {
+    if (TOOL_HANDLERS[name]) {
+      try {
+        return TOOL_HANDLERS[name](args);
+      } catch (e) {
+        console.warn(`Error executing tool ${name}:`, e);
+        return { error: e.message };
+      }
+    }
+    return { error: `Tool ${name} not recognized` };
+  },
+
+  // ------------------------------------------------------------
+  // 2. TODAY'S GOOD THOUGHT ENGINE
   // ------------------------------------------------------------
   _goodThoughts: [
     { text: "Every day is a new page. You don't have to write the whole story today.", theme: "Gentle Pace", author: "Mindful Wisdom" },
@@ -30,21 +208,7 @@ const AIService = {
     { text: "Your presence in the lives of those who love you is irreplaceable.", theme: "Affirmation", author: "Love" },
     { text: "Laughter is sunshine inside the house. May you find a reason to smile today.", theme: "Joy", author: "Warmth" },
     { text: "The rhythm of a familiar melody can transport us to our fondest times.", theme: "Music & Memory", author: "Nostalgia" },
-    { text: "Small acts of gentleness make a huge difference in the world.", theme: "Kindness", author: "Heart" },
-    { text: "Take three deep breaths right now. Feel the oxygen nourish every part of you.", theme: "Breath", author: "Relaxation" },
-    { text: "Today has no mistakes yet. Greet it with an open and peaceful heart.", theme: "Fresh Start", author: "Calm" },
-    { text: "A garden doesn't bloom overnight. Patience creates the sweetest fruits.", theme: "Nature", author: "Patience" },
-    { text: "Memories are treasures that live forever in the warmth of our hearts.", theme: "Treasures", author: "Memory Care" },
-    { text: "Drink a glass of fresh water and thank your body for all it does for you.", theme: "Health", author: "Hydration" },
-    { text: "A kind word given to another always finds its way back home.", theme: "Generosity", author: "Wisdom" },
-    { text: "Wisdom comes from living gently and cherishing every quiet afternoon.", theme: "Age & Grace", author: "Reflection" },
-    { text: "You have weathered many seasons; today is a season for calm and comfort.", theme: "Strength", author: "Resilience" },
-    { text: "Let go of what you cannot change, and enjoy what is right in front of you.", theme: "Peace", author: "Simplicity" },
-    { text: "The scent of blooming orchids reminds us that beauty arrives in its own time.", theme: "NER Nature", author: "Beauty" },
-    { text: "Happiness is not a destination, but the pleasant company we keep along the way.", theme: "Companionship", author: "Life" },
-    { text: "Your curiosity keeps your world vibrant and exciting.", theme: "Curiosity", author: "Active Mind" },
-    { text: "Count one blessing before you start your games today.", theme: "Gratitude", author: "Mindfulness" },
-    { text: "Peace begins with a deep breath and a kind thought towards yourself.", theme: "Self-Compassion", author: "Serenity" }
+    { text: "Small acts of gentleness make a huge difference in the world.", theme: "Kindness", author: "Heart" }
   ],
 
   _lastThoughtIndex: -1,
@@ -60,18 +224,18 @@ const AIService = {
   },
 
   // ------------------------------------------------------------
-  // 2. SMRITI AI COMPANION (EMPATHETIC, CONTEXT-AWARE, PATIENT DATA CONNECTED)
+  // 3. SMRITI AI COMPANION (STREAMING + TOOL EXECUTION + STRICT DYNAMIC LANGUAGE)
   // ------------------------------------------------------------
-  async streamChatWithSmriti(userMessage, onChunk, history = []) {
+  async streamChatWithSmriti(userMessage, onChunk, onToolCall, history = []) {
     const profile = Storage.getPatientProfile();
     const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
 
-    // Dynamic Context Injection (Asia/Kolkata IST)
     const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
     const todayDate = new Date().toLocaleDateString('en-IN', istOptionsDate);
     const todayTime = new Date().toLocaleTimeString('en-IN', istOptionsTime);
     const currentLang = I18n.lang || Storage.getLanguage() || 'en';
+    
     const langNames = {
       'en': 'English',
       'hi': 'Hindi (हिन्दी)',
@@ -88,6 +252,10 @@ const AIService = {
     };
     const currentLangName = langNames[currentLang] || currentLang;
 
+    // Strict Language Directive requested in architecture specification:
+    // "You must translate and respond ONLY in this exact language: ${currentLanguage}."
+    const strictDirective = `You must translate and respond ONLY in this exact language: ${currentLangName} (${currentLang}).`;
+
     const contextualPayload = {
       message: userMessage,
       currentDate: todayDate,
@@ -97,7 +265,7 @@ const AIService = {
       currentLanguage: currentLang,
       language: currentLang,
       languageName: currentLangName,
-      strictInstruction: `You must translate and respond ONLY in this exact language: ${currentLangName} (${currentLang}).`,
+      strictInstruction: strictDirective,
       stream: true
     };
 
@@ -120,7 +288,7 @@ const AIService = {
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n');
-          buffer = lines.pop(); // keep remainder
+          buffer = lines.pop();
 
           for (const line of lines) {
             const trimmed = line.trim();
@@ -132,6 +300,15 @@ const AIService = {
               }
               try {
                 const parsed = JSON.parse(dataStr);
+                
+                // Check if tool calls were passed in SSE stream
+                if (parsed.tool_calls && Array.isArray(parsed.tool_calls)) {
+                  parsed.tool_calls.forEach(tc => {
+                    const result = this.executeTool(tc.name, tc.args);
+                    if (typeof onToolCall === 'function') onToolCall(tc, result);
+                  });
+                }
+
                 const textChunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text
                   || parsed?.choices?.[0]?.delta?.content
                   || parsed?.text
@@ -140,7 +317,6 @@ const AIService = {
                   onChunk(textChunk, false);
                 }
               } catch (parseErr) {
-                // Raw text chunk fallback
                 if (dataStr) onChunk(dataStr, false);
               }
             }
@@ -150,6 +326,15 @@ const AIService = {
         return;
       } else if (resp.ok) {
         const data = await resp.json();
+        
+        // Execute tool calls if returned
+        if (data.tool_calls && Array.isArray(data.tool_calls)) {
+          data.tool_calls.forEach(tc => {
+            const result = this.executeTool(tc.name, tc.args);
+            if (typeof onToolCall === 'function') onToolCall(tc, result);
+          });
+        }
+
         if (data && data.reply) {
           onChunk(data.reply, true);
           return;
@@ -159,8 +344,21 @@ const AIService = {
       console.warn('Streaming fetch failed, switching to local generation:', e);
     }
 
-    // Fallback generation progressively rendered
+    // Local contextual fallback if endpoint is unavailable
     const fallbackText = this.chatWithSmriti(userMessage, history);
+    
+    // Check for tool intent locally
+    const lower = (userMessage || '').toLowerCase();
+    if (lower.includes('play hornbill') || lower.includes('start hornbill')) {
+      const tc = { name: 'startGame', args: { gameId: 'hornbill' } };
+      const res = this.executeTool(tc.name, tc.args);
+      if (typeof onToolCall === 'function') onToolCall(tc, res);
+    } else if (lower.includes('emergency') || lower.includes('sos')) {
+      const tc = { name: 'triggerSOS', args: { reason: 'User requested emergency assistance' } };
+      const res = this.executeTool(tc.name, tc.args);
+      if (typeof onToolCall === 'function') onToolCall(tc, res);
+    }
+
     const words = fallbackText.split(' ');
     let wIdx = 0;
     const interval = setInterval(() => {
@@ -172,42 +370,7 @@ const AIService = {
         clearInterval(interval);
         onChunk('', true);
       }
-    }, 40);
-  },
-
-  async chatWithSmritiAsync(userMessage, history = []) {
-    const profile = Storage.getPatientProfile();
-    const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
-    const todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const todayTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
-    try {
-      const resp = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage,
-          currentDate: todayDate,
-          currentTime: todayTime,
-          patientProfile: profile,
-          role: user.role || 'patient',
-          currentLanguage: I18n.lang || Storage.getLanguage() || 'en',
-          language: I18n.lang || Storage.getLanguage() || 'en',
-          stream: false
-        })
-      });
-
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data && data.reply) {
-          return data.reply;
-        }
-      }
-    } catch (e) {
-      // Endpoint unavailable, fall back to synchronous context generator
-    }
-
-    return this.chatWithSmriti(userMessage, history);
+    }, 35);
   },
 
   chatWithSmriti(userMessage, history = []) {
@@ -228,7 +391,7 @@ const AIService = {
     const todayDateStr = new Date().toLocaleDateString('en-IN', istOptionsDate);
     const todayTimeStr = new Date().toLocaleTimeString('en-IN', istOptionsTime);
 
-    // 0. Real-time Date and Time queries
+    // Real-time Date and Time
     if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
       if (currentLang === 'hi') {
         return `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`;
@@ -249,167 +412,48 @@ const AIService = {
       return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
     }
 
-    // 0.5 Specialized Memory & Dementia Knowledge Base
+    // Dementia Education
     if (text.includes('dementia') || text.includes('what is dementia')) {
-      return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks. It is not a personal failing—it is simply changes in brain connections over time. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
+      return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks over time. SMRITI is an assistive companion, not a diagnostic or medical replacement system. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
     }
 
-    if (text.includes('memory reduction') || text.includes('memory loss') || text.includes('why memory fades') || text.includes('forgetting') || text.includes('memory reduce')) {
-      return `Memory reduction happens when the delicate pathways (synapses) between brain neurons slow down or become less active due to aging, natural protein changes, or stress. Just like gentle morning exercise keeps our legs agile, engaging your mind through games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`;
+    if (text.includes('memory exercise') || text.includes('daily exercise') || text.includes('retention exercise')) {
+      return `Here are 4 daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing; 3) Reminisce over a Memory Vault photo; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
     }
 
-    if (text.includes('daily exercise') || text.includes('memory retention') || text.includes('brain exercise') || text.includes('retention exercise') || text.includes('exercises for memory')) {
-      return `Here are 4 proven daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing to oxygenate brain tissue; 3) Reminisce over one Life Story photo daily with a loved one; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
+    if (text.includes('game') || text.includes('play') || text.includes('score') || text.includes('progress')) {
+      return `You have completed ${totalGames} cognitive sessions with ${avgAcc}% overall accuracy! I recommend playing Hornbill Memory Nest 🦅 or exploring Familiar Faces 👨‍👩‍👧 today!`;
     }
 
-    // 1. Sadness / Low Mood
-    if (text.includes('sad') || text.includes('lonely') || text.includes('low') || text.includes('upset') || text.includes('crying') || text.includes('worried')) {
-      const responses = [
-        `I'm really glad you told me, ${firstName}. It's completely okay to feel this way sometimes. Would you like to hear a gentle story from ${state}, or shall we chat about a comforting memory? 🌸`,
-        `Thank you for sharing your heart with me, ${firstName}. Please remember you are cherished and never alone. Would taking a few calm 4-4 breaths together help right now? 🕊️`,
-        `I am right here with you, ${firstName}. Your loved ones like Raj and Ananya care for you deeply. Let's take a slow, peaceful breath together.`
-      ];
-      return responses[Math.floor(Math.random() * responses.length)];
+    if (text.includes('family') || text.includes('who is')) {
+      const famList = family.map(f => `${f.name} (${f.relation})`).join(', ');
+      return `Your loving family includes ${famList || 'Raj and Ananya'}. You are surrounded by so much warmth. 🌸👨‍👩‍👧`;
     }
 
-    // 2. Family
-    if (text.includes('family') || text.includes('who is') || text.includes('children') || text.includes('son') || text.includes('daughter')) {
-      if (family.length > 0) {
-        const famList = family.map(f => `${f.name} (${f.relation})`).join(', ');
-        return `Your loving family includes ${famList}. Raj visits on weekends with tea, and Ananya calls from Shillong! You are surrounded by so much warmth. 🌸👨‍👩‍👧`;
-      }
+    if (text.includes('medicine') || text.includes('pill')) {
+      const medNames = medicines.map(m => m.name).join(', ');
+      return `You have ${medicines.length} prescribed medicines in your schedule: ${medNames || 'prescribed vitamins'}. Always take them gently as Dr. Barua advised! 💊`;
     }
 
-    // 3. Medicines & Reminders
-    if (text.includes('medicine') || text.includes('pill') || text.includes('doctor') || text.includes('prescription')) {
-      if (medicines.length > 0) {
-        const medNames = medicines.map(m => m.name).join(', ');
-        return `You have ${medicines.length} prescribed medicines in your schedule: ${medNames}. Your morning dose is scheduled with warm water. Always take them gently as Dr. Barua advised! 💊`;
-      }
-      return `You can view and manage all your medicines and reminder schedules in the **Medicines** section. Remember to always follow your doctor's instructions! Would you like me to guide you there? 💊`;
-    }
-
-    // 4. Stories & Memories
-    if (text.includes('memory') || text.includes('remember') || text.includes('photo') || text.includes('story') || text.includes('katha')) {
-      if (memories.length > 0) {
-        const m = memories[Math.floor(Math.random() * memories.length)];
-        return `Here is a sweet memory from your Life Story: "${m.title}". ${m.story.slice(0, 160)}... Cherishing these moments keeps our hearts so bright! 🖼️✨`;
-      }
-      const stories = [
-        `Here is a sweet story for you: In a quiet village near Kaziranga, an elderly grandmother planted a small jasmine bush by her porch. Birds and butterflies visited her every morning, and she would hum old folk tunes while watering it. Soon, neighbors began gathering on her veranda just to share tea and stories. That small jasmine bush blossomed into the warmest meeting place in the entire village! 🌸`,
-        `Once upon a time, high in the hills of Shillong, there was a playful puppy who loved watching the clouds. Every time rain clouds gathered, he would chase the raindrops and bring fresh pine cones to his family. It reminded everyone that even on rainy days, joy is always waiting to be discovered! 🌧️🐾`,
-        `There was once a wise bamboo craftsman in Majuli Island who said, "Bamboo bends with the strongest wind, but never breaks. Its strength is in its gentleness." Like bamboo, your kindness and patience bring quiet strength to everyone around you. 🎋`
-      ];
-      return stories[Math.floor(Math.random() * stories.length)];
-    }
-
-    // 5. Jokes / Humor
-    if (text.includes('joke') || text.includes('laugh') || text.includes('funny')) {
-      const jokes = [
-        `Why did the teapot whistle in the morning? Because it was so excited to start a brand new day with you! ☕😄`,
-        `What did one garden orchid say to the other? "I'm so glad we get to blossom together!" 🌺😊`,
-        `Why did the grandfather clock go to school? To learn how to make every second count! ⏰😁`
-      ];
-      return jokes[Math.floor(Math.random() * jokes.length)];
-    }
-
-    // 6. Motivation / Good thought
     if (text.includes('motivat') || text.includes('thought') || text.includes('quote') || text.includes('inspire') || text.includes('wisdom')) {
       const thought = this.generateGoodThought();
       return `Here is a special thought for you today, ${firstName}: "${thought.text}" 🌻`;
     }
 
-    // 7. Game recommendations & Activity requests
-    if (text.includes('game') || text.includes('play') || text.includes('activity') || text.includes('score') || text.includes('progress')) {
-      return `You have completed ${totalGames} cognitive sessions with ${avgAcc}% overall accuracy! I recommend playing **Hornbill Memory Nest** 🦅 or exploring **Familiar Faces** 👨‍👩‍👧 today!`;
+    // Default regional greetings
+    if (currentLang === 'hi') {
+      return `नमस्ते ${firstName}! मैं आपकी क्या सहायता करूँ? हम मिलकर खेल खेल सकते हैं, सुविचार सुन सकते हैं या आपकी दिनचर्या देख सकते हैं। 🌸`;
+    }
+    if (currentLang === 'as') {
+      return `নমস্কাৰ ${firstName}! মই আপোনাক কেনেকৈ সহায় কৰিব পাৰোঁ? আমি খেল খেলিব পাৰোঁ বা শুভ চিন্তা শুনিব পাৰোঁ। 🌸`;
+    }
+    if (currentLang === 'bn') {
+      return `নমস্কার ${firstName}! আমি আপনাকে কীভাবে সাহায্য করতে পারি? আমরা খেলা খেলতে পারি বা শুভ ভাবনা শুনতে পারি। 🌸`;
     }
 
-    // 8. Greetings
-    if (text.includes('hello') || text.includes('hi') || text.includes('hey') || text.includes('namaste') || text.includes('morning') || text.includes('evening')) {
-      return `Namaste and hello, ${firstName}! 😊 It's wonderful to talk with you. How is your day going? Would you like to hear an inspiring story, play a fun game, or just chat?`;
-    }
-
-    // 9. How are you / About Smriti
-    if (text.includes('how are you') || text.includes('who are you') || text.includes('what can you do')) {
-      return `I'm feeling cheerful and delighted to be with you, ${firstName}! I am Smriti, your personal memory and wellness companion connected to your Life Story and health routines. What's on your mind?`;
-    }
-
-    // 10. Emergency / Help
-    if (text.includes('help') || text.includes('emergency') || text.includes('doctor') || text.includes('call')) {
-      return `If you need assistance or want to call your saved family contact, tap the 🆘 button at the top right or open the **Emergency Help** section. I can also help you navigate there! ❤️`;
-    }
-
-    // Default conversational fallback
-    const defaults = [
-      `That sounds interesting, ${firstName}! Tell me more about that, or would you like to do a quick brain exercise together?`,
-      `Thank you for sharing that with me! You always bring such pleasant thoughts to our conversations. Would you like a good thought or a relaxing story right now?`,
-      `I enjoy chatting with you, ${firstName}. Every day is brighter when we connect. What would you like to explore next in Smriti?`
-    ];
-    return defaults[Math.floor(Math.random() * defaults.length)];
+    return `Namaste ${firstName}! It is wonderful to chat with you. How can I assist you with your memory journey today? 🌻`;
   },
 
-  // ------------------------------------------------------------
-  // 3. SMART PRESCRIPTION OCR / EXTRACTION ENGINE
-  // ------------------------------------------------------------
-  extractPrescription(fileOrText) {
-    // Simulated smart medical OCR with realistic fallback
-    const sampleMedicines = [
-      {
-        name: 'Pantoprazole Gastro-Resistant',
-        strength: '40 mg',
-        instructions: '1 tablet once daily in the morning 30 minutes before food',
-        frequency: 'Morning (Before Breakfast)',
-        duration: '30 days',
-        confidence: 'High (98%)',
-        doctor: 'Dr. A. K. Barua, MD',
-        date: '2026-08-15',
-        pharmacy: 'Apollo Health Pharmacy',
-        notes: 'Take with half glass of plain water'
-      },
-      {
-        name: 'Multivitamin with Zinc & B-Complex',
-        strength: '1 Capsule',
-        instructions: '1 capsule once daily after lunch',
-        frequency: 'Afternoon (After Food)',
-        duration: '60 days',
-        confidence: 'High (95%)',
-        doctor: 'Dr. A. K. Barua, MD',
-        date: '2026-08-15',
-        pharmacy: 'Apollo Health Pharmacy',
-        notes: 'Nutritional wellness supplement'
-      },
-      {
-        name: 'Calcium Carbonate + Vit D3',
-        strength: '500 mg / 400 IU',
-        instructions: '1 tablet daily at night after dinner',
-        frequency: 'Night (After Food)',
-        duration: '90 days',
-        confidence: 'High (92%)',
-        doctor: 'Dr. A. K. Barua, MD',
-        date: '2026-08-15',
-        pharmacy: 'Apollo Health Pharmacy',
-        notes: 'Bone strength supplement'
-      }
-    ];
-
-    return new Promise((resolve) => {
-      // Simulate fast OCR processing delay
-      setTimeout(() => {
-        resolve({
-          success: true,
-          medicines: sampleMedicines,
-          doctorName: 'Dr. A. K. Barua, MD',
-          prescriptionDate: '15 Aug 2026',
-          disclaimer: 'Information extracted from your uploaded prescription — please verify against the original document before taking any medication.'
-        });
-      }, 1200);
-    });
-  },
-
-  // ------------------------------------------------------------
-  // 4. PERSONALIZED ACTIVITY RECOMMENDER
-  // Considers: mood, performance history, weak cognitive areas, time of day
-  // ------------------------------------------------------------
   recommendActivity(overrideMood = null, customHistory = null) {
     const games = [
       { id: 'hornbill', name: 'Hornbill Memory Nest', icon: '🦅', tag: 'Visual Working Memory', route: '#/games/hornbill', desc: 'Match gentle nature cards in the forest', area: 'Visual Memory' },
@@ -425,110 +469,13 @@ const AIService = {
     const history = customHistory || Storage.getGameHistory() || [];
     const hour = new Date().getHours();
 
-    // 1. If user is feeling Low or Worried, recommend comforting, non-stressful games
     if (mood === 'low' || mood === 'worried') {
-      const comfortingGames = [
-        {
-          game: games.find(g => g.id === 'familiar-faces'),
-          reason: 'Recommended because you felt low or worried today — connecting with familiar friendly faces brings comfort and reassurance.'
-        },
-        {
-          game: games.find(g => g.id === 'hornbill'),
-          reason: 'Recommended for your mood today — a gentle, peaceful nature card match to calm and refresh your thoughts.'
-        }
-      ];
-      // Pick based on which has been played less recently
-      const pick = comfortingGames[Math.floor(Date.now() / 3600000) % comfortingGames.length];
-      return { ...pick.game, reason: pick.reason };
+      return { ...games[2], reason: 'Recommended because you felt low or worried today — connecting with familiar friendly faces brings comfort and reassurance.' };
     }
-
-    // 2. If user is feeling Great or Good, offer an engaging cognitive challenge
     if (mood === 'great' || mood === 'good') {
-      const challengeGames = [
-        {
-          game: games.find(g => g.id === 'bamboo-sequence'),
-          reason: 'Recommended because of your great positive energy today — challenge your pattern memory with glowing bamboo rhythms!'
-        },
-        {
-          game: games.find(g => g.id === 'memory-moments'),
-          reason: 'Recommended to match your cheerful spirits — engage your mind with delightful short stories and story recall.'
-        }
-      ];
-      const pick = challengeGames[Math.floor(Date.now() / 3600000) % challengeGames.length];
-      return { ...pick.game, reason: pick.reason };
+      return { ...games[6], reason: 'Recommended because of your great positive energy today — challenge your pattern memory with glowing bamboo rhythms!' };
     }
-
-    // 3. Analyze weak cognitive areas from history
-    if (history.length >= 3) {
-      const statsByGame = {};
-      history.forEach(h => {
-        if (!statsByGame[h.gameId]) {
-          statsByGame[h.gameId] = { totalAcc: 0, count: 0 };
-        }
-        statsByGame[h.gameId].totalAcc += (h.accuracy || 0);
-        statsByGame[h.gameId].count++;
-      });
-
-      // Look for game with lowest accuracy below 85%
-      let lowestAccGameId = null;
-      let minAcc = 85;
-      for (const [gid, s] of Object.entries(statsByGame)) {
-        const avg = s.totalAcc / s.count;
-        if (avg < minAcc) {
-          minAcc = avg;
-          lowestAccGameId = gid;
-        }
-      }
-
-      if (lowestAccGameId) {
-        const target = games.find(g => g.id === lowestAccGameId);
-        if (target) {
-          return {
-            ...target,
-            reason: `Recommended to strengthen your ${target.area} — a little daily practice builds remarkable confidence!`
-          };
-        }
-      }
-
-      // Check for an unplayed or least-played game
-      const unplayed = games.find(g => !statsByGame[g.id]);
-      if (unplayed) {
-        return {
-          ...unplayed,
-          reason: `Recommended to explore new brain paths — you haven't tried ${unplayed.name} recently!`
-        };
-      }
-    }
-
-    // 4. Time of Day dynamic selection (varied by day of week so it never repeats daily)
-    const dayOfWeek = new Date().getDay();
-    if (hour < 12) {
-      const morningGames = [games[0], games[3], games[4]]; // Hornbill, Remember Home, My Day
-      const chosen = morningGames[dayOfWeek % morningGames.length];
-      return {
-        ...chosen,
-        reason: `Recommended for your morning routine — gentle morning focus to awaken your mind.`
-      };
-    } else if (hour < 17) {
-      const afternoonGames = [games[1], games[2], games[4]]; // Memory Moments, Familiar Faces, My Day
-      const chosen = afternoonGames[dayOfWeek % afternoonGames.length];
-      return {
-        ...chosen,
-        reason: `Recommended for your afternoon recharge — keeps your attention active and alert.`
-      };
-    } else if (hour < 21) {
-      const eveningGames = [games[5], games[0], games[6]]; // Listen & Remember, Hornbill, Bamboo
-      const chosen = eveningGames[dayOfWeek % eveningGames.length];
-      return {
-        ...chosen,
-        reason: `Recommended for a peaceful evening — relaxing mindful recall before bedtime.`
-      };
-    } else {
-      return {
-        ...games[6],
-        reason: `Recommended for gentle nighttime relaxation — glowing bamboo sequencing to wind down.`
-      };
-    }
+    return { ...games[0], reason: 'Recommended for a peaceful memory workout — matching nature cards to refresh your thoughts.' };
   }
 };
 

@@ -1,10 +1,217 @@
 /* ============================================================
    SMRITI — Serverless AI Chat API Route (/api/chat)
-   Supports Gemini (with stream: true SSE), OpenAI, or dynamic context fallback.
-   Dynamically injects date, time, medical context, and real patient profile.
+   Multi-Tier Resilient Fallback Engine:
+     Tier 1: Local RAG (data/qa_knowledge.json)
+     Tier 2: Primary LLM (OpenAI gpt-4o-mini with 16 Function Tools)
+     Tier 3: Fallback LLM (Google Gemini 1.5 Flash)
+     Tier 4: Dynamic Contextual Synthesis Engine
+   Strict Persona System Prompt & Language Enforcement.
    ============================================================ */
 
-function generateContextualResponse(message, profile, role, lang = 'en') {
+const OPENAI_TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "getPatientProfile",
+      description: "Get the current patient's profile details, stage of impairment, and preferences.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getFamilyMembers",
+      description: "Get the list of family members, relations, and emergency contacts.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getTodayRoutine",
+      description: "Get today's scheduled routines, tasks, and completion status.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "createReminder",
+      description: "Create a new reminder or medicine task for the patient.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Title of the reminder (e.g., Morning medicine, Drink water)" },
+          time: { type: "string", description: "Time in HH:MM format (24h or 12h)" },
+          category: { type: "string", description: "Category: medicine, hydration, routine, exercise, appointment" }
+        },
+        required: ["title", "time"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getGameProgress",
+      description: "Get game history, total cognitive sessions, and average accuracy.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "startGame",
+      description: "Launch or navigate to a specific cognitive game in SMRITI.",
+      parameters: {
+        type: "object",
+        properties: {
+          gameId: {
+            type: "string",
+            enum: ["hornbill", "memory-moments", "familiar-faces", "remember-home", "my-day", "listen-remember", "bamboo-sequence"],
+            description: "Identifier of the game to start"
+          }
+        },
+        required: ["gameId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getCurrentDate",
+      description: "Get the current date, day, and time in Indian Standard Time (IST).",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "triggerSOS",
+      description: "Trigger an emergency SOS alert to caregivers and emergency services.",
+      parameters: {
+        type: "object",
+        properties: {
+          reason: { type: "string", description: "Optional reason for emergency" }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getWeeklyInsights",
+      description: "Get cognitive performance trends and weekly insights for the patient or caregiver.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "updateDifficulty",
+      description: "Update the game difficulty setting.",
+      parameters: {
+        type: "object",
+        properties: {
+          level: { type: "string", enum: ["easy", "medium", "hard"], description: "Difficulty level" }
+        },
+        required: ["level"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "updateLanguage",
+      description: "Change the platform and conversation language.",
+      parameters: {
+        type: "object",
+        properties: {
+          languageCode: {
+            type: "string",
+            enum: ["en", "hi", "as", "bn", "ta", "te", "mr", "gu", "kn", "mni", "kha", "lus"],
+            description: "Language code"
+          }
+        },
+        required: ["languageCode"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "updateAccessibilitySettings",
+      description: "Update accessibility preferences such as high contrast, large text, or sound effects.",
+      parameters: {
+        type: "object",
+        properties: {
+          highContrast: { type: "boolean" },
+          fontSize: { type: "string", enum: ["normal", "large", "extra-large"] },
+          soundEnabled: { type: "boolean" }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getGameRules",
+      description: "Get the rules, objectives, and tips for any SMRITI game.",
+      parameters: {
+        type: "object",
+        properties: {
+          gameId: {
+            type: "string",
+            enum: ["hornbill", "memory-moments", "familiar-faces", "remember-home", "my-day", "listen-remember", "bamboo-sequence"],
+            description: "Identifier of the game"
+          }
+        },
+        required: ["gameId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "getCurrentGameState",
+      description: "Get the state of the currently active game (if any).",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "giveGameHint",
+      description: "Provide a helpful, encouraging hint for the current cognitive game.",
+      parameters: {
+        type: "object",
+        properties: {
+          gameId: { type: "string" }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "saveGameResult",
+      description: "Record and save the result of a completed cognitive game session.",
+      parameters: {
+        type: "object",
+        properties: {
+          gameId: { type: "string" },
+          score: { type: "number" },
+          accuracy: { type: "number" }
+        },
+        required: ["gameId", "accuracy"]
+      }
+    }
+  }
+];
+
+function generateContextualResponse(message, profile, role, lang = 'en', todayDateStr, todayTimeStr) {
   const patient = (profile && profile.patient) || { name: 'Meera', state: 'Assam' };
   const firstName = (patient.preferredName || patient.name || 'Friend').split(' ')[0];
   const text = (message || '').trim().toLowerCase();
@@ -20,12 +227,7 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
   const medicines = (profile && profile.medicines) || [];
   const state = profile?.preferences?.regionalState || patient.state || 'Assam';
 
-  const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
-  const todayDateStr = new Date().toLocaleDateString('en-IN', istOptionsDate);
-  const todayTimeStr = new Date().toLocaleTimeString('en-IN', istOptionsTime);
-
-  // 1. Role-specific clinical or caregiver inquiry
+  // Role-specific clinical inquiry
   if (role === 'doctor') {
     return `Clinical Overview for ${patient.name} (${patient.stage || 'Mild MCI'}): ${totalGames} cognitive sessions recorded with ${avgAcc}% overall accuracy as of ${todayDateStr}. Adherence to prescribed routine is stable with ${medicines.length} active prescriptions. Recommended focus: episodic recall and gentle morning stimulation.`;
   }
@@ -33,7 +235,7 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
     return `Caregiver Summary (${todayDateStr}, ${todayTimeStr}): ${patient.name} has played ${totalGames} sessions recently. Best consistency in ${recentGame ? recentGame.gameName : 'Visual Memory'}. ${reminders.filter(r => r.active).length} daily reminders are active.`;
   }
 
-  // 2. Date & Time queries
+  // Date & Time queries
   if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
     if (lang === 'hi') {
       return `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`;
@@ -53,36 +255,35 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
     return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
   }
 
-  // 3. Specialized Clinical & Memory Knowledge Base
+  // Clinical & Memory Knowledge
   if (text.includes('dementia') || text.includes('what is dementia')) {
-    return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks. It is not a personal failing—it is simply changes in brain connections over time. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
+    return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks over time. SMRITI is a memory assistance companion, not a medical diagnostic or replacement system. With loving routines, cognitive games, and a calm environment, seniors can live with high dignity! 🌸`;
   }
 
   if (text.includes('memory reduction') || text.includes('memory loss') || text.includes('why memory fades') || text.includes('forgetting') || text.includes('memory reduce')) {
-    return `Memory reduction happens when the delicate pathways (synapses) between brain neurons slow down or become less active due to aging, natural protein changes, or stress. Just like gentle morning exercise keeps our legs agile, engaging your mind through games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`;
+    return `Memory reduction happens when neural connections slow down due to aging, natural shifts, or stress. Engaging your mind with games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`;
   }
 
   if (text.includes('daily exercise') || text.includes('memory retention') || text.includes('brain exercise') || text.includes('retention exercise') || text.includes('exercises for memory')) {
-    return `Here are 4 proven daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing to oxygenate brain tissue; 3) Reminisce over one Life Story photo daily with a loved one; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
+    return `Here are 4 daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing; 3) Reminisce over a Memory Vault photo; 4) Take a fresh morning walk and stay well hydrated! 🚶‍♀️💧`;
   }
 
-  // 4. Patient conversational intent
   if (text.includes('medicine') || text.includes('pill') || text.includes('tablet')) {
     const medNames = medicines.map(m => m.name).join(', ');
-    return `Dear ${firstName}, according to your routine on ${todayDateStr}, you have ${medicines.length} prescribed items (${medNames}). Your morning medicine is scheduled with a warm glass of water. Remember to take it gently as Dr. Barua advised! 💊`;
+    return `Dear ${firstName}, according to your routine on ${todayDateStr}, you have ${medicines.length} prescribed items (${medNames || 'prescribed vitamins'}). Please take them as advised by Dr. Barua! 💊`;
   }
 
   if (text.includes('family') || text.includes('who is') || text.includes('children') || text.includes('son') || text.includes('daughter')) {
     const famNames = family.map(f => `${f.name} (${f.relation})`).join(', ');
-    return `Your loving family members include ${famNames}. Raj often visits on weekends with tea, and Ananya loves calling you from Shillong! You are surrounded by so much warmth and care. 🌸👨‍👩‍👧`;
+    return `Your loving family members include ${famNames || 'Raj and Ananya'}. You are surrounded by so much warmth and care. 🌸👨‍👩‍👧`;
   }
 
   if (text.includes('memory') || text.includes('remember') || text.includes('photo') || text.includes('story')) {
     if (memories.length > 0) {
       const m = memories[Math.floor(Math.random() * memories.length)];
-      return `I love reminiscing with you, ${firstName}! Do you remember ${m.title}? ${m.story.slice(0, 140)}... It is such a cherished treasure in your Life Story. 🖼️✨`;
+      return `I love reminiscing with you, ${firstName}! Do you remember ${m.title}? ${m.story.slice(0, 140)}... It is such a cherished treasure in your Memory Vault. 🖼️✨`;
     }
-    return `Your life stories and memories are safely kept in your Life Story album, ${firstName}. What favorite memory would you like to reflect on today?`;
+    return `Your life stories and memories are safely kept in your Memory Vault, ${firstName}. What favorite memory would you like to reflect on today?`;
   }
 
   if (text.includes('sad') || text.includes('lonely') || text.includes('low') || text.includes('upset') || text.includes('worried')) {
@@ -93,16 +294,7 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
     return `You're doing wonderfully, ${firstName}! You have completed ${totalGames} mindful sessions with an average accuracy of ${avgAcc}%. How about playing Hornbill Memory Nest or visiting Familiar Faces today? 🦅✨`;
   }
 
-  if (text.includes('joke') || text.includes('laugh')) {
-    const jokes = [
-      'Why did the teapot whistle so merrily in Assam? Because it couldn\'t wait to pour out fresh joy for you! ☕😄',
-      'What did one orchid say to the morning sun? "I am so glad we get to blossom together today!" 🌺😊',
-      'Why did the grandfather clock go to school? To learn how to make every second count! ⏰😁'
-    ];
-    return jokes[Math.floor(Math.random() * jokes.length)];
-  }
-
-  // General warm, context-aware personalized fallback strictly in selected language
+  // Regional language fallback greetings
   if (lang === 'hi') {
     return `नमस्ते ${firstName}! इस समय ${todayTimeStr} बजा है। आपकी स्मृति अभ्यास यात्रा बहुत अच्छी चल रही है। आज मैं आपकी क्या सहायता करूँ? 🌸`;
   }
@@ -113,12 +305,7 @@ function generateContextualResponse(message, profile, role, lang = 'en') {
     return `নমস্কার ${firstName}! এখন সময় ${todayTimeStr}। আপনার স্মৃতি অনুশীলন দারুণ চলছে। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি? 🌸`;
   }
 
-  const generalGreetings = [
-    `Namaste ${firstName}! It is ${todayTimeStr} on ${todayDateStr}. You have completed ${totalGames} memory sessions so far. How can I brighten your day right now? 🌻`,
-    `Hello ${firstName}! I am right here with you. Your wellness journey in ${state} is going so well. Would you like to hear an inspiring story or revisit family photos? 🕊️`,
-    `Joyful day to you, ${firstName}! We can practice deep breathing, review your morning routine, or share a cheerful laugh. What is on your mind? 🌸`
-  ];
-  return generalGreetings[Math.floor(Math.random() * generalGreetings.length)];
+  return `Namaste ${firstName}! It is ${todayTimeStr} on ${todayDateStr}. You have completed ${totalGames} memory sessions so far. How can I brighten your day right now? 🌻`;
 }
 
 module.exports = async function handler(req, res) {
@@ -145,7 +332,8 @@ module.exports = async function handler(req, res) {
       const data = body ? JSON.parse(body) : {};
       const { message, patientProfile, role, stream, currentLanguage, language } = data;
       const activeLang = currentLanguage || language || 'en';
-      const langNames = {
+
+      const langMap = {
         'en': 'English',
         'hi': 'Hindi (हिन्दी)',
         'as': 'Assamese (অসমীয়া)',
@@ -159,6 +347,8 @@ module.exports = async function handler(req, res) {
         'gu': 'Gujarati (ગુજરાતી)',
         'kn': 'Kannada (ಕನ್ನಡ)'
       };
+      const activeLangName = langMap[activeLang] || activeLang;
+
       const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
       const todayDate = data.currentDate || new Date().toLocaleDateString('en-IN', istOptionsDate);
@@ -174,28 +364,23 @@ module.exports = async function handler(req, res) {
       const moods = patientProfile?.moodHistory || [];
       const latestMood = moods.length > 0 ? moods[moods.length - 1].mood : 'good';
 
-      // 1. DYNAMIC SYSTEM PROMPT WITH TIME, DATE, AND PATIENT PROFILE CONTEXT
-      const systemPrompt = `You are SWAI (Smriti Wisdom AI), a warm, compassionate, and attentive memory care companion in the SMRITI elderly care platform.
-Current Real-Time Context:
-- Current Date: ${todayDate}
-- Current Local Time: ${todayTime}
-- User Profile: ${patient.name} (Role: ${role || 'patient'}, Stage: ${patient.stage || 'Mild Cognitive Impairment / Healthy Senior'})
-- Region / Cultural State: ${patientProfile?.preferences?.regionalState || patient.state || 'Assam'}
-- Cognitive Stats: ${totalGames} games completed, Average Accuracy: ${avgAcc}%
-- Daily Routine: ${completedTasks} of ${totalTasks} tasks completed today
-- Latest Mood: ${latestMood}
+      // EXACT SYSTEM PROMPT REQUIRED BY ARCHITECTURE SPECIFICATION
+      const systemPrompt = `You are SMRITI SAATHI, the AI companion of the SMRITI cognitive memory assistance platform. Answer questions about SMRITI, its website, games, memory vault, routines, reminders, accessibility, multilingual features, voice interaction, caregiver features, insights, AI architecture, RAG, SIH problem statement and project implementation. When connected to application functions, use real application data and function calls rather than inventing information. Never fabricate a user's family member, routine, score, reminder, medical condition or game result. For dementia-related questions, provide general educational information and clearly state that SMRITI is not a diagnostic, treatment or medical replacement system. If the user asks something outside the available knowledge, say that you do not have verified information rather than hallucinating. Keep responses simple, warm, respectful and elderly-friendly. You must translate and respond ONLY in this exact language: ${activeLangName}. Never silently switch languages. When the user asks to perform an application action, use the appropriate function instead of merely explaining how to do it.
+
+Real-Time Platform Context:
+- Current Date & Time (IST): ${todayDate}, ${todayTime}
+- Patient Profile: ${patient.name} (Role: ${role || 'patient'}, Stage: ${patient.stage || 'Mild Cognitive Impairment'})
+- Region / Culture: ${patientProfile?.preferences?.regionalState || patient.state || 'Assam'}
+- Total Cognitive Games Played: ${totalGames}, Average Accuracy: ${avgAcc}%
+- Daily Tasks Completed: ${completedTasks} / ${totalTasks}
+- Current Mood: ${latestMood}
 - Family Members: ${JSON.stringify(patientProfile?.familyMembers || [])}
-- Prescriptions: ${JSON.stringify(patientProfile?.medicines || [])}
-- Cherished Memories: ${JSON.stringify(patientProfile?.memories || [])}
+- Active Prescriptions: ${JSON.stringify(patientProfile?.medicines || [])}
+- Cherished Memories: ${JSON.stringify(patientProfile?.memories || [])}`;
 
-Directives:
-1. STRICT LANGUAGE ENFORCEMENT: You must respond ONLY in the following language: ${langName} (${activeLang}). All words, greetings, answers, and emotional cues MUST be completely written in ${langName}.
-2. Always be warm, respectful, and empathetic (use culturally comforting Indian cues appropriate for ${langName}).
-3. Answer questions about current time, date, family, and progress using the real-time context above.
-4. Keep answers concise, clear, and reassuring (maximum 2-3 sentences).
-5. Never provide medical diagnoses or alter prescriptions; always encourage consulting Dr. Barua or family for clinical changes.`;
-
-      // 1.5 HYBRID LOCAL KNOWLEDGE BASE LOOKUP
+      // ==========================================================
+      // TIER 1: LOCAL RAG KNOWLEDGE BASE MATCHING
+      // ==========================================================
       try {
         const path = require('path');
         const fs = require('fs');
@@ -215,6 +400,15 @@ Directives:
           if (matchedTopic) {
             const topicReply = (matchedTopic.responses && (matchedTopic.responses[activeLang] || matchedTopic.responses.en)) || '';
             if (topicReply) {
+              const toolCallsForTopic = [];
+              if (cleanMsg.includes('play hornbill') || cleanMsg.includes('start hornbill') || (matchedTopic.id === 'game_rules_hornbill' && (cleanMsg.includes('play') || cleanMsg.includes('start') || cleanMsg.includes('want')))) {
+                toolCallsForTopic.push({ name: 'startGame', args: { gameId: 'hornbill' } });
+              } else if (cleanMsg.includes('play familiar') || cleanMsg.includes('start familiar') || (matchedTopic.id === 'game_rules_familiar_faces' && (cleanMsg.includes('play') || cleanMsg.includes('start')))) {
+                toolCallsForTopic.push({ name: 'startGame', args: { gameId: 'familiar-faces' } });
+              } else if (matchedTopic.id === 'emergency_help' && (cleanMsg.includes('sos') || cleanMsg.includes('emergency') || cleanMsg.includes('help'))) {
+                toolCallsForTopic.push({ name: 'triggerSOS', args: { reason: 'User requested emergency assistance' } });
+              }
+
               if (stream) {
                 res.writeHead(200, {
                   'Content-Type': 'text/event-stream',
@@ -230,6 +424,9 @@ Directives:
                     wIdx++;
                   } else {
                     clearInterval(timer);
+                    if (toolCallsForTopic.length > 0) {
+                      res.write('data: ' + JSON.stringify({ tool_calls: toolCallsForTopic }) + '\n\n');
+                    }
                     res.write('data: [DONE]\n\n');
                     res.end();
                   }
@@ -237,22 +434,117 @@ Directives:
                 return;
               } else {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ reply: topicReply, source: 'local_qa_knowledge' }));
+                res.end(JSON.stringify({
+                  reply: topicReply,
+                  tool_calls: toolCallsForTopic.length > 0 ? toolCallsForTopic : undefined,
+                  source: 'local_rag_knowledge'
+                }));
                 return;
               }
             }
           }
         }
-      } catch (qaErr) {
-        console.warn('Local QA knowledge match error:', qaErr.message);
+      } catch (ragErr) {
+        console.warn('Tier 1 Local RAG error:', ragErr.message);
       }
 
-      // 2. Google Gemini API Integration (with stream: true SSE support)
+      // ==========================================================
+      // TIER 2: PRIMARY LLM (OpenAI gpt-4o-mini with 16 Tools)
+      // ==========================================================
+      const openaiKey = process.env.OPENAI_API_KEY;
+      if (openaiKey) {
+        try {
+          const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${openaiKey}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: message || 'Hello' }
+              ],
+              tools: OPENAI_TOOLS,
+              tool_choice: 'auto',
+              temperature: 0.6,
+              max_tokens: 350
+            })
+          });
+
+          if (openaiRes.ok) {
+            const result = await openaiRes.json();
+            const choice = result?.choices?.[0];
+            const messageObj = choice?.message;
+
+            if (messageObj) {
+              const toolCalls = messageObj.tool_calls;
+              const textContent = messageObj.content || '';
+
+              if (toolCalls && toolCalls.length > 0) {
+                // OpenAI issued one or more function calls!
+                const parsedToolCalls = toolCalls.map(tc => ({
+                  id: tc.id,
+                  name: tc.function.name,
+                  args: (() => {
+                    try { return JSON.parse(tc.function.arguments); } catch { return {}; }
+                  })()
+                }));
+
+                // Return both text (if any) and tool calls for client-side execution loop
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                  reply: textContent || `Executing ${parsedToolCalls.map(t => t.name).join(', ')}...`,
+                  tool_calls: parsedToolCalls,
+                  source: 'openai_gpt4o_mini'
+                }));
+                return;
+              }
+
+              if (textContent) {
+                if (stream) {
+                  res.writeHead(200, {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive'
+                  });
+                  const words = textContent.split(' ');
+                  let wIdx = 0;
+                  const streamTimer = setInterval(() => {
+                    if (wIdx < words.length) {
+                      const chunk = (wIdx > 0 ? ' ' : '') + words[wIdx];
+                      res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`);
+                      wIdx++;
+                    } else {
+                      clearInterval(streamTimer);
+                      res.write('data: [DONE]\n\n');
+                      res.end();
+                    }
+                  }, 25);
+                  return;
+                } else {
+                  res.writeHead(200, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ reply: textContent, source: 'openai_gpt4o_mini' }));
+                  return;
+                }
+              }
+            }
+          } else {
+            console.warn('Tier 2 OpenAI response non-ok status:', openaiRes.status);
+          }
+        } catch (openaiErr) {
+          console.warn('Tier 2 OpenAI error, falling back to Tier 3:', openaiErr.message);
+        }
+      }
+
+      // ==========================================================
+      // TIER 3: FALLBACK LLM (Google Gemini 1.5 Flash)
+      // ==========================================================
       const geminiKey = process.env.GEMINI_API_KEY;
       if (geminiKey) {
         try {
           if (stream) {
-            // Streaming via Gemini generateContent SSE
             const geminiStreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${geminiKey}`;
             const geminiRes = await fetch(geminiStreamUrl, {
               method: 'POST',
@@ -301,53 +593,35 @@ Directives:
               const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
               if (text) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ reply: text, source: 'gemini' }));
+                res.end(JSON.stringify({ reply: text, source: 'gemini_fallback' }));
                 return;
               }
             }
           }
         } catch (geminiErr) {
-          console.warn('Gemini API call error:', geminiErr.message);
+          console.warn('Tier 3 Gemini error, falling back to Tier 4:', geminiErr.message);
         }
       }
 
-      // 3. OpenAI API Integration fallback
-      const openaiKey = process.env.OPENAI_API_KEY;
-      if (openaiKey) {
-        try {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${openaiKey}`
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: message || 'Hello' }
-              ],
-              max_tokens: 220,
-              temperature: 0.7
-            })
-          });
+      // ==========================================================
+      // TIER 4: DYNAMIC CONTEXTUAL SYNTHESIS ENGINE
+      // ==========================================================
+      const reply = generateContextualResponse(message, patientProfile, role, activeLang, todayDate, todayTime);
 
-          if (response.ok) {
-            const apiRes = await response.json();
-            const text = apiRes.choices[0]?.message?.content;
-            if (text) {
-              res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ reply: text, source: 'openai' }));
-              return;
-            }
-          }
-        } catch (llmErr) {
-          console.warn('OpenAI call failed, falling back to contextual generator:', llmErr.message);
-        }
+      // Check if message matched an action intent to provide tool_calls locally
+      const cleanLower = (message || '').toLowerCase();
+      let localToolCalls = [];
+      if (cleanLower.includes('play hornbill') || cleanLower.includes('start hornbill') || cleanLower.includes('hornbill game')) {
+        localToolCalls.push({ name: 'startGame', args: { gameId: 'hornbill' } });
+      } else if (cleanLower.includes('play familiar') || cleanLower.includes('familiar faces')) {
+        localToolCalls.push({ name: 'startGame', args: { gameId: 'familiar-faces' } });
+      } else if (cleanLower.includes('play memory moments') || cleanLower.includes('story game')) {
+        localToolCalls.push({ name: 'startGame', args: { gameId: 'memory-moments' } });
+      } else if (cleanLower.includes('sos') || cleanLower.includes('emergency') || cleanLower.includes('help me call')) {
+        localToolCalls.push({ name: 'triggerSOS', args: { reason: 'User requested emergency assistance' } });
+      } else if (cleanLower.includes('switch to hindi') || cleanLower.includes('hindi language')) {
+        localToolCalls.push({ name: 'updateLanguage', args: { languageCode: 'hi' } });
       }
-
-      // 4. Intelligent Context-Aware Synthesis Engine (Local / Server fallback)
-      const reply = generateContextualResponse(message, patientProfile, role, activeLang);
 
       if (stream) {
         res.writeHead(200, {
@@ -355,7 +629,6 @@ Directives:
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive'
         });
-        // Stream out words progressively to fulfill stream contracts
         const words = reply.split(' ');
         let wordIndex = 0;
         const streamTimer = setInterval(() => {
@@ -365,6 +638,9 @@ Directives:
             wordIndex++;
           } else {
             clearInterval(streamTimer);
+            if (localToolCalls.length > 0) {
+              res.write(`data: ${JSON.stringify({ tool_calls: localToolCalls })}\n\n`);
+            }
             res.write('data: [DONE]\n\n');
             res.end();
           }
@@ -373,7 +649,11 @@ Directives:
       }
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ reply, source: 'context_engine' }));
+      res.end(JSON.stringify({
+        reply,
+        tool_calls: localToolCalls.length > 0 ? localToolCalls : undefined,
+        source: 'contextual_engine'
+      }));
     } catch (err) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Invalid request body: ' + err.message }));

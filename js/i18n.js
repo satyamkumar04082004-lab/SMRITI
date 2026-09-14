@@ -260,6 +260,17 @@ const translations = {
   },
   
   hi: {
+    chatbotTitle: 'स्मृति AI साथी',
+    chatbotSubtitle: 'आपकी स्नेहमयी आवाज़ और स्मृति साथी',
+    chatbotPromptTime: '⏰ क्या समय हुआ है?',
+    chatbotPromptExercises: '🧠 स्मृति अभ्यास',
+    chatbotPromptStory: '📖 एक कहानी सुनाएं',
+    chatbotPromptThought: '🌻 आज का सुविचार',
+    chatbotPromptGame: '🎮 खेल का सुझाव दें',
+    chatbotInputPlaceholder: 'संदेश लिखें या 🎤 दबाकर बोलें...',
+    chatbotSend: 'भेजें',
+    chatbotVoiceNote: '💡 आप कभी भी बोल या लिख सकते हैं। स्मृति उत्तर बोलकर सुनाती है।',
+    chatbotThinking: 'स्मृति सोच रही है...',
     appName: 'स्मृति',
     appTagline: 'संज्ञानात्मक देखभाल और स्मृति साथी',
     welcome: 'स्वागत है',
@@ -422,6 +433,17 @@ const translations = {
   },
 
   bn: {
+    chatbotTitle: 'স্মৃতি AI সঙ্গী',
+    chatbotSubtitle: 'আপনার প্রিয় কণ্ঠ ও স্মৃতি সঙ্গী',
+    chatbotPromptTime: '⏰ এখন কটা বাজে?',
+    chatbotPromptExercises: '🧠 স্মৃতি অনুশীলন',
+    chatbotPromptStory: '📖 একটি গল্প বলুন',
+    chatbotPromptThought: '🌻 আজকের শুভ ভাবনা',
+    chatbotPromptGame: '🎮 খেলার পরামর্শ দিন',
+    chatbotInputPlaceholder: 'বার্তা লিখুন অথবা 🎤 চেপে বলুন...',
+    chatbotSend: 'পাঠান',
+    chatbotVoiceNote: '💡 আপনি যেকোনো সময় বলতে বা লিখতে পারেন। স্মৃতি পড়ে শোনাবে।',
+    chatbotThinking: 'স্মৃতি ভাবছে...',
     appName: 'স্মৃতি',
     appTagline: 'জ্ঞানীয় যত্ন ও স্মৃতি সহায়ক',
     welcome: 'স্বাগতম',
@@ -652,6 +674,17 @@ const translations = {
     historyTitle: 'ઇતિહાસ'
   },
   as: {
+    chatbotTitle: 'স্মৃতি AI সংগী',
+    chatbotSubtitle: 'আপোনাৰ মৰমিয়াল কণ্ঠ আৰু স্মৃতিৰ সংগী',
+    chatbotPromptTime: '⏰ এতিয়া কিমান সময়?',
+    chatbotPromptExercises: '🧠 স্মৃতিৰ অনুশীলন',
+    chatbotPromptStory: '📖 এটা সাধু কওক',
+    chatbotPromptThought: '🌻 আজিৰ শুভ চিন্তা',
+    chatbotPromptGame: '🎮 খেলৰ পৰামৰ্শ দিয়ক',
+    chatbotInputPlaceholder: 'বাৰ্তা লিখক বা 🎤 টিপি কওক...',
+    chatbotSend: 'প্ৰেৰণ কৰক',
+    chatbotVoiceNote: '💡 আপুনি যিকোনো সময়তে ক’ব বা লিখিব পাৰে। স্মৃতিয়ে মাত মাতি উত্তৰ দিয়ে।',
+    chatbotThinking: 'স্মৃতিয়ে ভাবি আছে...',
     appName: 'স্মৃতি',
     appTagline: 'জ্ঞানীয় যত্ন আৰু স্মৃতি সহযোগী',
     welcome: 'স্বাগতম',
@@ -1099,6 +1132,7 @@ const I18n = {
       const key = el.getAttribute('data-i18n-placeholder');
       el.placeholder = this.t(key);
     });
+    window.dispatchEvent(new CustomEvent('smriti:languageChanged', { detail: { lang: this._currentLang } }));
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: this._currentLang } }));
   },
 

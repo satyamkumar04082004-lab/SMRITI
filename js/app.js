@@ -366,9 +366,9 @@ function renderHeader() {
   headerEl.className = 'app-header';
   headerEl.innerHTML = `
     <div class="header-inner">
-      <div class="header-brand" onclick="window.location.hash = (Auth.getUser()?.role === 'caregiver' ? '#/dashboard' : Auth.getUser()?.role === 'doctor' ? '#/doctor' : '#/home')" style="cursor: pointer;">
-        <span class="header-logo">🧠</span>
-        <span class="header-title">${I18n.t('appName')}</span>
+      <div class="header-brand" id="app-brand" style="cursor: pointer;">
+        <span class="header-logo" id="app-logo">🧠</span>
+        <span class="header-title" id="app-title">${I18n.t('appName')}</span>
       </div>
       <div class="header-actions">
         <!-- 🟢 Offline / Online Sync Badge -->
@@ -417,6 +417,19 @@ function renderHeader() {
     </div>
   `;
   document.getElementById('root').prepend(headerEl);
+
+  // Safe SPA Navigation for Brand Logo & Title (Zero ReferenceError)
+  const brandEl = headerEl.querySelector('#app-brand') || headerEl.querySelector('.header-brand');
+  const logoEl = headerEl.querySelector('#app-logo') || headerEl.querySelector('.header-logo');
+  const titleEl = headerEl.querySelector('#app-title') || headerEl.querySelector('.header-title');
+  const handleBrandClick = (e) => {
+    if (e) e.preventDefault();
+    const user = Auth.getUser();
+    window.location.hash = (user?.role === 'caregiver' ? '#/dashboard' : user?.role === 'doctor' ? '#/doctor' : '#/home');
+  };
+  if (brandEl) brandEl.addEventListener('click', handleBrandClick);
+  if (logoEl) logoEl.addEventListener('click', handleBrandClick);
+  if (titleEl) titleEl.addEventListener('click', handleBrandClick);
 
   // Region selector initialization and change listener
   const regionSelect = headerEl.querySelector('#header-region-select');

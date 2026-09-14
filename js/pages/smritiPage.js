@@ -1,10 +1,11 @@
 /* ============================================================
    SMRITI — AI Voice & Memory Companion Page
    Interactive conversational companion with dynamic context injection,
-   streaming progressive token display, typing skeleton indicator, and TTS.
+   streaming progressive token display, tool execution notifications,
+   reactive language switching, and TTS.
    ============================================================ */
 
-import AIService from '../aiService.js';
+import AIService, { TOOL_HANDLERS } from '../aiService.js';
 import Storage from '../storage.js';
 import TTS from '../tts.js';
 import I18n from '../i18n.js';
@@ -19,8 +20,16 @@ export default function SmritiPage(container) {
     firstName = UserState.getDisplayName() || 'Friend';
   });
 
+  const getInitialGreeting = () => {
+    const lang = I18n.lang || 'en';
+    if (lang === 'hi') return `नमस्ते ${firstName}! 😊 मैं स्मृति साथी हूँ, आपकी संज्ञानात्मक स्मृति साथी। आज आप कैसा महसूस कर रहे हैं?`;
+    if (lang === 'as') return `নমস্কাৰ ${firstName}! 😊 মই স্মৃতি সংগী, আপোনাৰ মৰমৰ সহায়ক। আজি আপোনাৰ মনটো কেনে আছে?`;
+    if (lang === 'bn') return `নমস্কার ${firstName}! 😊 আমি স্মৃতি সাথী, আপনার প্রিয় স্মৃতি সহায়ক। আজ আপনার কেমন লাগছে?`;
+    return `Hello ${firstName}! 😊 I'm Smriti Saathi, your cognitive care and memory companion. How are you feeling today?`;
+  };
+
   let conversation = [
-    { sender: 'smriti', text: `Hello ${firstName}! 😊 I'm Smriti, your cognitive care and memory companion. How are you feeling today?` }
+    { sender: 'smriti', text: getInitialGreeting() }
   ];
 
   let companionState = 'READY'; // READY | LISTENING... | THINKING... | SPEAKING...
@@ -65,6 +74,16 @@ export default function SmritiPage(container) {
     };
   }
 
+  // Reactive Language Event Listener (eliminating page reloads)
+  const onLanguageChanged = () => {
+    if (recognition) {
+      recognition.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
+    }
+    render();
+  };
+  window.addEventListener('smriti:languageChanged', onLanguageChanged);
+  window.addEventListener('languageChanged', onLanguageChanged);
+
   function render() {
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 650px; padding-bottom: 2rem;">
@@ -75,8 +94,8 @@ export default function SmritiPage(container) {
               <div style="font-size: 3.5rem;">🤖✨</div>
             </div>
           </div>
-          <h2 style="color: var(--maroon); margin-top: 0.5rem; font-size: 1.6rem;">Smriti AI Companion</h2>
-          <p class="text-muted" style="margin-bottom: 0.75rem; font-size: 1.05rem;">Your friendly voice and memory companion</p>
+          <h2 style="color: var(--maroon); margin-top: 0.5rem; font-size: 1.6rem;">${I18n.t('chatbotTitle')}</h2>
+          <p class="text-muted" style="margin-bottom: 0.75rem; font-size: 1.05rem;">${I18n.t('chatbotSubtitle')}</p>
           
           <div class="companion-status-pill ${companionState.toLowerCase().replace(/[^a-z]/g, '')}">
             <span class="status-dot"></span>
@@ -86,11 +105,11 @@ export default function SmritiPage(container) {
 
         <!-- Quick Action Prompt Chips -->
         <div class="quick-prompts-scroll" style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1rem;">
-          <button class="chip-btn" data-msg="What date and time is it right now?">⏰ What Time Is It?</button>
-          <button class="chip-btn" data-msg="What are daily exercises for memory retention?">🧠 Memory Exercises</button>
-          <button class="chip-btn" data-msg="Tell me an inspiring story">📖 Tell a Story</button>
-          <button class="chip-btn" data-msg="Give me a good thought for today">🌻 Good Thought</button>
-          <button class="chip-btn" data-msg="What game should I play today?">🎮 Suggest Game</button>
+          <button class="chip-btn" data-msg="What date and time is it right now?">${I18n.t('chatbotPromptTime')}</button>
+          <button class="chip-btn" data-msg="What are daily exercises for memory retention?">${I18n.t('chatbotPromptExercises')}</button>
+          <button class="chip-btn" data-msg="Tell me an inspiring story">${I18n.t('chatbotPromptStory')}</button>
+          <button class="chip-btn" data-msg="Give me a good thought for today">${I18n.t('chatbotPromptThought')}</button>
+          <button class="chip-btn" data-msg="What game should I play today?">${I18n.t('chatbotPromptGame')}</button>
         </div>
 
         <!-- Conversation History -->
@@ -98,17 +117,23 @@ export default function SmritiPage(container) {
           ${conversation.map((msg, idx) => `
             <div class="chat-bubble ${msg.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-smriti'}">
               <div class="chat-bubble-header">
-                <strong>${msg.sender === 'user' ? firstName : '🤖 Smriti'}</strong>
-                ${msg.sender === 'smriti' ? `<button class="btn-replay-audio" data-idx="${idx}" title="Replay voice">🔊</button>` : ''}
+                <strong>${msg.sender === 'user' ? firstName : '🤖 Smriti Saathi'}</strong>
+                ${msg.sender === 'smriti' && msg.text ? `<button class="btn-replay-audio" data-idx="${idx}" title="Replay voice">🔊</button>` : ''}
               </div>
               <div class="chat-bubble-body">${msg.text}</div>
+              ${msg.toolAction ? `
+                <div style="margin-top: 0.4rem; padding: 0.3rem 0.6rem; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; font-size: 0.82rem; color: #047857; display: flex; align-items: center; gap: 0.35rem;">
+                  <span>⚡</span>
+                  <span><strong>${msg.toolAction.name}:</strong> ${msg.toolAction.message || 'Action executed'}</span>
+                </div>
+              ` : ''}
             </div>
           `).join('')}
 
           <!-- Typing Skeleton Indicator while fetching -->
           ${isThinking ? `
             <div id="chat-typing-skeleton" class="chat-bubble chat-bubble-smriti" style="display: flex; flex-direction: column; gap: 6px; width: 180px; padding: 0.75rem 1rem;">
-              <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 700;">🤖 Smriti thinking...</div>
+              <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 700;">${I18n.t('chatbotThinking')}</div>
               <div style="display: flex; gap: 5px; align-items: center; padding: 4px 0;">
                 <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: blink 1s infinite alternate;"></span>
                 <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: blink 1s infinite alternate 0.3s;"></span>
@@ -124,16 +149,16 @@ export default function SmritiPage(container) {
             ${isListening ? '⏹️' : '🎤'}
           </button>
 
-          <input type="text" id="chat-text-input" class="form-input" placeholder="Type a message or tap 🎤 to talk..." style="flex: 1; min-height: 52px; font-size: 1.05rem;" />
+          <input type="text" id="chat-text-input" class="form-input" placeholder="${I18n.t('chatbotInputPlaceholder')}" style="flex: 1; min-height: 52px; font-size: 1.05rem;" />
           
           <button id="btn-send-chat" class="btn btn-primary" style="min-height: 52px; padding: 0 1.25rem;">
-            Send
+            ${I18n.t('chatbotSend')}
           </button>
         </div>
 
         <!-- Helpful Voice Note -->
         <div class="text-center mt-sm" style="font-size: 0.85rem; color: var(--gray-500);">
-          💡 You can speak or type anytime. Smriti speaks responses aloud automatically.
+          ${I18n.t('chatbotVoiceNote')}
         </div>
       </div>
     `;
@@ -253,35 +278,45 @@ export default function SmritiPage(container) {
     conversation.push({ sender: 'smriti', text: '' });
 
     try {
-      // Use streaming enabled API call
-      await AIService.streamChatWithSmriti(text, (token, isFinal) => {
-        isThinking = false;
-        conversation[assistantIndex].text += token;
-        companionState = 'SPEAKING...';
-        
-        // Update DOM bubble progressively
-        const chatContainer = container.querySelector('#chat-messages');
-        if (chatContainer) {
-          const bubbles = chatContainer.querySelectorAll('.chat-bubble-smriti');
-          const lastBubble = bubbles[bubbles.length - 1];
-          if (lastBubble) {
-            const body = lastBubble.querySelector('.chat-bubble-body');
-            if (body) body.textContent = conversation[assistantIndex].text;
+      // Use streaming enabled API call with tool callback
+      await AIService.streamChatWithSmriti(
+        text,
+        (token, isFinal) => {
+          isThinking = false;
+          conversation[assistantIndex].text += token;
+          companionState = 'SPEAKING...';
+          
+          const chatContainer = container.querySelector('#chat-messages');
+          if (chatContainer) {
+            const bubbles = chatContainer.querySelectorAll('.chat-bubble-smriti');
+            const lastBubble = bubbles[bubbles.length - 1];
+            if (lastBubble) {
+              const body = lastBubble.querySelector('.chat-bubble-body');
+              if (body) body.textContent = conversation[assistantIndex].text;
+            }
+            scrollChatToBottom();
           }
-          scrollChatToBottom();
-        }
 
-        if (isFinal) {
-          render();
-          if (aiSettings.autoSpeak !== false && conversation[assistantIndex].text) {
-            TTS.speak(conversation[assistantIndex].text);
+          if (isFinal) {
+            render();
+            if (aiSettings.autoSpeak !== false && conversation[assistantIndex].text) {
+              TTS.speak(conversation[assistantIndex].text);
+            }
+            setTimeout(() => {
+              companionState = 'READY';
+              updateUI();
+            }, 3500);
           }
-          setTimeout(() => {
-            companionState = 'READY';
-            updateUI();
-          }, 3500);
+        },
+        (toolCall, toolResult) => {
+          // Record tool execution visually in conversation
+          conversation[assistantIndex].toolAction = {
+            name: toolCall.name,
+            message: toolResult?.message || `Completed ${toolCall.name}`
+          };
+          render();
         }
-      });
+      );
     } catch (err) {
       console.warn('Streaming error, falling back to sync:', err);
       isThinking = false;
@@ -316,6 +351,8 @@ export default function SmritiPage(container) {
       }
       TTS.stop();
       if (typeof unsubscribeUser === 'function') unsubscribeUser();
+      window.removeEventListener('smriti:languageChanged', onLanguageChanged);
+      window.removeEventListener('languageChanged', onLanguageChanged);
     }
   };
 }
