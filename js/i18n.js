@@ -187,7 +187,7 @@ export const stitchTranslations = {
     g3Tag: 'Recognition',
     g3Instruction: 'Identify people who love you',
 
-    g4Title: 'Remember My Home',
+    g4Title: 'Remember Home',
     g4Desc: 'Recall objects in a room',
     g4Tag: 'Spatial Memory',
     g4Instruction: 'Remember where items were placed',
