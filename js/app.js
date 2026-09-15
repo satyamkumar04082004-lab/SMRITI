@@ -891,6 +891,20 @@ function init() {
     if (saathiDrawerEl) {
       renderSaathiDrawer();
     }
+    // Instantly re-render active page content with new language
+    if (route && contentEl && typeof route.page === 'function') {
+      try {
+        if (currentCleanup) {
+          if (typeof currentCleanup === 'function') currentCleanup();
+          else if (typeof currentCleanup.cleanup === 'function') currentCleanup.cleanup();
+          currentCleanup = null;
+        }
+        contentEl.innerHTML = '';
+        currentCleanup = route.page(contentEl);
+      } catch (e) {
+        console.warn('Page re-render on language change error:', e);
+      }
+    }
   };
 
   window.addEventListener('smriti:languageChanged', handleLangRefresh);

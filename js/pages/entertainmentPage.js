@@ -791,22 +791,31 @@ export default function EntertainmentPage(container) {
                 </p>
 
                 <!-- Stats summary cards -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
-                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Score</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #0F766E;">${quizScore} / 100</div>
-                  </div>
-                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
-                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Accuracy</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #2563EB;">
-                      ${Math.round((quizSessionReview.filter(r => r.isCorrect).length / SESSION_LIMIT) * 100)}%
+                ${(() => {
+                  const correctCount = quizSessionReview.filter(r => r.isCorrect).length;
+                  const acc = Math.round((correctCount / SESSION_LIMIT) * 100);
+                  const isBonus = acc >= 70;
+                  return `
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
+                        <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Score</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #0F766E;">${quizScore} / 100</div>
+                      </div>
+                      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
+                        <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Accuracy</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #2563EB;">
+                          ${acc}%
+                        </div>
+                      </div>
+                      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
+                        <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Coins Adjustment</div>
+                        <div style="font-size: 1.35rem; font-weight: 800; color: ${isBonus ? '#059669' : '#DC2626'};">
+                          ${isBonus ? '+15 🪙' : '−10 🪙'}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1rem;">
-                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 700;">Coins Earned</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #D97706;">${quizScore} 🪙</div>
-                  </div>
-                </div>
+                  `;
+                })()}
 
                 <!-- Review of all 10 questions -->
                 <h4 style="text-align: left; color: #334155; font-size: 1.15rem; margin-bottom: 0.75rem;">Question Review:</h4>
@@ -1099,7 +1108,6 @@ export default function EntertainmentPage(container) {
           btn.style.background = '#0D9488';
           btn.style.color = '#FFFFFF';
           quizScore += 10;
-          Coins.add(10, 'Music Quiz');
           if (feedback) {
             feedback.style.display = 'block';
             feedback.style.background = '#ECFDF5';
@@ -1111,7 +1119,6 @@ export default function EntertainmentPage(container) {
         } else {
           btn.style.background = '#DC2626';
           btn.style.color = '#FFFFFF';
-          Coins.deduct(5, 'Wrong answer in quiz');
           if (feedback) {
             feedback.style.display = 'block';
             feedback.style.background = '#FEF2F2';
@@ -1131,6 +1138,15 @@ export default function EntertainmentPage(container) {
         setTimeout(() => {
           if (currentQuestionIndex + 1 >= SESSION_LIMIT || currentQuestionIndex + 1 >= sessionQuestions.length) {
             quizFinished = true;
+            // Lump-Sum Coin Settlement for Quiz Session
+            const correctTotal = quizSessionReview.filter(r => r.isCorrect).length;
+            const accuracyPercent = Math.round((correctTotal / SESSION_LIMIT) * 100);
+            if (accuracyPercent >= 70) {
+              Coins.add(15, 'Entertainment Quiz bonus');
+            } else {
+              Coins.deduct(10, 'Entertainment Quiz adjustment');
+            }
+            Coins.updateBadge();
           } else {
             currentQuestionIndex++;
           }

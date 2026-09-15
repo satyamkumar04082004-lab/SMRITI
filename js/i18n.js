@@ -162,7 +162,50 @@ export const stitchTranslations = {
     difficulty: 'Difficulty',
     easy: 'Easy',
     medium: 'Medium',
-    hard: 'Hard'
+    hard: 'Hard',
+    playAgain: 'Play Again',
+    exitToHub: 'Exit to Games',
+    hints: 'Hints',
+    time: 'Time',
+    coinsEarned: 'Coins Earned',
+    startGame: 'Start Game',
+    gameOver: 'Game Complete!',
+
+    // Game Titles & Details (Natural English Titles)
+    g1Title: 'Hornbill Memory Nest',
+    g1Desc: 'Match pairs of nature cards',
+    g1Tag: 'Memory',
+    g1Instruction: 'Tap cards to find matching pairs',
+
+    g2Title: 'Memory Moments',
+    g2Desc: 'Remember the story sequence',
+    g2Tag: 'Memory',
+    g2Instruction: 'Remember what happened in the story',
+
+    g3Title: 'Familiar Faces',
+    g3Desc: 'Recognise loved ones around you',
+    g3Tag: 'Recognition',
+    g3Instruction: 'Identify people who love you',
+
+    g4Title: 'Remember My Home',
+    g4Desc: 'Recall objects in a room',
+    g4Tag: 'Spatial Memory',
+    g4Instruction: 'Remember where items were placed',
+
+    g5Title: 'My Day Routine',
+    g5Desc: 'Put your daily routine in order',
+    g5Tag: 'Routine',
+    g5Instruction: 'Arrange daily activities in right sequence',
+
+    g6Title: 'Listen & Remember',
+    g6Desc: 'Listen and answer questions',
+    g6Tag: 'Attention',
+    g6Instruction: 'Listen to the audio and choose the right answer',
+
+    g7Title: 'Bamboo Sequence',
+    g7Desc: 'Repeat the glowing pattern',
+    g7Tag: 'Pattern Memory',
+    g7Instruction: 'Watch glowing bamboo pads and repeat pattern'
   },
 
   hi: {
@@ -319,7 +362,50 @@ export const stitchTranslations = {
     difficulty: 'कठिनाई',
     easy: 'सरल',
     medium: 'मध्यम',
-    hard: 'कठिन'
+    hard: 'कठिन',
+    playAgain: 'पुनः खेलें',
+    exitToHub: 'खेल केंद्र पर लौटें',
+    hints: 'संकेत',
+    time: 'समय',
+    coinsEarned: 'अर्जित सिक्के',
+    startGame: 'खेल शुरू करें',
+    gameOver: 'खेल पूरा हुआ!',
+
+    // Game Titles & Details
+    g1Title: 'हॉर्नबिल स्मृति घोंसला',
+    g1Desc: 'प्रकृति कार्ड के जोड़े मिलाएं',
+    g1Tag: 'स्मृति',
+    g1Instruction: 'मिलान करने वाले कार्ड ढूंढें',
+
+    g2Title: 'स्मृति क्षण',
+    g2Desc: 'कहानी के क्रम को याद रखें',
+    g2Tag: 'स्मृति',
+    g2Instruction: 'कहानी के घटनाक्रम को याद करें',
+
+    g3Title: 'परिचित चेहरे',
+    g3Desc: 'अपने प्रियजनों को पहचानें',
+    g3Tag: 'पहचान',
+    g3Instruction: 'अपने परिवार और मित्रों को पहचानें',
+
+    g4Title: 'मेरा घर याद करें',
+    g4Desc: 'कमरे में रखी वस्तुओं को याद रखें',
+    g4Tag: 'स्थानिक स्मृति',
+    g4Instruction: 'वस्तुओं के सही स्थान को याद करें',
+
+    g5Title: 'मेरी दिनचर्या',
+    g5Desc: 'दिनचर्या को सही क्रम में लगाएं',
+    g5Tag: 'दिनचर्या',
+    g5Instruction: 'दैनिक कार्यों को सही क्रम में व्यवस्थित करें',
+
+    g6Title: 'सुनें और याद रखें',
+    g6Desc: 'ध्यान से सुनकर उत्तर दें',
+    g6Tag: 'एकाग्रता',
+    g6Instruction: 'ऑडियो सुनें और सही उत्तर चुनें',
+
+    g7Title: 'बांस अनुक्रम',
+    g7Desc: 'चमकदार पैटर्न को दोहराएं',
+    g7Tag: 'पैटर्न स्मृति',
+    g7Instruction: 'चमकते बांस पैड को देखें और क्रम दोहराएं'
   },
 
   bn: {
@@ -476,7 +562,50 @@ export const stitchTranslations = {
     difficulty: 'কঠিনতা',
     easy: 'সহজ',
     medium: 'মাঝারি',
-    hard: 'কঠিন'
+    hard: 'কঠিন',
+    playAgain: 'আবার খেলুন',
+    exitToHub: 'খেলার কেন্দ্রে ফিরুন',
+    hints: 'ইঙ্গিত',
+    time: 'সময়',
+    coinsEarned: 'অর্জিত কয়েন',
+    startGame: 'খেলা শুরু করুন',
+    gameOver: 'খেলা সমাপ্ত!',
+
+    // Game Titles & Details
+    g1Title: 'হর্নবিল স্মৃতি বাসা',
+    g1Desc: 'প্রকৃতি কার্ডের জোড়া মেলান',
+    g1Tag: 'স্মৃতি',
+    g1Instruction: 'একই কার্ডের জোড়া খুঁজে বের করুন',
+
+    g2Title: 'স্মৃতির মুহূর্ত',
+    g2Desc: 'গল্পের ক্রমটি মনে রাখুন',
+    g2Tag: 'স্মৃতি',
+    g2Instruction: 'গল্পের ঘটনাগুলি ক্রমানুসারে মনে রাখুন',
+
+    g3Title: 'পরিচিত মুখ',
+    g3Desc: 'প্রিয়জনদের চিনুন',
+    g3Tag: 'পরিচয়',
+    g3Instruction: 'আপনার ভালোবাসার মানুষদের শনাক্ত করুন',
+
+    g4Title: 'আমার বাড়ি মনে রাখুন',
+    g4Desc: 'ঘরের জিনিসপত্র মনে রাখুন',
+    g4Tag: 'স্থানিক স্মৃতি',
+    g4Instruction: 'জিনিসগুলি কোথায় ছিল তা মনে রাখুন',
+
+    g5Title: 'আমার দৈনন্দিন নিয়ম',
+    g5Desc: 'দৈনিক কাজগুলি সঠিক ক্রমে সাজান',
+    g5Tag: 'নিয়ম',
+    g5Instruction: 'নিয়মিত কাজগুলি একের পর এক সাজান',
+
+    g6Title: 'শুনুন ও মনে রাখুন',
+    g6Desc: 'মন দিয়ে শুনে উত্তর দিন',
+    g6Tag: 'মনোযোগ',
+    g6Instruction: 'শব্দ শুনুন এবং সঠিক উত্তরটি বাছুন',
+
+    g7Title: 'বাঁশের সুর অনুক্রম',
+    g7Desc: 'উজ্জ্বল নকশা অনুসরণ করুন',
+    g7Tag: 'প্যাটার্ন স্মৃতি',
+    g7Instruction: 'আলো জ্বলা প্যাডগুলি দেখে অনুক্রম পুনরাবৃত্তি করুন'
   },
 
   as: {
@@ -633,7 +762,50 @@ export const stitchTranslations = {
     difficulty: 'কঠিনতা',
     easy: 'সহজ',
     medium: 'মজলীয়া',
-    hard: 'টান'
+    hard: 'টান',
+    playAgain: 'পুনৰ খেলক',
+    exitToHub: 'খেলৰ কেন্দ্ৰলৈ উভতি যাওক',
+    hints: 'ইংগিত',
+    time: 'সময়',
+    coinsEarned: 'অৰ্জিত মুদ্ৰা',
+    startGame: 'খেল আৰম্ভ কৰক',
+    gameOver: 'খেল সমাপ্ত!',
+
+    // Game Titles & Details
+    g1Title: 'ধনেশ পক্ষীৰ স্মৃতি বাহ',
+    g1Desc: 'প্ৰকৃতিৰ কাৰ্ডৰ যোৰ মিলোৱা খেল',
+    g1Tag: 'স্মৃতি',
+    g1Instruction: 'একে কাৰ্ডৰ যোৰ বিচাৰি উলিয়াওক',
+
+    g2Title: 'স্মৃতিৰ মুহূৰ্ত',
+    g2Desc: 'কাহিনীৰ ক্ৰমটো মনত ৰাখক',
+    g2Tag: 'স্মৃতি',
+    g2Instruction: 'কাহিনীৰ ঘটনাৱলী ক্ৰমানুসাৰে মনত পেলাওক',
+
+    g3Title: 'চিনাকি মুখ',
+    g3Desc: 'আপোনজনক চিনাক্ত কৰক',
+    g3Tag: 'চিনাকি',
+    g3Instruction: 'আপোনাৰ পৰিয়াল আৰু মৰমৰ ব্যক্তিসকলক চিনক',
+
+    g4Title: 'মোৰ ঘৰ মনত পেলাওক',
+    g4Desc: 'কোঠাৰ সামগ্ৰী মনত ৰাখক',
+    g4Tag: 'স্থানিক স্মৃতি',
+    g4Instruction: 'সামগ্ৰীসমূহ ক’ত আছিল মনত পেলাওক',
+
+    g5Title: 'মোৰ দৈনন্দিন নিয়ম',
+    g5Desc: 'দৈনিক নিয়মবোৰ ক্ৰমত সজাওক',
+    g5Tag: 'নিয়মিকা',
+    g5Instruction: 'নিয়মীয়া কামবোৰ এটাৰ পাছত এটাকৈ সজাওক',
+
+    g6Title: 'শুনক আৰু মনত ৰাখক',
+    g6Desc: 'মন দি শুনি উত্তৰ দিয়ক',
+    g6Tag: 'মনোযোগ',
+    g6Instruction: 'মাত শুনক আৰু সঠিক উত্তৰ বাছক',
+
+    g7Title: 'বাঁহৰ সুৰ অনুক্ৰম',
+    g7Desc: 'উজ্বল বিন্যাস অনুসৰণ কৰক',
+    g7Tag: 'বিন্যাস স্মৃতি',
+    g7Instruction: 'পোহৰ হোৱা বাঁহৰ পেড চাই অনুক্ৰম পুনৰাবৃত্তি কৰক'
   }
 };
 

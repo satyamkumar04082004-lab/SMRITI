@@ -357,15 +357,11 @@ class GameController {
   }
 
   /**
-   * Record a wrong answer with penalty deduction
+   * Record a wrong answer (no live deduction — coins settled at session end)
    */
   recordWrong() {
     this.totalQuestions++;
-    Coins.deduct(5, `${this.config.gameId || 'game'} penalty`);
-    Coins.updateBadge();
-    if (window.SmritiToast) {
-      window.SmritiToast.show('−5 🪙 (Keep trying gently!)', 'warning');
-    }
+    this.wrongAnswers = (this.wrongAnswers || 0) + 1;
   }
 
   /**
@@ -386,9 +382,18 @@ class GameController {
       : (this.totalQuestions > 0 ? Math.round((this.correctAnswers / this.totalQuestions) * 100) : 0);
     const finalScore = overrides.score !== undefined ? overrides.score : this.score;
 
-    // Calculate coins
-    const coinCalc = Coins.calculate(accuracy, timeTaken, this.config.parTime || 60);
-    Coins.add(coinCalc.total, this.config.gameId);
+    // Calculate coins (Lump-Sum Session Settlement)
+    let coinDelta = 0;
+    let coinMessage = '';
+    if (accuracy >= 70) {
+      coinDelta = 15;
+      Coins.add(coinDelta, `${this.config.gameId || 'game'} completion bonus`);
+      coinMessage = `🪙 +${coinDelta} ${I18n.t('coins')} (Accuracy ≥ 70% Bonus!)`;
+    } else {
+      coinDelta = -10;
+      Coins.deduct(10, `${this.config.gameId || 'game'} session adjustment`);
+      coinMessage = `🪙 −10 ${I18n.t('coins')} (Accuracy < 70% Adjustment)`;
+    }
     Coins.updateBadge();
 
     // Save result
@@ -400,7 +405,7 @@ class GameController {
       timeTaken,
       hintsUsed: this.hintsUsed,
       difficulty: this.difficulty,
-      coinsEarned: coinCalc.total,
+      coinsEarned: coinDelta,
     });
 
     // Determine encouragement
@@ -463,7 +468,12 @@ class GameController {
             </div>
           </div>
 
-          <div class="result-coins">🪙 +${coinCalc.total} ${I18n.t('coins')}</div>
+          <div class="result-coins" style="margin: 1.25rem 0; font-size: 1.25rem; font-weight: 700; color: ${coinDelta >= 0 ? '#0D9488' : '#DC2626'};">
+            ${coinMessage}
+            <div style="font-size: 0.9rem; font-weight: normal; color: var(--color-text-muted, #64748b); margin-top: 4px;">
+              Correct: ${this.correctAnswers} | Wrong: ${this.wrongAnswers || 0}
+            </div>
+          </div>
 
           <div class="result-actions">
             <button class="btn btn-primary btn-block" id="result-replay">

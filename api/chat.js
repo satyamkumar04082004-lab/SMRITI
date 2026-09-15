@@ -255,76 +255,142 @@ function generateContextualResponse(message, profile, role, lang = 'en', todayDa
     return `It brings so much warmth to hear you speak of them, ${firstName}. They loved you so very deeply. Would you like to share a sweet memory of them with me, or shall we listen to some calming bansuri music together? 🌸✨`;
   }
 
+  // Helper for language-appropriate string resolution
+  const pickLang = (enStr, hiStr, asStr, bnStr) => {
+    if (lang === 'hi') return hiStr;
+    if (lang === 'as') return asStr;
+    if (lang === 'bn') return bnStr;
+    return enStr;
+  };
+
   // 3. Medical Liability Prevention
   if (text.includes('diagnose') || text.includes('cure') || text.includes('stop taking medicine') || text.includes('what disease do i have') || text.includes('dawa chhod')) {
-    return `Dear ${firstName}, SMRITI is an assistive memory and cognitive companion, not a diagnostic or medical replacement system. Please consult your physician Dr. Barua before making any changes to your medication or healthcare plan! 🩺💊`;
+    return pickLang(
+      `Dear ${firstName}, SMRITI is an assistive memory and cognitive companion, not a diagnostic or medical replacement system. Please consult your physician Dr. Barua before making any changes to your medication or healthcare plan! 🩺💊`,
+      `प्रिय ${firstName}, स्मृति एक सहायक संज्ञानात्मक साथी है, कोई नैदानिक या चिकित्सा प्रतिस्थापन प्रणाली नहीं। कृपया अपनी दवाओं या स्वास्थ्य योजना में बदलाव से पहले अपने चिकित्सक डॉ. बरुआ से परामर्श करें! 🩺💊`,
+      `মৰমৰ ${firstName}, স্মৃতি এটি সহায়ক স্মৃতি আৰু সংজ্ঞানাত্মক সংগীহে, কোনো চিকিৎসাজনিত ব্যৱস্থা নহয়। ঔষধ বা চিকিৎসাৰ পৰিৱৰ্তন কৰাৰ আগতে অনুগ্ৰহ কৰি চিকিৎসক ডাঃ বৰুৱাৰ পৰামৰ্শ লওক! 🩺💊`,
+      `প্রিয় ${firstName}, স্মৃতি একটি সহায়ক স্মৃতি ও সুস্থতার সঙ্গী, কোনো রোগ নির্ণয় বা চিকিৎসা ব্যবস্থা নয়। ঔষধ বা চিকিৎসার কোনো পরিবর্তনের আগে দয়া করে চিকিৎসক ডাঃ বড়ুয়ার পরামর্শ নিন! 🩺💊`
+    );
   }
 
   // Role-specific clinical inquiry
   if (role === 'doctor') {
-    return `Clinical Overview for ${patient.name} (${patient.stage || 'Mild MCI'}): ${totalGames} cognitive sessions recorded with ${avgAcc}% overall accuracy as of ${todayDateStr}. Adherence to prescribed routine is stable with ${medicines.length} active prescriptions. Recommended focus: episodic recall and gentle morning stimulation.`;
+    return pickLang(
+      `Clinical Overview for ${patient.name} (${patient.stage || 'Mild MCI'}): ${totalGames} cognitive sessions recorded with ${avgAcc}% overall accuracy as of ${todayDateStr}. Adherence to prescribed routine is stable with ${medicines.length} active prescriptions. Recommended focus: episodic recall and gentle morning stimulation.`,
+      `${patient.name} (${patient.stage || 'हल्की संज्ञानात्मक दुर्बलता'}) की नैदानिक समीक्षा: ${todayDateStr} तक ${avgAcc}% सटीकता के साथ ${totalGames} सत्र दर्ज। ${medicines.length} सक्रिय दवाओं का पालन स्थिर है। अनुशंसित ध्यान: सुबह का हल्का स्मरण अभ्यास।`,
+      `${patient.name}ৰ ক্লিনিকেল পৰ্যালোচনা: ${todayDateStr} লৈকে ${avgAcc}% শুদ্ধতাৰে ${totalGames} টা অধিৱেশন সম্পন্ন। ${medicines.length} টা সক্ৰিয় ঔষধ সেৱন নিয়মীয়া আছে।`,
+      `${patient.name}-এর ক্লিনিকাল বিবরণ: ${todayDateStr} পর্যন্ত ${avgAcc}% নির্ভুলতায় ${totalGames} টি সেশন সম্পন্ন। ওষুধ সেবন নিয়মিত রয়েছে।`
+    );
   }
   if (role === 'caregiver') {
-    return `Caregiver Summary (${todayDateStr}, ${todayTimeStr}): ${patient.name} has played ${totalGames} sessions recently. Best consistency in ${recentGame ? recentGame.gameName : 'Visual Memory'}. ${reminders.filter(r => r.active).length} daily reminders are active.`;
+    return pickLang(
+      `Caregiver Summary (${todayDateStr}, ${todayTimeStr}): ${patient.name} has played ${totalGames} sessions recently. Best consistency in ${recentGame ? recentGame.gameName : 'Visual Memory'}. ${reminders.filter(r => r.active).length} daily reminders are active.`,
+      `तत्वधान सारांश (${todayDateStr}, ${todayTimeStr}): ${patient.name} ने हाल ही में ${totalGames} खेल खेले हैं। सर्वश्रेष्ठ प्रदर्शन ${recentGame ? recentGame.gameName : 'दृष्टि स्मृति'} में रहा। ${reminders.filter(r => r.active).length} अनुस्मारक सक्रिय हैं।`,
+      `তত্ত্বাৱধায়ক সংক্ষিপ্তসাৰ: ${patient.name}-এ শেহতীয়াকৈ ${totalGames} টা খেল খেলিছে। ${reminders.filter(r => r.active).length} টা সোঁৱৰণী সক্ৰিয় হৈ আছে।`,
+      `তত্ত্বাবধায়ক সারাংশ: ${patient.name} সম্প্রতি ${totalGames} টি খেলা খেলেছেন। ${reminders.filter(r => r.active).length} টি সক্রিয় রিমাইন্ডার রয়েছে।`
+    );
   }
 
   // Date & Time queries
   if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
-    if (lang === 'hi') {
-      return `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`;
-    }
-    if (lang === 'as') {
-      return `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr} (${todayDateStr})। এয়া জিৰণি লোৱাৰ বা স্মৃতিৰ অনুশীলন কৰাৰ উত্তম সময়! ⏰✨`;
-    }
-    if (lang === 'bn') {
-      return `নমস্কার ${firstName}! এখন সময় ${todayTimeStr} (${todayDateStr})। এটি বিশ্রাম নেওয়া বা সহজ স্মৃতিচর্চার খুব সুন্দর সময়! ⏰✨`;
-    }
-    return `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. It's a peaceful moment to relax or do a gentle memory exercise! ⏰✨`;
+    return pickLang(
+      `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. It's a peaceful moment to relax or do a gentle memory exercise! ⏰✨`,
+      `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`,
+      `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr} (${todayDateStr})। এয়া জিৰণি লোৱাৰ বা স্মৃতিৰ অনুশীলন কৰাৰ উত্তম সময়! ⏰✨`,
+      `নমস্কার ${firstName}! এখন সময় ${todayTimeStr} (${todayDateStr})। এটি বিশ্রাম নেওয়া বা সহজ স্মৃতিচর্চার খুব সুন্দর সময়! ⏰✨`
+    );
   }
   if (text.includes('what date') || text.includes('today\'s date') || text.includes('which day') || text.includes('what day is today') || text.includes('aaj kaun sa din') || text.includes('aaj ki tarikh')) {
-    if (lang === 'hi') {
-      return `आज की तारीख ${todayDateStr} है। आपका दिन सुखद और शांत रहे! 📅🌸`;
-    }
-    return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
+    return pickLang(
+      `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`,
+      `आज की तारीख ${todayDateStr} है। आपका दिन सुखद, शांत और स्वस्थ रहे! 📅🌸`,
+      `আজিৰ তাৰিখ ${todayDateStr}। আপোনাৰ দিনটো শান্তিময় আৰু আনন্দদায়ক হওক! 📅🌸`,
+      `আজকের তারিখ ${todayDateStr}। আপনার আজকের দিনটি সুন্দর ও শান্তিময় কাটুক! 📅🌸`
+    );
   }
 
   // Clinical & Memory Knowledge
   if (text.includes('dementia') || text.includes('what is dementia')) {
-    return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks over time. SMRITI is a memory assistance companion, not a medical diagnostic or replacement system. With loving routines, cognitive games, and a calm environment, seniors can live with high dignity! 🌸`;
+    return pickLang(
+      `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks over time. SMRITI is a memory assistance companion, not a medical diagnostic or replacement system. With loving routines, cognitive games, and a calm environment, seniors can live with high dignity! 🌸`,
+      `डिमेंशिया मस्तिष्क में स्मृति, विचार और दैनिक कार्यों में समय के साथ होने वाले क्रमिक बदलावों का एक सामान्य चिकित्सीय नाम है। स्मृति कोई नैदानिक प्रणाली नहीं बल्कि एक सहायक साथी है। स्नेहपूर्ण दिनचर्या और दिमागी खेलों से वरिष्ठ नागरिक सम्मानपूर्वक जीवन जी सकते हैं! 🌸`,
+      `ডিমেনচিয়া হৈছে বয়সৰ লগে লগে স্মৃতি আৰু চিন্তাৰ পৰিৱৰ্তনক বুজোৱা এক অৱস্থা। স্মৃতি কোনো ৰোগ নিৰ্ণয়ৰ মাধ্যম নহয়, এটি মৰমিয়াল সহায়কহে। মৰমৰ পৰিৱেশ আৰু মানসিক খেলৰ দ্বাৰা মন সতেজ ৰাখিব পাৰি! 🌸`,
+      `ডিমেনশিয়া হলো সময়ের সাথে সাথে স্মৃতি ও চিন্তাভাবনায় পরিবর্তন ঘটার একটি স্বাভাবিক চিকিৎসা পরিভাষা। স্মৃতি কোনো রোগ নির্ণয়ের ব্যবস্থা নয়, একটি ভালোবাসার সঙ্গী। নিয়মিত স্মৃতিচর্চা ও ভালো পরিবেশে প্রবীণরা মর্যাদার সাথে জীবনযাপন করতে পারেন! 🌸`
+    );
   }
 
   if (text.includes('memory reduction') || text.includes('memory loss') || text.includes('why memory fades') || text.includes('forgetting') || text.includes('memory reduce')) {
-    return `Memory reduction happens when neural connections slow down due to aging, natural shifts, or stress. Engaging your mind with games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`;
+    return pickLang(
+      `Memory reduction happens when neural connections slow down due to aging, natural shifts, or stress. Engaging your mind with games, recalling family memories, and sound sleep keeps those neuronal bridges active! 🧠✨`,
+      `उम्र बढ़ने या तनाव के कारण मस्तिष्क के न्यूरोनल संपर्क धीमे होने से स्मृति में कमी आती है। पहेलियां खेलने, पारिवारिक बातें याद करने और गहरी नींद लेने से ये संबंध सक्रिय रहते हैं! 🧠✨`,
+      `বয়স বৃদ্ধি বা মানসিক চাপৰ বাবে মগজুৰ সংযোগবোৰ লেহেমীয়া হ'লে স্মৃতিশক্তি হ্ৰাস পায়। মানসিক খেল আৰু পৰিয়ালৰ স্মৃতি স্মৰণে ইয়াক সক্ৰিয় কৰি ৰাখে! 🧠✨`,
+      `বয়স বৃদ্ধি ও ক্লান্তির কারণে মস্তিষ্কের কোষের সংযোগ ধীর হয়ে এলে স্মৃতি কিছুটা হ্রাস পায়। ব্রেন গেম খেলা ও প্রিয়জনের স্মৃতি মনে করলে মস্তিষ্ক সতেজ থাকে! 🧠✨`
+    );
   }
 
   if (text.includes('daily exercise') || text.includes('memory retention') || text.includes('brain exercise') || text.includes('retention exercise') || text.includes('exercises for memory')) {
-    return `Here are 4 daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing; 3) Reminisce over a Memory Vault photo; 4) Take a fresh morning walk and stay well hydrated! 🚶‍♀️💧`;
+    return pickLang(
+      `Here are 4 daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing; 3) Reminisce over a Memory Vault photo; 4) Take a fresh morning walk and stay well hydrated! 🚶‍♀️💧`,
+      `स्मृति बनाए रखने के लिए 4 दैनिक अभ्यास: 1) प्रतिदिन सुबह 10 मिनट हॉर्नबिल या परिचित चेहरे खेलें; 2) 4-4 गहरी सांस का प्राणायाम करें; 3) स्मृति तिजोरी से पुरानी तस्वीर देखें; 4) सुबह की ताज़ा सैर करें और पर्याप्त पानी पिएं! 🚶‍♀️💧`,
+      `স্মৃতি সতেজ ৰখাৰ ৪টা দৈনিক অভ্যাস: ১) পুৱা ১০ মিনিট ধনেশ পক্ষী বা চিনাকি মুখ খেলক; ২) দীঘলকৈ উশাহ লওক; ৩) পুৰণি ছবি মনত পেলাওক; ৪) পুৱাৰ মুকলি বতাহত খোজ কাঢ়ক! 🚶‍♀️💧`,
+      `স্মৃতি ধরে রাখার ৪টি সহজ নিয়ম: ১) সকালে ১০ মিনিট হর্নবিল বা পরিচিত মুখ খেলা; ২) শান্ত হয়ে গভীর শ্বাস নেওয়া; ৩) অ্যালবামের পুরনো ছবি দেখে স্মৃতিচারণ; ৪) সকালে হালকা হাঁটা ও পর্যাপ্ত জল খাওয়া! 🚶‍♀️💧`
+    );
   }
 
   if (text.includes('medicine') || text.includes('pill') || text.includes('tablet')) {
     const medNames = medicines.map(m => m.name).join(', ');
-    return `Dear ${firstName}, according to your routine on ${todayDateStr}, you have ${medicines.length} prescribed items (${medNames || 'prescribed vitamins'}). Please take them as advised by Dr. Barua! 💊`;
+    return pickLang(
+      `Dear ${firstName}, according to your routine on ${todayDateStr}, you have ${medicines.length} prescribed items (${medNames || 'prescribed vitamins'}). Please take them as advised by Dr. Barua! 💊`,
+      `प्रिय ${firstName}, ${todayDateStr} की दिनचर्या के अनुसार आपकी ${medicines.length} दवाएं निर्धारित हैं (${medNames || 'दवाएं व विटामिन'})। कृपया डॉ. बरुआ की सलाह अनुसार इन्हें समय पर लें! 💊`,
+      `মৰমৰ ${firstName}, ${todayDateStr} ৰ নিয়ম অনুসৰি আপোনাৰ ${medicines.length} টা ঔষধ আছে (${medNames || 'ঔষধ'})। অনুগ্ৰহ কৰি ডাঃ বৰুৱাৰ নিৰ্দেশনা অনুসৰি সময়মতে খাওক! 💊`,
+      `প্রিয় ${firstName}, ${todayDateStr} অনুযায়ী আপনার ${medicines.length} টি ওষুধ রয়েছে (${medNames || 'ঔষধ'})। দয়া করে চিকিৎসকের পরামর্শ মেনে সময়মতো সেবন করুন! 💊`
+    );
   }
 
   if (text.includes('family') || text.includes('who is') || text.includes('children') || text.includes('son') || text.includes('daughter')) {
     const famNames = family.map(f => `${f.name} (${f.relation})`).join(', ');
-    return `Your loving family members include ${famNames || 'Raj and Ananya'}. You are surrounded by so much warmth and care. 🌸👨‍👩‍👧`;
+    return pickLang(
+      `Your loving family members include ${famNames || 'Raj and Ananya'}. You are surrounded by so much warmth and care. 🌸👨‍👩‍👧`,
+      `आपके स्नेही परिवार में ${famNames || 'राज और अनन्य'} शामिल हैं। आप हमेशा उनके अपार प्रेम और सुरक्षा में हैं। 🌸👨‍👩‍👧`,
+      `আপোনাৰ মৰমৰ পৰিয়ালৰ সদস্যসকল হ'ল ${famNames || 'ৰাজ আৰু অনন্যা'}। আপুনি সদায় পৰিয়ালৰ মৰম আৰু সুৰক্ষাত আছে। 🌸👨‍👩‍👧`,
+      `আপনার স্নেহশীল পরিবারের মধ্যে রয়েছেন ${famNames || 'রাজ ও অনন্যা'}। আপনি সর্বদা তাদের ভালোবাসা ও যত্নে আছেন। 🌸👨‍👩‍👧`
+    );
   }
 
   if (text.includes('memory') || text.includes('remember') || text.includes('photo') || text.includes('story')) {
     if (memories.length > 0) {
       const m = memories[Math.floor(Math.random() * memories.length)];
-      return `I love reminiscing with you, ${firstName}! Do you remember ${m.title}? ${m.story.slice(0, 140)}... It is such a cherished treasure in your Memory Vault. 🖼️✨`;
+      return pickLang(
+        `I love reminiscing with you, ${firstName}! Do you remember ${m.title}? ${m.story.slice(0, 140)}... It is such a cherished treasure in your Memory Vault. 🖼️✨`,
+        `मुझे आपके साथ पुरानी यादें ताज़ा करना बहुत प्रिय है, ${firstName}! क्या आपको ${m.title} याद है? यह आपकी स्मृति तिजोरी का अनमोल ख़ज़ाना है। 🖼️✨`,
+        `আপোনাৰ লগত পুৰণি স্মৃতি সোঁৱৰণ কৰিবলৈ বৰ ভাল লাগে, ${firstName}! আপোনাৰ ${m.title} মনত আছেনে? এয়া আপোনাৰ স্মৃতি ভঁৰালৰ বহুমূলীয়া সম্পদ। 🖼️✨`,
+        `আপনার সাথে পুরনো কথা মনে করতে খুব আনন্দ হয়, ${firstName}! আপনার কি ${m.title} মনে আছে? এটি আপনার স্মৃতির ভাণ্ডারের এক অমূল্য রত্ন। 🖼️✨`
+      );
     }
-    return `Your life stories and memories are safely kept in your Memory Vault, ${firstName}. What favorite memory would you like to reflect on today?`;
+    return pickLang(
+      `Your life stories and memories are safely kept in your Memory Vault, ${firstName}. What favorite memory would you like to reflect on today?`,
+      `आपकी जीवन गाथाएं और मधुर यादें आपकी स्मृति तिजोरी में सुरक्षित हैं, ${firstName}। आज आप किस प्रिय स्मृति को याद करना चाहेंगे?`,
+      `আপোনাৰ জীৱনৰ মিঠা স্মৃতিবোৰ স্মৃতি ভঁৰালত সংৰক্ষিত আছে, ${firstName}। আজি কোনটো স্মৃতি মনত পেলাব বিচাৰে?`,
+      `আপনার সুন্দর স্মৃতিগুলো স্মৃতি ভল্টে নিরাপদে রাখা আছে, ${firstName}। আজ কোন প্রিয় স্মৃতিটি মনে করতে চান?`
+    );
   }
 
   if (text.includes('sad') || text.includes('lonely') || text.includes('low') || text.includes('upset') || text.includes('worried')) {
-    return `I'm right here with you, ${firstName}. It is completely natural to have moments like this. Would you like to take a slow, calming breath together, or listen to a sweet folk story from ${state}? You are deeply cherished and never alone. 🌿❤️`;
+    return pickLang(
+      `I'm right here with you, ${firstName}. It is completely natural to have moments like this. Would you like to take a slow, calming breath together, or listen to a sweet folk story from ${state}? You are deeply cherished and never alone. 🌿❤️`,
+      `मैं बिल्कुल आपके साथ हूँ, ${firstName}। कभी-कभी ऐसा लगना स्वाभाविक है। क्या हम मिलकर एक धीमी, शांत सांस लें, या ${state} की कोई मीठी लोककथा सुनें? आप बहुत प्रिय हैं और कभी अकेले नहीं हैं। 🌿❤️`,
+      `মই আপোনাৰ কাষতে আছোঁ, ${firstName}। এনেকুৱা অনুভৱ হোৱাটো স্বাভাৱিক। আহক আমি দুয়ো শান্তভাৱে দীঘল উশাহ লওঁ বা কোনো সুন্দৰ লোকগীত শুনো। আপুনি কেতিয়াও অকলে নহয়। 🌿❤️`,
+      `আমি আপনার পাশেই আছি, ${firstName}। মন এমন খারাপ লাগা খুবই স্বাভাবিক। আসুন আমরা ধীরে ধীরে গভীর শ্বাস নিই বা কোনো সুন্দর মিষ্টি গান শুনি। আপনি সকলের অত্যন্ত প্রিয় ও কখনই একা নন। 🌿❤️`
+    );
   }
 
   if (text.includes('game') || text.includes('play') || text.includes('score') || text.includes('progress')) {
-    return `You're doing wonderfully, ${firstName}! You have completed ${totalGames} mindful sessions with an average accuracy of ${avgAcc}%. How about playing Hornbill Memory Nest or visiting Familiar Faces today? 🦅✨`;
+    return pickLang(
+      `You're doing wonderfully, ${firstName}! You have completed ${totalGames} mindful sessions with an average accuracy of ${avgAcc}%. How about playing Hornbill Memory Nest or visiting Familiar Faces today? 🦅✨`,
+      `आप बहुत ही शानदार प्रदर्शन कर रहे हैं, ${firstName}! आपने ${avgAcc}% सटीकता के साथ ${totalGames} खेल पूरे किए हैं। क्या आज हॉर्नबिल मेमोरी या परिचित चेहरे खेलें? 🦅✨`,
+      `আপুনি অতি সুন্দৰ প্ৰদৰ্শন কৰিছে, ${firstName}! আপুনি ${avgAcc}% শুদ্ধতাৰে ${totalGames} টা অনুশীলন সম্পন্ন কৰিছে। আজি ধনেশ পক্ষী বা চিনাকি মুখ খেলিম নেকি? 🦅✨`,
+      `আপনি চমৎকার অনুশীলন করছেন, ${firstName}! আপনি ${avgAcc}% নির্ভুলতায় ${totalGames} টি খেলা শেষ করেছেন। আজ কি হর্নবিল মেমোরি বা পরিচিত মুখ খেলা যাক? 🦅✨`
+    );
   }
 
   // Regional language fallback greetings
