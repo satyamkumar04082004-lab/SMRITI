@@ -136,8 +136,6 @@ function getFormattedRegionalDate() {
     en: 'en-IN'
   };
   return istDate.toLocaleDateString(localeMap[lang] || 'en-IN', options);
-};
-  return istDate.toLocaleDateString(I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN', options);
 }
 
 // --- Emergency Help Modal Dialog ---
