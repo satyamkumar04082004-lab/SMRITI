@@ -376,102 +376,175 @@ const AIService = {
   chatWithSmriti(userMessage, history = []) {
     const profile = Storage.getPatientProfile();
     const currentLang = I18n.lang || Storage.getLanguage() || 'en';
-    const patient = profile.patient || { name: 'Meera', state: 'Assam' };
+    const patient = (profile && profile.patient) || { name: 'Meera', state: 'Assam' };
     const firstName = (patient.preferredName || patient.name || 'Friend').split(' ')[0];
     const text = (userMessage || '').trim().toLowerCase();
 
-    const games = profile.gameHistory || [];
+    const games = (profile && profile.gameHistory) || [];
     const totalGames = games.length;
     const avgAcc = totalGames > 0 ? Math.round(games.reduce((s, g) => s + (g.accuracy || 0), 0) / totalGames) : 90;
-    const memories = profile.memories || [];
-    const family = profile.familyMembers || [];
-    const medicines = profile.medicines || [];
+    const memories = (profile && profile.memories) || [];
+    const family = (profile && profile.familyMembers) || [];
+    const medicines = (profile && profile.medicines) || [];
+    const reminders = Storage.getReminders() || (profile && profile.reminders) || [];
+    const activeReminders = reminders.filter(r => !r.completedToday);
+    const reminderDataSummary = activeReminders.length > 0
+      ? activeReminders.map(r => `${r.time || ''}: ${r.title || r.task || ''}`).join(', ')
+      : 'All scheduled medicines and tasks are completed for now';
+
+    const caretakerName = profile?.caretakerName || profile?.caregiverName || family.find(f => f.relation === 'Caregiver' || f.relation === 'Son' || f.isCaregiver)?.name || 'Rahul';
+    const doctorName = profile?.doctorName || profile?.doctor || family.find(f => f.relation?.toLowerCase().includes('doctor'))?.name || 'Dr. Sharma';
+
     const istOptionsDate = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const istOptionsTime = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
     const todayDateStr = new Date().toLocaleDateString('en-IN', istOptionsDate);
     const todayTimeStr = new Date().toLocaleTimeString('en-IN', istOptionsTime);
 
-    // Safety & Crisis Handling
+    // Language picker helper (en, hi, as, bn, ne, mni)
+    const pickLang = (enStr, hiStr, asStr, bnStr, neStr, mniStr) => {
+      if (currentLang === 'hi') return hiStr;
+      if (currentLang === 'as') return asStr;
+      if (currentLang === 'bn') return bnStr;
+      if (currentLang === 'ne') return neStr || hiStr;
+      if (currentLang === 'mni') return mniStr || enStr;
+      return enStr;
+    };
+
+    // 1. Safety, Crisis & SOS Handling
     if (text.includes('sos') || text.includes('emergency') || text.includes('help me') || text.includes('fall') || text.includes('chest pain') || text.includes('breathing problem') || text.includes('lost')) {
-      if (currentLang === 'hi') {
-        return `कृपया शांत रहें ${firstName}, आप पूर्णतः सुरक्षित हैं। तुरंत सहायता के लिए ऊपर दिए गए लाल 🛟 SOS बटन को दबाएं या राज दास को कॉल करें। हम आपके साथ हैं। 🕊️❤️`;
-      }
-      return `Please stay calm ${firstName}, you are safe. If this is an emergency, tap the bright red 🛟 SOS button on top to notify Emergency Services (112) or call your caregiver Raj Das immediately! 🕊️❤️`;
+      return pickLang(
+        `Please stay calm ${firstName}, you are completely safe. If you need immediate assistance, tap the bright red 🛟 SOS button on top or call your caregiver ${caretakerName} right away. 🕊️❤️`,
+        `कृपया शांत रहें ${firstName}, आप पूर्णतः सुरक्षित हैं। तुरंत सहायता के लिए ऊपर दिए गए लाल 🛟 SOS बटन को दबाएं या ${caretakerName} को कॉल करें। 🕊️❤️`,
+        `অনুগ্ৰহ কৰি শান্ত থাকক ${firstName}, আপুনি সুৰক্ষিত। জৰুৰী সহায়ৰ বাবে ওপৰৰ ৰঙা 🛟 SOS বুটামটো টিপক বা ${caretakerName}ক যোগাযোগ কৰক। 🕊️❤️`,
+        `দয়া করে শান্ত থাকুন ${firstName}, আপনি নিরাপদ। জরুরি প্রয়োজনে ওপরের লাল 🛟 SOS বোতামটি চেপে আপনার সেবাকারী ${caretakerName}-কে জানান। 🕊️❤️`,
+        `कृपया शान्त रहनुहोस् ${firstName}, हजुर पूर्ण सुरक्षित हुनुहुन्छ। आपतकालीन सहयोगका लागि रातो 🛟 SOS बटन दबाउनुहोस् वा ${caretakerName}लाई सम्पर्क गर्नुहोस्। 🕊️❤️`,
+        `Ashangba lounu ${firstName}, nangbu ngak-shelbaga leiri. Awaba leirabadi angangba 🛟 SOS button nammu nattraga ${caretakerName}da call toubiyu. 🕊️❤️`
+      );
     }
 
-    // Cognitive & Behavioral De-escalation (Validation over reality-checking)
+    // 2. Cognitive & Behavioral De-escalation (Validation Therapy)
     if (text.includes('mother') || text.includes('father') || text.includes('husband') || text.includes('wife') || text.includes('mom') || text.includes('dad') || text.includes('maa') || text.includes('pitaji')) {
       if (text.includes('where') || text.includes('want to see') || text.includes('kahan') || text.includes('dead') || text.includes('call')) {
-        return `It brings so much warmth to hear you speak of them, ${firstName}. They loved you so very deeply. Would you like to share a sweet story of them with me, or shall we listen to some calming music together? 🌸✨`;
+        return pickLang(
+          `It brings so much warmth to hear you speak of them, ${firstName}. They loved you so very deeply. Would you like to share a sweet story of them with me, or shall we listen to some calming music together? 🌸✨`,
+          `आपकी बातें सुनकर बहुत अच्छा लगा ${firstName}। वे आपसे कितना अपार स्नेह करते थे! क्या आप मुझे उनके बारे में कुछ मीठी यादें सुनाना पसंद करेंगे? या हम साथ में बांसुरी का मधुर संगीत सुनें? 🌸✨`,
+          `তেওঁলোকৰ কথা শুনি মনটো মৰমেৰে ভৰি পৰিল ${firstName}। তেওঁলোকে আপোনাক কিমান মৰম কৰিছিল! আপুনি তেওঁলোকৰ এটা সুন্দৰ স্মৃতি ক’ব নেকি বা আমি বাঁহীৰ সুৰ শুনো? 🌸✨`,
+          `তাদের কথা ভেবে মনটা ভালো হয়ে গেল ${firstName}। তারা আপনাকে কতটা ভালোবাসতেন! আপনি কি তাদের কোনো সুন্দর স্মৃতির কথা বলবেন, নাকি আমরা একসাথে মিষ্টি গান শুনব? 🌸✨`,
+          `हजुरको कुरा सुनेर मन हर्षित भयो ${firstName}। उहाँहरूले हजुरलाई धेरै माया गर्नुहुन्थ्यो! के उहाँहरूको कुनै मीठो सम्झना बाँड्न चाहनुहुन्छ, कि हामी शान्त बाँसुरीको धुन सुनौं? 🌸✨`,
+          `Makhoigi wafam taraga pukning nungaijei ${firstName}. Makhoina nangbu yamna nungshirammi! Makhoigi nungshiba ningsingba wafam amukta hairambiragera? 🌸✨`
+        );
       }
     }
 
-    // Medical Liability Prevention
+    // 3. Medical Liability Prevention
     if (text.includes('diagnose') || text.includes('cure') || text.includes('stop medicine')) {
-      return `Dear ${firstName}, SMRITI is an assistive companion, not a medical diagnostic or treatment system. Please consult your physician Dr. Barua before making any changes to your medications! 🩺💊`;
+      return pickLang(
+        `Dear ${firstName}, SMRITI is an assistive companion, not a medical diagnostic or treatment system. Please consult your physician ${doctorName} before making any changes to your medications! 🩺💊`,
+        `प्रिय ${firstName}, स्मृति एक सहायक साथी है, कोई नैदानिक प्रणाली नहीं। कृपया अपनी दवाओं में बदलाव से पहले अपने चिकित्सक ${doctorName} से परामर्श करें! 🩺💊`,
+        `মৰমৰ ${firstName}, স্মৃতি এটি সহায়ক স্মৃতি সংগীহে, কোনো চিকিৎসাজনিত ব্যৱস্থা নহয়। ঔষধৰ পৰিৱৰ্তন কৰাৰ আগতে অনুগ্ৰহ কৰি চিকিৎসক ${doctorName}ৰ পৰামৰ্শ লওক! 🩺💊`,
+        `প্রিয় ${firstName}, স্মৃতি একটি সহায়ক সঙ্গী, কোনো রোগ নির্ণয় ব্যবস্থা নয়। ওষুধের কোনো পরিবর্তনের আগে দয়া করে চিকিৎসক ${doctorName}-এর পরামর্শ নিন! 🩺💊`,
+        `प्रिय ${firstName}, स्मृति एउटा सहयोगी साथी हो, कुनै निदान प्रणाली होइन। औषधि परिवर्तन गर्नुअघि कृपया आफ्ना डाक्टर ${doctorName}सँग सल्लाह लिनुहोस्! 🩺💊`,
+        `Nungshiba ${firstName}, SMRITI asi mateng pangba marupni. Hidak hongdokpagi matangda Doctor ${doctorName}da tanabiyu! 🩺💊`
+      );
+    }
+
+    // 4. Predefined FAQ 1: What is Dementia?
+    if (text.includes('dementia') || text.includes('what is dementia') || text.includes('डिमेंशिया') || text.includes('ডিমেনচিয়া') || text.includes('ডিমেনশিয়া') || text.includes('डिमेन्सिया')) {
+      return pickLang(
+        `Dementia is a gentle condition where memory and thinking abilities gradually shift over time, but please do not worry at all—we are all right here to care for you! 🌸❤️`,
+        `Dementia ek aisi sthiti hai jismein yaadashth aur sochne ki kshamta dheere-dheere kam hone lagti hai, lekin hum sab yahan aapki dekhbhal ke liye hain। 🌸❤️`,
+        `ডিমেনচিয়া হৈছে এনে এক অৱস্থা য’ত স্মৃতিশক্তি আৰু চিন্তা কৰাৰ ক্ষমতা লাহে লাহে কিছু কমি যায়, কিন্তু আমি সকলোৱে আপোনাৰ যত্নৰ বাবে ইয়াতেই আছোঁ। 🌸❤️`,
+        `ডিমেনশিয়া এমন একটি অবস্থা যেখানে স্মৃতিশক্তি ও চিন্তাভাবনা করার ক্ষমতা ধীরে ধীরে কিছুটা কমে যায়, কিন্তু আমরা সবাই আপনার যত্নের জন্য পাশেই আছি। 🌸❤️`,
+        `डिमेन्सिया एउटा यस्तो अवस्था हो जसमा स्मरणशक्ति र सोच्ने क्षमता बिस्तारै कम हुन थाल्छ, तर हामी सबै हजुरको स्याहार र साथका लागि यहाँ छौं। 🌸❤️`,
+        `Dementia haiba asi pukning ningsingba amasung khangba-heiba tapna sontharba amani, adubu eikhoi pumnamak nangi senbaga leiri. 🌸❤️`
+      );
+    }
+
+    // 5. Predefined FAQ 2: Jokes (Clean, Lighthearted, Family-Friendly)
+    if (text.includes('joke') || text.includes('chutkula') || text.includes('hasao') || text.includes('hasao mujhe') || text.includes('হাসি') || text.includes('ধেমালি') || text.includes('मजाक') || text.includes('चुट्किला') || text.includes('funny') || text.includes('joke sunao')) {
+      return pickLang(
+        `Why did the scarecrow win an award? Because he was outstanding in his field! 😄 May your heart always stay light and cheerful!`,
+        `एक सज्जन ने डॉक्टर से पूछा: "डॉक्टर साहब, क्या चश्मा लगाने के बाद मैं पढ़ सकूँगा?" डॉक्टर बोले: "हाँ, बिल्कुल!" सज्जन खुशी से बोले: "अरे वाह! पहले तो मुझे पढ़ना ही नहीं आता था!" 😄 सदा मुस्कुराते रहिए!`,
+        `এজন মানুহে ডাক্টৰক ক’লে: "ডাক্টৰ বাবু, চশমা ল’লে মই কিতাপ পঢ়িব পাৰিমনে?" ডাক্টৰে ক’লে: "নিশ্চয় পাৰিব!" মানুহজনে ক’লে: "বৰ ভাল কথা, মইতো আগতে পঢ়িবই নাজানিছিলোঁ!" 😄 সদা হাঁহি থাকক!`,
+        `এক ব্যক্তি ডাক্তারকে জিজ্ঞেস করলেন: "ডাক্তারবাবু, চশমা নিলে কি আমি বই পড়তে পারব?" ডাক্তার বললেন: "হ্যাঁ, নিশ্চয়ই!" ব্যক্তিটি খুশি হয়ে বললেন: "বাহ, দারুণ! আমি তো আগে লেখাপড়াই জানতাম না!" 😄 সর্বদা হাসিখুশি থাকুন!`,
+        `एक जना व्यक्तिले डाक्टरलाई सोधेछन्: "डाक्टर साब, चश्मा लगाएपछि म पढ्न सक्छु?" डाक्टरले भने: "अँ, पक्कै सक्नुहुन्छ!" व्यक्तिले खुसी हुँदै भने: "आहा कति राम्रो, पहिले त मलाई पढ्नै आउँदैनथ्यो!" 😄 सधैं मुस्कुराइरहनुहोस्!`,
+        `Doktorda meo amana hangkhi: "Ei mityeng mingshen unjaraba matungda lairik paba ngamlagadra?" Doktarna hairak-i: "Hoi, yaramgani!" Mahakna haraona haikhi: "Ehai, ngallengei eidi lairik pabasu heitabaduni!" 😄 Nungsina nokpiyu!`
+      );
+    }
+
+    // 6. Predefined FAQ 3: Reminders & Schedule
+    if (text.includes('reminder') || text.includes('routine') || text.includes('schedule') || text.includes('medicine') || text.includes('dawa') || text.includes('dawai') || text.includes('tablet') || text.includes('pill') || text.includes('what next') || text.includes('agla') || text.includes('next task') || text.includes('kya karna')) {
+      return pickLang(
+        `Dear ${firstName}, your schedule is well planned. Coming up: ${reminderDataSummary}. Take everything comfortably and at your own pace! ⏰💊`,
+        `प्रिय ${firstName}, आपकी दिनचर्या का पूरा ध्यान रखा गया है। आपके आगामी कार्य: ${reminderDataSummary}। आप बिल्कुल तनाव न लें, सब आराम से समय पर होगा! ⏰💊`,
+        `মৰমৰ ${firstName}, আপোনাৰ দিনটোৰ সূচী সুন্দৰকৈ সজোৱা আছে। আগন্তুক কাৰ্য: ${reminderDataSummary}। সকলো কাম শান্তিৰে কৰক! ⏰💊`,
+        `প্রিয় ${firstName}, আপনার দিনের রুটিন সুন্দরভাবে সাজানো আছে। পরবর্তী কাজ: ${reminderDataSummary}। কোনো চিন্তা করবেন না, সবকিছু শান্তিমতো হয়ে যাবে! ⏰💊`,
+        `प्रिय ${firstName}, हजुरको तालिका राम्रोसँग मिलाइएको छ। आगामी कार्य: ${reminderDataSummary}। हजुर ढुक्क हुनुहोस्, सबै समयमै आरामले हुनेछ! ⏰💊`,
+        `Nungshiba ${firstName}, nangi thabak mayam semduna leire: ${reminderDataSummary}. Tapna nungaina toubiyu! ⏰💊`
+      );
+    }
+
+    // 7. Predefined FAQ 4: Caretaker & Doctor Info
+    if (text.includes('doctor') || text.includes('caretaker') || text.includes('caregiver') || text.includes('dekhbhal') || text.includes('who is my doctor') || text.includes('who takes care') || text.includes('care taker')) {
+      return pickLang(
+        `Your loving caretaker is ${caretakerName}, and your attending doctor is ${doctorName}. They both care deeply about your comfort and happiness! 🩺🤝`,
+        `आपके स्नेही देखभालकर्ता ${caretakerName} हैं और आपके चिकित्सक ${doctorName} हैं। वे दोनों आपकी सेहत और खुशी का पूरा ध्यान रखते हैं! 🩺🤝`,
+        `আপোনাৰ মৰমৰ তত্ত্বাৱধায়ক ${caretakerName} আৰু চিকিৎসক ডাঃ ${doctorName}। তেওঁলোকে সদায় আপোনাৰ সুস্বাস্থ্যৰ যত্ন লয়! 🩺🤝`,
+        `আপনার স্নেহের সেবাকারী ${caretakerName} এবং চিকিৎসক ডাঃ ${doctorName}। তারা সর্বদা আপনার যত্ন ও মঙ্গলের খেয়াল রাখেন! 🩺🤝`,
+        `हजुरको हेरचाहकर्ता ${caretakerName} र डाक्टर ${doctorName} हुनुहुन्छ। उहाँहरू सधैं हजुरको स्वास्थ्य र सहजताको ख्याल राख्नुहुन्छ! 🩺🤝`,
+        `Nangi senbiba miudi ${caretakerName}ni, amasung doctorna ${doctorName}ni. Makhoi anina nangbu nungsina senbi! 🩺🤝`
+      );
     }
 
     // Real-time Date and Time
     if (text.includes('time') || text.includes('clock') || text.includes('kitne baje') || text.includes('samay') || text.includes('সময়')) {
-      if (currentLang === 'hi') {
-        return `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`;
-      }
-      if (currentLang === 'as') {
-        return `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr} (${todayDateStr})। এয়া জিৰণি লোৱাৰ বা স্মৃতিৰ অনুশীলন কৰাৰ উত্তম সময়! ⏰✨`;
-      }
-      if (currentLang === 'bn') {
-        return `নমস্কার ${firstName}! এখন সময় ${todayTimeStr} (${todayDateStr})। এটি বিশ্রাম নেওয়া বা সহজ স্মৃতিচর্চার খুব সুন্দর সময়! ⏰✨`;
-      }
-      return `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. It's a peaceful moment to relax or do a gentle memory exercise! ⏰✨`;
+      return pickLang(
+        `Dear ${firstName}, the current time is ${todayTimeStr} on ${todayDateStr}. A pleasant time to relax or enjoy a gentle memory game! ⏰✨`,
+        `नमस्ते ${firstName}! इस समय ${todayTimeStr} (${todayDateStr}) हुआ है। यह समय आराम करने या एक हल्का दिमागी खेल खेलने के लिए बहुत अच्छा है! ⏰✨`,
+        `নমস্কাৰ ${firstName}! এতিয়া সময় ${todayTimeStr} (${todayDateStr})। এয়া জিৰণি লোৱাৰ বা স্মৃতিৰ অনুশীলন কৰাৰ উত্তম সময়! ⏰✨`,
+        `নমস্কার ${firstName}! এখন সময় ${todayTimeStr} (${todayDateStr})। এটি বিশ্রাম নেওয়া বা সহজ স্মৃতিচর্চার খুব সুন্দর সময়! ⏰✨`,
+        `नमस्ते ${firstName}! अहिले समय ${todayTimeStr} भएको छ। यो समय आराम गर्न वा हल्का खेल खेल्नका लागि धेरै राम्रो छ! ⏰✨`
+      );
     }
 
     if (text.includes('what date') || text.includes('today\'s date') || text.includes('which day') || text.includes('what day is today') || text.includes('aaj kaun sa din') || text.includes('aaj ki tarikh')) {
-      if (currentLang === 'hi') {
-        return `आज की तारीख ${todayDateStr} है। आपका दिन सुखद और शांत रहे! 📅🌸`;
-      }
-      return `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`;
+      return pickLang(
+        `Today is ${todayDateStr}. May your day be filled with calm joy, good health, and comforting memories! 📅🌸`,
+        `आज की तारीख ${todayDateStr} है। आपका दिन सुखद, शांत और स्वस्थ रहे! 📅🌸`,
+        `আজিৰ তাৰিখ ${todayDateStr}। আপোনাৰ দিনটো শান্তিময় আৰু আনন্দদায়ক হওক! 📅🌸`,
+        `আজকের তারিখ ${todayDateStr}। আপনার আজকের দিনটি সুন্দর ও শান্তিময় কাটুক! 📅🌸`,
+        `आजको मिति ${todayDateStr} हो। हजुरको दिन शान्तिमय र सुखद रहोस्! 📅🌸`
+      );
     }
 
-    // Dementia Education
-    if (text.includes('dementia') || text.includes('what is dementia')) {
-      return `Dementia is a gentle medical term describing shifts in how our brain processes memories, thoughts, and daily tasks over time. SMRITI is an assistive companion, not a diagnostic or medical replacement system. With loving routines, stimulating cognitive games, and a calm environment, seniors can live with high dignity and warmth! 🌸`;
-    }
-
-    if (text.includes('memory exercise') || text.includes('daily exercise') || text.includes('retention exercise')) {
-      return `Here are 4 daily exercises for memory retention: 1) Play a cognitive game like Hornbill Memory Nest or Familiar Faces for 10 minutes every morning; 2) Practice 4-4 diaphragmatic breathing; 3) Reminisce over a Memory Vault photo; 4) Take a brisk morning walk and stay well hydrated! 🚶‍♀️💧`;
-    }
-
-    if (text.includes('game') || text.includes('play') || text.includes('score') || text.includes('progress')) {
-      return `You have completed ${totalGames} cognitive sessions with ${avgAcc}% overall accuracy! I recommend playing Hornbill Memory Nest 🦅 or exploring Familiar Faces 👨‍👩‍👧 today!`;
-    }
-
-    if (text.includes('family') || text.includes('who is')) {
-      const famList = family.map(f => `${f.name} (${f.relation})`).join(', ');
-      return `Your loving family includes ${famList || 'Raj and Ananya'}. You are surrounded by so much warmth. 🌸👨‍👩‍👧`;
-    }
-
-    if (text.includes('medicine') || text.includes('pill')) {
-      const medNames = medicines.map(m => m.name).join(', ');
-      return `You have ${medicines.length} prescribed medicines in your schedule: ${medNames || 'prescribed vitamins'}. Always take them gently as Dr. Barua advised! 💊`;
-    }
-
+    // Motivation & Thought
     if (text.includes('motivat') || text.includes('thought') || text.includes('quote') || text.includes('inspire') || text.includes('wisdom')) {
       const thought = this.generateGoodThought();
       return `Here is a special thought for you today, ${firstName}: "${thought.text}" 🌻`;
     }
 
-    // Default regional greetings
-    if (currentLang === 'hi') {
-      return `नमस्ते ${firstName}! मैं आपकी क्या सहायता करूँ? हम मिलकर खेल खेल सकते हैं, सुविचार सुन सकते हैं या आपकी दिनचर्या देख सकते हैं। 🌸`;
-    }
-    if (currentLang === 'as') {
-      return `নমস্কাৰ ${firstName}! মই আপোনাক কেনেকৈ সহায় কৰিব পাৰোঁ? আমি খেল খেলিব পাৰোঁ বা শুভ চিন্তা শুনিব পাৰোঁ। 🌸`;
-    }
-    if (currentLang === 'bn') {
-      return `নমস্কার ${firstName}! আমি আপনাকে কীভাবে সাহায্য করতে পারি? আমরা খেলা খেলতে পারি বা শুভ ভাবনা শুনতে পারি। 🌸`;
+    // Friendly greetings
+    if (text.includes('hello') || text.includes('hi') || text.includes('namaste') || text.includes('pranam') || text.includes('nomoskar')) {
+      return pickLang(
+        `Namaste ${firstName}! I am Saathi, your 24/7 caring companion. It is ${todayTimeStr} on ${todayDateStr}. How can I bring a smile to your heart today? 🌸`,
+        `नमस्ते ${firstName}! मैं 'साथी' हूँ, आपका 24/7 स्नेही साथी। आज ${todayDateStr} है और समय ${todayTimeStr}। आज मैं आपकी क्या सेवा करूँ? 🌸`,
+        `নমস্কাৰ ${firstName}! মই 'সাথী', আপোনাৰ সহায়ক সংগী। এতিয়া সময় ${todayTimeStr}। আজি আপোনাৰ মনটো কেনেকৈ আনন্দিত কৰিব পাৰোঁ? 🌸`,
+        `নমস্কার ${firstName}! আমি 'সাথী', আপনার ২৪/৭ ভালোবাসার সঙ্গী। এখন সময় ${todayTimeStr}। আজ আপনার জন্য আমি কী করতে পারি? 🌸`,
+        `नमस्ते ${firstName}! म 'साथी' हुँ, हजुरको २४/७ स्नेही साथी। अहिले समय ${todayTimeStr} भएको छ। आज म हजुरको सेवा कसरी गरूँ? 🌸`,
+        `Khurumjari ${firstName}! Ei Saathini, nangi 24/7 marupni. Matam ${todayTimeStr} tare. Eina karamba mateng pangge? 🌸`
+      );
     }
 
-    return `Namaste ${firstName}! It is wonderful to chat with you. How can I assist you with your memory journey today? 🌻`;
+    // 8. Predefined FALLBACK CONDITION for Unknown Queries
+    // "Mujhe is baare mein abhi jankari nahi hai, lekin aap chinta mat kijiye, main iski khabar [Caretaker's Name] ko de deta hoon."
+    return pickLang(
+      `I don't have information about this right now, but please don't worry at all—I will inform ${caretakerName} right away. 🌸`,
+      `Mujhe is baare mein abhi jankari nahi hai, lekin aap chinta mat kijiye, main iski khabar ${caretakerName} ko de deta hoon.`,
+      `এই বিষয়ে মোৰ এতিয়া সঠিক তথ্য জনা নাই, কিন্তু আপুনি অকণো চিন্তা নকৰিব, মই এই কথা ${caretakerName}ক জনাই দিছোঁ। 🌸`,
+      `আমার এই বিষয়ে এখন জানা নেই, তবে আপনি একদম চিন্তা করবেন না, আমি এই খবরটি ${caretakerName}-কে জানিয়ে দিচ্ছি। 🌸`,
+      `मलाई यस विषयमा अहिले जानकारी छैन, तर हजुरले चिन्ता नलिनुहोस्, म यो कुरा ${caretakerName}लाई खबर गरिदिन्छु। 🌸`,
+      `Masi eina khangjade, adubu nangna waba tounu, eina ${caretakerName}da pao pirage! 🌸`
+    );
   },
 
   recommendActivity(overrideMood = null, customHistory = null) {

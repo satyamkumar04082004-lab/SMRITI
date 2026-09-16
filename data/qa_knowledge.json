@@ -51,10 +51,12 @@
         "mci"
       ],
       "responses": {
-        "en": "Dementia is a gentle medical term describing changes in how our brain processes memories, thoughts, and daily tasks over time. It is not a personal failing, but natural shifts in neuronal connections. SMRITI provides non-pharmacological cognitive stimulation and routine guidance. Note: SMRITI is an assistive companion, not a diagnostic or medical replacement system.",
-        "hi": "डिमेंशिया एक चिकित्सीय स्थिति है जिसमें समय के साथ याददाश्त, सोचने और दैनिक कार्यों को करने में बदलाव आते हैं। यह कोई कमजोरी नहीं है, बल्कि मस्तिष्क की प्राकृतिक प्रक्रिया है। ध्यान दें: स्मृति एक सहायक साथी है, यह किसी चिकित्सीय निदान या इलाज का विकल्प नहीं है।",
-        "as": "ডিমেনচিয়া হৈছে সময়ৰ লগে লগে মগজুৰ স্মৃতি আৰু চিন্তা প্ৰক্ৰিয়াত হোৱা পৰিৱৰ্তনক বুজোৱা এক চিকিৎসা অৱস্থা। মনত ৰাখিব: স্মৃতি সহায়ক সঁহাৰিহে, ই কোনো ডাক্তৰী নিদান বা চিকিৎসাৰ বিকল্প নহয়।",
-        "bn": "ডিমেনশিয়া হলো সময়ের সাথে সাথে স্মৃতিশক্তি ও চিন্তা প্রক্রিয়ায় কিছু স্বাভাবিক পরিবর্তন। লক্ষ্য রাখবেন: স্মৃতি একটি সহায়ক সঙ্গী, এটি কোনো চিকিৎসাগত রোগ নির্ণয় বা চিকিৎসার বিকল্প নয়।"
+        "en": "Dementia is a gentle condition where memory and thinking abilities gradually shift over time, but please do not worry at all—we are all right here by your side to care for you! 🌸❤️",
+        "hi": "Dementia ek aisi sthiti hai jismein yaadashth aur sochne ki kshamta dheere-dheere kam hone lagti hai, lekin hum sab yahan aapki dekhbhal ke liye hain। 🌸❤️",
+        "as": "ডিমেনচিয়া হৈছে এনে এক অৱস্থা য’ত স্মৃতিশক্তি আৰু চিন্তা কৰাৰ ক্ষমতা লাহে লাহে কিছু কমি যায়, কিন্তু আমি সকলোৱে আপোনাৰ যত্নৰ বাবে ইয়াতেই আছোঁ। 🌸❤️",
+        "bn": "ডিমেনশিয়া এমন একটি অবস্থা যেখানে স্মৃতিশক্তি ও চিন্তাভাবনা করার ক্ষমতা ধীরে ধীরে কিছুটা কমে যায়, কিন্তু আমরা সবাই আপনার যত্নের জন্য পাশেই আছি। 🌸❤️",
+        "ne": "डिमेन्सिया एउटा यस्तो अवस्था हो जसमा स्मरणशक्ति र सोच्ने क्षमता बिस्तारै कम हुन थाल्छ, तर हामी सबै हजुरको स्याहार र साथका लागि यहाँ छौं। 🌸❤️",
+        "mni": "Dementia haiba asi pukning ningsingba amasung khangba-heiba tapna sontharba amani, adubu eikhoi pumnamak nangi senbaga leiri. 🌸❤️"
       }
     },
     {
@@ -195,6 +197,34 @@
         "hi": "अच्छी और शांत नींद के लिए: सोने से एक घंटा पहले फोन से दूर रहें, गुनगुना दूध या हर्बल चाय पिएं, और हमारे मनोरंजन अनुभाग में सुखद बांसुरी की धुन सुनते हुए गहरी सांस लें। शुभ रात्रि! 🌙🪈",
         "as": "সুন্দৰ আৰু শান্ত টোপনিৰ বাবে: শুৱাৰ এঘণ্টা আগতে স্ক্ৰীন এৰক, এগিলাচ কুহুমীয়া গাখীৰ বা চাহ খাওক, আৰু বাঁহীৰ সুমধুৰ সুৰ শুনি গভীৰ উশাহ লওক। শুভ ৰাত্ৰি! 🌙🪈",
         "bn": "শান্তিপূর্ণ ঘুমের জন্য: ঘুমানোর ১ ঘণ্টা আগে উজ্জ্বল পর্দা থেকে দূরে থাকুন, ঈষদুষ্ণ দুধ বা হারবাল চা পান করুন এবং মিষ্টি বাঁশির সুর শুনুন। শুভ রাত্রি! 🌙🪈"
+      }
+    },
+    {
+      "id": "elderly_jokes",
+      "keywords": [
+        "joke",
+        "tell me a joke",
+        "chutkula",
+        "chutkule",
+        "hasao",
+        "joke sunao",
+        "मजाक",
+        "चुटकला",
+        "चुटकुला",
+        "हंसाओ",
+        "হাসি",
+        "কৌতুক",
+        "ধেমালি",
+        "funny",
+        "चुट्किला"
+      ],
+      "responses": {
+        "en": "Why did the scarecrow win an award? Because he was outstanding in his field! 😄 May your heart always stay light and cheerful!",
+        "hi": "एक सज्जन ने डॉक्टर से पूछा: \"डॉक्टर साहब, क्या चश्मा लगाने के बाद मैं पढ़ सकूँगा?\" डॉक्टर बोले: \"हाँ, बिल्कुल!\" सज्जन खुशी से बोले: \"अरे वाह! पहले तो मुझे पढ़ना ही नहीं आता था!\" 😄 सदा मुस्कुराते रहिए!",
+        "as": "এজন মানুহে ডাক্টৰক ক’লে: \"ডাক্টৰ বাবু, চশমা ল’লে মই কিতাপ পঢ়িব পাৰিমনে?\" ডাক্টৰে ক’লে: \"নিশ্চয় পাৰিব!\" মানুহজনে ক’লে: \"বৰ ভাল কথা, মইতো আগতে পঢ়িবই নাজানিছিলোঁ!\" 😄 সদা হাঁহি থাকক!",
+        "bn": "এক ব্যক্তি ডাক্তারকে জিজ্ঞেস করলেন: \"ডাক্তারবাবু, চশমা নিলে কি আমি বই পড়তে পারব?\" ডাক্তার বললেন: \"হ্যাঁ, নিশ্চয়ই!\" ব্যক্তিটি খুশি হয়ে বললেন: \"বাহ, দারুণ! আমি তো আগে লেখাপড়াই জানতাম না!\" 😄 সর্বদা হাসিখুশি থাকুন!",
+        "ne": "एक जना व्यक्तिले डाक्टरलाई सोधेछन्: \"डाक्टर साब, चश्मा लगाएपछि म पढ्न सक्छु?\" डाक्टरले भने: \"अँ, पक्कै सक्नुहुन्छ!\" व्यक्तिले खुसी हुँदै भने: \"आहा कति राम्रो, पहिले त मलाई पढ्नै आउँदैनथ्यो!\" 😄 सधैं मुस्कुराइरहनुहोस्!",
+        "mni": "Doktorda meo amana hangkhi: \"Ei mityeng mingshen unjaraba matungda lairik paba ngamlagadra?\" Doktarna hairak-i: \"Hoi, yaramgani!\" Mahakna haraona haikhi: \"Ehai, ngallengei eidi lairik pabasu heitabaduni!\" 😄 Nungsina nokpiyu!"
       }
     }
   ]

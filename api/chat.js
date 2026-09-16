@@ -211,7 +211,7 @@ const OPENAI_TOOLS = [
   }
 ];
 
-function generateContextualResponse(message, profile, role, lang = 'en', todayDateStr, todayTimeStr, caretakerName = 'Raj Das', doctorName = 'Dr. A. K. Barua', reminderDataSummary = 'None pending') {
+function generateContextualResponse(message, profile, role, lang = 'en', todayDateStr, todayTimeStr, caretakerName = 'Rahul', doctorName = 'Dr. Sharma', reminderDataSummary = 'None pending') {
   const patient = (profile && profile.patient) || { name: 'Meera', state: 'Assam' };
   const firstName = (patient.preferredName || patient.name || 'Friend').split(' ')[0];
   const text = (message || '').trim().toLowerCase();
@@ -277,7 +277,7 @@ function generateContextualResponse(message, profile, role, lang = 'en', todayDa
   if (text.includes('dementia') || text.includes('what is dementia') || text.includes('डिमेंशिया') || text.includes('ডিমেনচিয়া') || text.includes('ডিমেনশিয়া') || text.includes('डिमेन्सिया')) {
     return pickLang(
       `Dementia is a condition where memory gradually becomes a little weaker over time, but please do not worry at all—we are all right here to care for you and stay by your side! 🌸❤️`,
-      `डिमेंशिया एक ऐसी स्थिति है जिसमें याददाश्त धीरे-धीरे कम होने लगती है, लेकिन आप चिंता मत कीजिए, हम सब यहाँ आपकी देखभाल के लिए हैं। 🌸❤️`,
+      `Dementia ek aisi sthiti hai jismein yaadashth aur sochne ki kshamta dheere-dheere kam hone lagti hai, lekin hum sab yahan aapki dekhbhal ke liye hain। 🌸❤️`,
       `ডিমেনচিয়া হৈছে এনে এক অৱস্থা য’ত স্মৃতিশক্তি লাহে লাহে কিছু কমি যায়, কিন্তু আপুনি অকণো চিন্তা নকৰিব, আমি সকলোৱে আপোনাৰ যত্নৰ বাবে ইয়াতেই আছোঁ। 🌸❤️`,
       `ডিমেনশিয়া এমন একটি অবস্থা যেখানে স্মৃতিশক্তি ধীরে ধীরে কিছুটা কমে যায়, কিন্তু আপনি একদম চিন্তা করবেন না, আমরা সবাই আপনার যত্নের জন্য পাশেই আছি। 🌸❤️`,
       `डिमेन्सिया एउटा यस्तो अवस्था हो जसमा स्मरणशक्ति बिस्तारै कम हुन थाल्छ, तर हजुरले चिन्ता नलिनुहोस्, हामी सबै हजुरको स्याहार र साथका लागि यहाँ छौं। 🌸❤️`,
@@ -420,7 +420,7 @@ function generateContextualResponse(message, profile, role, lang = 'en', todayDa
   // "Mujhe is baare mein abhi jankari nahi hai, lekin aap chinta mat kijiye, main iski khabar [INSERT_CARETAKER_NAME] ko de deta hoon."
   return pickLang(
     `I don't have information about this right now, but please don't worry at all—I will inform ${caretakerName} right away. Stay comfortable and peaceful! 🌸`,
-    `मुझे इस बारे में अभी जानकारी नहीं है, लेकिन आप चिंता मत कीजिए, मैं इसकी खबर ${caretakerName} को दे देता हूँ। आप बिल्कुल आराम से रहें! 🌸`,
+    `Mujhe is baare mein abhi jankari nahi hai, lekin aap chinta mat kijiye, main iski khabar ${caretakerName} ko de deta hoon.`,
     `এই বিষয়ে মোৰ এতিয়া সঠিক তথ্য জনা নাই, কিন্তু আপুনি অকণো চিন্তা নকৰিব, মই এই কথা ${caretakerName}ক জনাই দিছোঁ। আপুনি শান্তভাৱে থাকক! 🌸`,
     `আমার এই বিষয়ে এখন জানা নেই, তবে আপনি একদম চিন্তা করবেন না, আমি এই খবরটি ${caretakerName}-কে জানিয়ে দিচ্ছি। আপনি নিশ্চিন্তে থাকুন! 🌸`,
     `मलाई यस विषयमा अहिले जानकारी छैन, तर हजुरले चिन्ता नलिनुहोस्, म यो कुरा ${caretakerName}लाई खबर गरिदिन्छु। हजुर आरामसँग बस्नुहोस्! 🌸`,
@@ -486,8 +486,8 @@ module.exports = async function handler(req, res) {
       const latestMood = moods.length > 0 ? moods[moods.length - 1].mood : 'good';
 
       // DYNAMIC ENTITIES & CONTEXT FOR SAATHI
-      const caretakerName = patientProfile?.caretakerName || patientProfile?.familyMembers?.find(f => f.relation === 'Caregiver' || f.relation === 'Son' || f.isCaregiver)?.name || 'Raj Das';
-      const doctorName = patientProfile?.doctorName || patientProfile?.doctor || 'Dr. A. K. Barua';
+      const caretakerName = patientProfile?.caretakerName || patientProfile?.caregiverName || patientProfile?.familyMembers?.find(f => f.relation === 'Caregiver' || f.relation === 'Son' || f.isCaregiver)?.name || 'Rahul';
+      const doctorName = patientProfile?.doctorName || patientProfile?.doctor || patientProfile?.familyMembers?.find(f => f.relation?.toLowerCase().includes('doctor'))?.name || 'Dr. Sharma';
       const activeReminders = reminders.filter(r => !r.completedToday);
       const reminderDataSummary = activeReminders.length > 0 
         ? activeReminders.map(r => `${r.time || ''}: ${r.title || r.task || ''}`).join(', ')
