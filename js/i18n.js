@@ -806,7 +806,608 @@ export const stitchTranslations = {
     g7Desc: 'উজ্বল বিন্যাস অনুসৰণ কৰক',
     g7Tag: 'বিন্যাস স্মৃতি',
     g7Instruction: 'পোহৰ হোৱা বাঁহৰ পেড চাই অনুক্ৰম পুনৰাবৃত্তি কৰক'
+  },
+
+  mni: {
+    // App & Branding
+    appName: 'স্মৃতি',
+    appTagline: 'নুমিৎ খুদিংগী নিংসিংবা অমসুং হকশেলগী মফম',
+    welcome: 'তরাম্না ওকচরি',
+    hello: 'খুরুমজরি',
+    greeting: 'ঙসি ঐখোই পুন্না ৱাখলবু চেকশিনহনসি!',
+    logout: 'লোগ আউৎ',
+    settings: 'সেটিংস',
+    back: 'হঞ্জিনবা',
+    close: 'থিংশিনবা',
+    save: 'কনবা',
+    cancel: 'তোকপা',
+    confirm: 'চেকশিনবা',
+    loading: 'লোদ তৌরি...',
+
+    // Header & Status
+    status: {
+      online: 'ওনলাইন',
+      offline: 'ওফলাইন মোদ'
+    },
+    nav: {
+      home: 'য়ুম',
+      games: 'শান্নপোৎ',
+      memories: 'নীংসিংবা',
+      wellness: 'হকশেল',
+      progress: 'মাংজিল থাবা',
+      settings: 'সেটিংস',
+      caregiver: 'সেনবীবা',
+      sound: 'খোল্লাও',
+      voice: 'খোন্থোক',
+      sos: 'অৱাবা'
+    },
+    coins: 'শেনয়েক',
+    redeemed: '✨ লৌখৎলে',
+    navSettings: 'সেটিংস',
+    navSettingsDesc: 'লোন অমসুং অপাম্বশিং শেমদোকপা',
+    settingsLanguage: 'লোন',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'সেনবীবা শম্নরে',
+      status: 'রাজ দাস (মচা) · শম্নরে',
+      viewReport: 'রিপোর্ত য়েংবা'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'অয়ুক্কী খুরুমজরি,',
+      welcome_text: 'নুমিৎ খুদিংগী নিংসিংবা অমসুং হকশেলগী মফমদা তরাম্না ওকচরি।',
+      tasks_completed: 'নুমিৎকী থবক: {total} গী মনুংদা {completed} লোইরে',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'নংশিবা মীবু কোল তৌবা',
+      son_name: 'রাজ দাস (মচা)',
+      ritual_title: 'নুমিৎ খুদিংগী থবক',
+      ritual_action: 'খোঙথাং ৩ গী লমজিং →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'হিদাক্কী নুমিৎ ৱাফম',
+      time: 'অয়ুক ০৮:৩০ পুং',
+      medicine_title: 'অয়ুক্কী বিপি হিদাক',
+      medicine_instructions: 'ঈশিং চাবা ঈশিংগা লোয়ননা হিদাক ১ চাবা',
+      mark_done: 'হিদাক চারে',
+      completed: 'লোইরে ✓',
+      snooze: 'মিনিত ১৫ কনবা',
+      coins_reward: '+১০ শেনয়েক'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'ঙসি অদোমগী নুংঙাইবরা?',
+      great: 'য়াম্না ফৈ',
+      good: 'ফৈ',
+      okay: 'চপ চাৈ',
+      low: 'পুকনিং নুংঙাইতে',
+      worried: 'ৱাজরি',
+      feedback_title: '{mood} ওইনা খংলে',
+      feedback_great: 'নহাক্কী হরাওবা উবদা থম্মোই নুংঙাইজেই! মসি ৱাখল চেৎহন্নবা ফবা মতমনি।',
+      feedback_good: 'নুংঙাইবা ফাওবা উবদা থম্মোই হরাওই! মসি ৱাখলবু পাঙ্গল হাপ্পা ওইগনি।',
+      feedback_okay: 'তন্থানা লৈবা নুমিৎ অসিমসু ইপা ঈশ্বরগী থৌজালনি। তপথনা হিংবা চাউই।',
+      feedback_low: 'ঐখোই পুম্নমক নহাক্কা লোয়ননা লৈরি। ৱাবীরগনু; নহাক্কী ইমুংনা নহাকপু য়াম্না নংশি।',
+      feedback_worried: 'থরোইনা লুনা ঈশিং থমদুনা শ্বাশ লৌবীয়ু। অদোম সুৰক্ষিতনি। রাজদা কোল তৌসিরা?',
+      chip_hornbill: 'হোর্নবীল শান্নবা',
+      chip_story: 'ৱারী নীংসিংবা',
+      chip_wellness: 'হকশেলগী লমজিং'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: 'ঙসিগী তোপ তোপ্পা ৱাখলগী থবক',
+      title: 'ৱাগী খোন্থোক অনুক্রম',
+      category: 'ৱাখল চেৎহনবা',
+      description: 'মৈঙাল থোকপা ৱাগী পীদশিংগী মতুং ইনবা',
+      reason: 'নহাক্কী হরাওবা ৱাখলগীদমক — ৱাগী সুরদা নিংসিংবা চেৎহল্লু!',
+      start_btn: 'শান্নবা হৌবা'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: 'ঙসিগী অফবা ৱাফম',
+      badge: 'ইন্সপিরেশন',
+      listen: 'তাবা',
+      new: 'অনৌবা ৱাফম'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'সাথী',
+      title: 'সাথী AI মরুপ',
+      subtitle: 'নহাক্কী খ্বাইদগী নংশিবা খোন্থোক অমসুং নিংসিংগী মরুপ',
+      badge: 'ওনলাইন লৈরে',
+      welcome: 'খুরুমজরি! ঐ সাথীনি, নহাক্কী নিংসিংবা অমসুং হকশেলগী মরুপনি। ঙসি ঐনা করম্না মতেং পাংগে?',
+      placeholder: 'সাথীদা হংবীয়ু নত্রগা 🎤 নম্মু...',
+      send: 'থাবা',
+      listening: 'তাজরি...',
+      thinking: 'খল্লি...',
+      voice_note: '💡 অদোমনা ৱা ঙাংবা নত্রগা ইবা য়াই। সাথীনা তাবা অমসুং পারকপা য়াগনি।',
+      quick_meds: '💊 ঐগী হিদাক্কী মতম করম্বা?',
+      quick_sos: '🚨 অৱাবা SOS মতেং',
+      quick_game: '🎋 ৱাগী সুর শান্নবা',
+      quick_tips: '🌻 ঙসিগী অফবা ৱাফম'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'থুনা চৎপগী মফম',
+      games: 'শান্নপোৎ লৈফম',
+      lifestory: 'পুন্সী ৱারী',
+      entertainment: 'নুংঙাইবা',
+      family: 'ইমুংগী শান্নবা',
+      stars: 'চয়োলগী থৌজান',
+      wellness: 'হকশেল',
+      reminders: 'নীংসিংহনবা',
+      medicines: 'হিদাক-লাংথক',
+      emergency: 'অৱাবা মতেং',
+      rewards: 'মনা অমসুং মেদল',
+      settings: 'সেটিংস'
+    },
+
+    // Games Common
+    gamesTitle: 'ৱাখলগী শান্নপোৎ',
+    gamesSubtitle: 'ৱাখল চেৎহন্নবা শান্নপোৎ অমা খনবীয়ু',
+    play: 'শান্নবা',
+    score: 'স্কোর',
+    accuracy: 'চুম্বা',
+    difficulty: 'লূবা',
+    easy: 'লাইবা',
+    medium: 'চপ চাবা',
+    hard: 'লূবা',
+    playAgain: 'অমুক শান্নবা',
+    exitToHub: 'শান্নফমদা হঞ্জিনবা',
+    hints: 'ইঙ্গিৎ',
+    time: 'মতম',
+    coinsEarned: 'ফংলবা শেনয়েক',
+    startGame: 'শান্নবা হৌবা',
+    gameOver: 'শান্নবা লোইরে!',
+
+    // Game Titles & Details
+    g1Title: 'হোর্নবীল নীংসিং বাহ',
+    g1Desc: 'মহৌশাগী কাৰ্দশিং মিল্লু',
+    g1Tag: 'নীংসিংবা',
+    g1Instruction: 'চপ মান্নবা কাৰ্দশিং পুন্না থিরু',
+
+    g2Title: 'নীংসিংগী পুংফম',
+    g2Desc: 'ৱারীগী খোঙথাং নিংসিংলু',
+    g2Tag: 'নীংসিংবা',
+    g2Instruction: 'ৱারীগী থবকশিং মতুং ইন্না নীংসিংলু',
+
+    g3Title: 'চিনাকপা মমাই',
+    g3Desc: 'নংশিরবা মীওইশিং খঙদোকলু',
+    g3Tag: 'শকখঙবা',
+    g3Instruction: 'নহাক্কী ইমুংগী মীওইশিং খঙদোকলু',
+
+    g4Title: 'ঐগী য়ুম নীংসিংবা',
+    g4Desc: 'কাগী পোৎলমশিং নীংসিংলু',
+    g4Tag: 'মফম নীংসিংবা',
+    g4Instruction: 'পোৎলমশিং কদায়দা লৈবগে খঙলু',
+
+    g5Title: 'ঐগী নুমিৎ থবক',
+    g5Desc: 'নুমিৎকী থবকশিং মতুং ইন্না থম্মু',
+    g5Tag: 'নিয়ম',
+    g5Instruction: 'নুমিৎকী খোঙথাংশিং চুম্না শেমজিল্লু',
+
+    g6Title: 'তাবা অমসুং নীংসিংবা',
+    g6Desc: 'মন থাদুনা তারগা পাউখুম পীবীয়ু',
+    g6Tag: 'মন থাবা',
+    g6Instruction: 'খোন্থোক তারগা অচুম্বা পাউখুম খনবীয়ু',
+
+    g7Title: 'ৱাগী সুর অনুক্রম',
+    g7Desc: 'ঙাল্লবা ৱাগী মতুং ইনবা',
+    g7Tag: 'সুর নীংসিংবা',
+    g7Instruction: 'ঙাল্লবা ৱাগী পীদশিং য়েংদুনা অমুক হন্না তৌবীয়ু'
+  },
+
+  brx: {
+    // App & Branding
+    appName: 'स्मृति',
+    appTagline: 'सानफ्रोमबोनि गोसोखां आरो देहा फोसाबनाय',
+    welcome: 'बरायबाय',
+    hello: 'खुलुमबाय',
+    greeting: 'फै दिनै जोंनि गोसोखौ सांग्रां खालामनो!',
+    logout: 'लग आउत',
+    settings: 'सेटिंफोर',
+    back: 'उदां',
+    close: 'बन्द खालाम',
+    save: 'दोनथुम',
+    cancel: 'नेरसिन',
+    confirm: 'थार खालाम',
+    loading: 'लोड जाबाय दं...',
+
+    // Header & Status
+    status: {
+      online: 'अनलाइन',
+      offline: 'अफलाइन मड'
+    },
+    nav: {
+      home: 'नखर',
+      games: 'गेलेनाय',
+      memories: 'गोसोखांथि',
+      wellness: 'देहा',
+      progress: 'थांखि',
+      settings: 'सेटिंफोर',
+      caregiver: 'सामलायगिरि',
+      sound: 'खोन्दो',
+      voice: 'राव',
+      sos: 'आपद'
+    },
+    coins: 'सिक्काफोर',
+    redeemed: '✨ दाबि खालामबाय',
+    navSettings: 'सेटिंफोर',
+    navSettingsDesc: 'राव, सोंनाय आरो गावनि मोजां मोननाय मिलाय',
+    settingsLanguage: 'राव',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'सामलायगिरि दाजाबाय',
+      status: 'राज दास (फिसा) · दाजाबाय',
+      viewReport: 'सामलायनाय रिपर्ट नाय'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'फुंनि खुलुमबाय,',
+      welcome_text: 'नोंथांनि सानफ्रोमबोनि गोसोखां आरो देहा फोसाबनायाव बरायबाय।',
+      tasks_completed: 'साननि मावनाय: {total} नि गेजेराव {completed} जोबबाय',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'मोजां मोननायखौ कल खालाम',
+      son_name: 'राज दास (फिसा)',
+      ritual_title: 'सानफ्रोमबोनि नियम',
+      ritual_action: '३-आगोमोन लामदिन्थि →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'थिसननाय मुलिनि समा',
+      time: 'फुं ०८:३० रिंगायाव',
+      medicine_title: 'फुंनि बिपि मुलि',
+      medicine_instructions: 'दुंहासु दैजों १ टाब्लित लों',
+      mark_done: 'मुलि जाबाय',
+      completed: 'जोबबाय ✓',
+      snooze: '१५ मिनिट उनाव गोसोखांहो',
+      coins_reward: '+१० सिक्का'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'दिनै नोंथांनि गोसोआ माबोरै दं?',
+      great: 'जोबोर मोजां',
+      good: 'मोजां',
+      okay: 'सादारन',
+      low: 'गोसो गाज्रि',
+      worried: 'चिन्ता',
+      feedback_title: '{mood} हिसाबै सिनथाबाय',
+      feedback_great: 'नोंथांनि रंजानाय गोसो नुनानै मोजां मोनबाय! मोजां गोसोआ गोसोखांथि गेलेनायनि थाखाय जोबोर मोजां।',
+      feedback_good: 'नोंथांनि मोजां गोसोआ जोबोर सांग्रां! गोसोखौ हुदा खालामब्ला गोसोखांथि मोजां जायो।',
+      feedback_okay: 'गोजोन सान आबो इसोरनि बान्था। लासै लासै हां ला आरो जिराय।',
+      feedback_low: 'जों नोंथांनि सेराव दं। जेबो दागिन; नखरनि मानसिफोरा नोंखौ मोजां मोनो।',
+      feedback_worried: 'गोजोनै गोथौ हां ला। नोंथाङा रैखाथि दं। राजजों रायलायनो सानो नामा?',
+      chip_hornbill: 'हर्नबिल गोसोखांथि गेले',
+      chip_story: 'सल’ गोसोखां गेले',
+      chip_wellness: 'सानफ्रोमबोनि देहा लामदिन्थि'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: 'दिनैनि जुनिया गोसोनि गेलेनाय',
+      title: 'औवा सुर अनुक्रम',
+      category: 'गोसो होनाय आरो महर',
+      description: 'गोजों औवा प्याडनि रोखोमखो उनसं',
+      reason: 'नोंथांनि रंजानाय गोसोनि थाखाय — औवा सुरा गोसोखांथिखौ मोजां खालामगोन!',
+      start_btn: 'गेलेनाय जागाय'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: 'दिनैनि मोजां साननाय',
+      badge: 'सोंनाय',
+      listen: 'खोनासोन',
+      new: 'गोदान साननाय'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'साथी',
+      title: 'साथी AI लोगो',
+      subtitle: 'नोंथांनि मोजां राव आरो गोसोखां लोगो',
+      badge: 'अनलाइन आरो थियारि',
+      welcome: 'खुलुमबाय! आं साथी, नोंथांनि गोसोखांथि आरो देहानि लोगो। दिनै आं मा हेफाजाब होनो हागौ?',
+      placeholder: 'साथीखौ सों एबा 🎤 थु...',
+      send: 'थिनहर',
+      listening: 'खोनासन्दों...',
+      thinking: 'सानदों...',
+      voice_note: '💡 नोंथाङा बुंनो एबा लिरनो हागोन। साथीया फरायना खोनासंलांगोन।',
+      quick_meds: '💊 आंनि मुलि लोंनाय समा माब्ला?',
+      quick_sos: '🚨 आपद SOS हेफाजाब',
+      quick_game: '🎋 औवा सुर गेले',
+      quick_tips: '🌻 दिनैनि मोजां साननाय'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'थाब थांनाय लामा',
+      games: 'गेलेग्रा जायगा',
+      lifestory: 'जिउ सल’',
+      entertainment: 'रंजानाय',
+      family: 'नखर गेलेनाय',
+      stars: 'सप्तानि हाथर्खि',
+      wellness: 'देहा',
+      reminders: 'गोसोखांहोग्रा',
+      medicines: 'मुलिफोर',
+      emergency: 'आपद हेफाजाब',
+      rewards: 'बान्था आरो मेदेल',
+      settings: 'सेटिंफोर'
+    },
+
+    // Games Common
+    gamesTitle: 'गोसोनि गेलेनाय',
+    gamesSubtitle: 'गोसो मोजां थानो मोनसे गेलेनाय सायख’',
+    play: 'गेले',
+    score: 'अंक',
+    accuracy: 'थारथि',
+    difficulty: 'गोब्राब',
+    easy: 'गोरलै',
+    medium: 'गेजेर',
+    hard: 'गोब्राब',
+    playAgain: 'आरो गेले',
+    exitToHub: 'गेलेग्रायाव थांफिन',
+    hints: 'इसारा',
+    time: 'समा',
+    coinsEarned: 'मोननाय सिक्का',
+    startGame: 'गेलेनाय जागाय',
+    gameOver: 'गेलेनाय जोबबाय!',
+
+    // Game Titles & Details
+    g1Title: 'हर्नबिल गोसोखां बासा',
+    g1Desc: 'मिथिंगा खार्दनि ज’रा मिलाय',
+    g1Tag: 'गोसोखां',
+    g1Instruction: 'रोखोमसे खार्दनि ज’रा नागिर',
+
+    g2Title: 'गोसोखां समा',
+    g2Desc: 'सल’नि रोखोमखौ गोसोआव लाबो',
+    g2Tag: 'गोसोखां',
+    g2Instruction: 'सल’नि जाथायखौ फारि फारि गोसोखां',
+
+    g3Title: 'सिनाय मोखां',
+    g3Desc: 'मोजां मोननायफोरखौ सिनाय',
+    g3Tag: 'सिनायथि',
+    g3Instruction: 'नोंथांनि नखरनि मानसिफोरखौ सिनाय',
+
+    g4Title: 'आंनि नखौ गोसोखां',
+    g4Desc: 'खथायाव थानाय बेसादखौ गोसोखां',
+    g4Tag: 'जायगा गोसोखां',
+    g4Instruction: 'बेसादफोरा बबेयाव दंमोन गोसोखां',
+
+    g5Title: 'आंनि साननि नियम',
+    g5Desc: 'साननि मावनायखौ थार फारियै साजाय',
+    g5Tag: 'नियम',
+    g5Instruction: 'सानफ्रोमबोनि मावनायखौ फारि फारि साजाय',
+
+    g6Title: 'खोनासोन आरो गोसोखां',
+    g6Desc: 'गोसो होना खोनासनानै फिननाय हो',
+    g6Tag: 'गोसो होनाय',
+    g6Instruction: 'राव खोनासनानै थार फिननाय सायख’',
+
+    g7Title: 'औवा सुर अनुक्रम',
+    g7Desc: 'गोजों औवा महरखौ उनसं',
+    g7Tag: 'महर गोसोखां',
+    g7Instruction: 'गोजों औवा प्याडफोरखौ नायनानै उनसं'
+  },
+
+  ne: {
+    // App & Branding
+    appName: 'स्मृति',
+    appTagline: 'दैनिक स्मृति तथा कल्याण अभयारण्य',
+    welcome: 'स्वागतम्',
+    hello: 'नमस्ते',
+    greeting: 'आउनुहोस् आज आफ्नो मनलाई सक्रिय राखौं!',
+    logout: 'लग आउट',
+    settings: 'सेटिङहरू',
+    back: 'पछाडि',
+    close: 'बन्द गर्नुहोस्',
+    save: 'बचत गर्नुहोस्',
+    cancel: 'रद्द गर्नुहोस्',
+    confirm: 'पुष्टि गर्नुहोस्',
+    loading: 'लोड हुँदैछ...',
+
+    // Header & Status
+    status: {
+      online: 'अनलाइन',
+      offline: 'अफलाइन मोड'
+    },
+    nav: {
+      home: 'गृह',
+      games: 'खेलहरू',
+      memories: 'सम्झनाहरू',
+      wellness: 'कल्याण',
+      progress: 'प्रगति',
+      settings: 'सेटिङहरू',
+      caregiver: 'हेरचाहकर्ता',
+      sound: 'सङ्गीत',
+      voice: 'आवाज',
+      sos: 'आपतकालीन'
+    },
+    coins: 'सिक्काहरू',
+    redeemed: '✨ दाबी गरियो',
+    navSettings: 'सेटिङहरू',
+    navSettingsDesc: 'भाषा, आवाज र प्राथमिकताहरू मिलाउनुहोस्',
+    settingsLanguage: 'भाषा',
+
+    // Caregiver Banner
+    caregiver: {
+      connected: 'हेरचाहकर्ता जोडिनुभयो',
+      status: 'राज दास (छोरा) · जोडिनुभएको छ',
+      viewReport: 'हेरचाह रिपोर्ट हेर्नुहोस्'
+    },
+
+    // Welcome Hero
+    hero: {
+      greeting: 'शुभ प्रभात,',
+      welcome_text: 'हजुरको दैनिक स्मृति र कल्याण अभयारण्यमा हार्दिक स्वागत छ।',
+      tasks_completed: 'दैनिक कार्यहरू: {total} मध्ये {completed} पूरा भयो',
+      blossom: '🌸'
+    },
+
+    // Quick Actions
+    quick: {
+      call_loved: 'आफ्नालाई कल गर्नुहोस्',
+      son_name: 'राज दास (छोरा)',
+      ritual_title: 'दैनिक नियम',
+      ritual_action: '३-चरणको मार्गनिर्देशन →'
+    },
+
+    // Scheduled Routine & Medication Card
+    routine: {
+      badge: 'निर्धारित औषधिको तालिका',
+      time: 'बिहान ०८:३० बजे',
+      medicine_title: 'बिहानको रक्तचापको औषधि',
+      medicine_instructions: 'मनतातो पानीसँग १ चक्की खानुहोस्',
+      mark_done: 'औषधि खाएँ',
+      completed: 'पूरा भयो ✓',
+      snooze: '१५ मिनेटपछि सम्झाउनुहोस्',
+      coins_reward: '+१० सिक्का'
+    },
+
+    // 5-Emoji Mood Check-in
+    mood: {
+      question: 'आज हजुरलाई कस्तो महसुस भइरहेको छ?',
+      great: 'धेरै राम्रो',
+      good: 'राम्रो',
+      okay: 'सामान्य',
+      low: 'उदास',
+      worried: 'चिन्तित',
+      feedback_title: '{mood} रूपमा दर्ता भयो',
+      feedback_great: 'हजुरको मुस्कुराउँदो मुहार देखेर खुसी लाग्यो! सकारात्मक सोच स्मरण अभ्यासका लागि उत्तम हुन्छ।',
+      feedback_good: 'हजुरलाई राम्रो भएको देखेर शान्ति मिल्यो! मन सक्रिय राख्नाले स्मरणशक्ति ताजा रहन्छ।',
+      feedback_okay: 'शान्त दिन पनि ईश्वरको उपहार हो। बिस्तारै गहिरो श्वास लिनुहोस् र आराम गर्नुहोस्।',
+      feedback_low: 'हामी हजुरकै साथमा छौं। कुनै चिन्ता नलिनुहोस्; परिवारले हजुरलाई धेरै माया गर्छ।',
+      feedback_worried: 'शान्त भएर गहिरो श्वास लिनुहोस्। हजुर पूर्ण सुरक्षित हुनुहुन्छ। के राजसँग कुरा गर्न चाहनुहुन्छ?',
+      chip_hornbill: 'हर्नबिल स्मृति खेल्नुहोस्',
+      chip_story: 'कथा स्मरण खेल',
+      chip_wellness: 'दैनिक स्वास्थ्य मार्गनिर्देशन'
+    },
+
+    // Personalized Activity
+    activity: {
+      subhead: 'आजको विशेष स्मरण अभ्यास',
+      title: 'बाँसको धुन अनुक्रम',
+      category: 'ध्यान र ढाँचा',
+      description: 'चम्किला बाँसका प्याडहरूको लय पछ्याउनुहोस्',
+      reason: 'हजुरको प्रफुल्ल मनका लागि — बाँसुरीको मीठो धुनमा आफ्नो स्मरण अभ्यास गर्नुहोस्!',
+      start_btn: 'अभ्यास सुरु गर्नुहोस्'
+    },
+
+    // Affirmation
+    affirmation: {
+      header: 'आजको शुभ विचार',
+      badge: 'प्रेरणा',
+      listen: 'सुन्नुहोस्',
+      new: 'नयाँ विचार'
+    },
+
+    // Saathi Mascot & Drawer
+    saathi: {
+      name: 'साथी',
+      title: 'साथी AI सहायक',
+      subtitle: 'हजुरको प्यारो आवाज र सम्झनाको साथी',
+      badge: 'अनलाइन र तयार',
+      welcome: 'नमस्ते! म साथी हुँ, हजुरको स्मृति र कल्याणको मित्र। आज म हजुरको कसरी सेवा गरूँ?',
+      placeholder: 'साथीलाई केही सोध्नुहोस् वा 🎤 थिच्नुहोस्...',
+      send: 'पठाउनुहोस्',
+      listening: 'सुन्दैछु...',
+      thinking: 'सोच्दैछु...',
+      voice_note: '💡 हजुरले बोल्न वा लेख्न सक्नुहुन्छ। साथीले पढेर सुनाउनेछ।',
+      quick_meds: '💊 मेरो औषधिको समय कहिले हो?',
+      quick_sos: '🚨 आपतकालीन SOS सहयोग',
+      quick_game: '🎋 बाँसको धुन खेल्नुहोस्',
+      quick_tips: '🌻 आजको शुभ विचार'
+    },
+
+    // Quick Navigation Grid
+    grid: {
+      header: 'द्रुत नेभिगेसन',
+      games: 'खेल केन्द्र',
+      lifestory: 'जीवन कथा',
+      entertainment: 'मनोरञ्जन',
+      family: 'पारिवारिक खेल',
+      stars: 'साप्ताहिक तारा',
+      wellness: 'कल्याण',
+      reminders: 'अनुस्मारक',
+      medicines: 'औषधिहरू',
+      emergency: 'आपतकालीन सहयोग',
+      rewards: 'पुरस्कार र ब्याज',
+      settings: 'सेटिङहरू'
+    },
+
+    // Games Common
+    gamesTitle: 'मानसिक खेलहरू',
+    gamesSubtitle: 'मन ताजा राख्न एउटा खेल रोज्नुहोस्',
+    play: 'खेल्नुहोस्',
+    score: 'स्कोर',
+    accuracy: 'शुद्धता',
+    difficulty: 'कठिनाई',
+    easy: 'सजिलो',
+    medium: 'मध्यम',
+    hard: 'कठिन',
+    playAgain: 'फेरि खेल्नुहोस्',
+    exitToHub: 'खेल केन्द्रमा फर्कनुहोस्',
+    hints: 'सङ्केत',
+    time: 'समय',
+    coinsEarned: 'कमाइएका सिक्का',
+    startGame: 'खेल सुरु गर्नुहोस्',
+    gameOver: 'खेल समाप्त भयो!',
+
+    // Game Titles & Details
+    g1Title: 'हर्नबिल स्मृति गुँड',
+    g1Desc: 'प्रकृतिका कार्डहरूको जोडी मिलाउनुहोस्',
+    g1Tag: 'दृष्टि स्मृति',
+    g1Instruction: 'उस्तै कार्डहरूको जोडी खोज्नुहोस्',
+
+    g2Title: 'स्मृतिका पलहरू',
+    g2Desc: 'कथाको क्रम सम्झनुहोस्',
+    g2Tag: 'कथा स्मरण',
+    g2Instruction: 'कथाका घटनाहरूलाई क्रमबद्ध सम्झनुहोस्',
+
+    g3Title: 'परिचित अनुहारहरू',
+    g3Desc: 'आफ्ना प्रियजनहरूलाई चिन्नुहोस्',
+    g3Tag: 'पहिचान',
+    g3Instruction: 'आफ्ना प्यारा मानिसहरूलाई पहिचान गर्नुहोस्',
+
+    g4Title: 'मेरो घर सम्झनुहोस्',
+    g4Desc: 'कोठाका सामानहरू सम्झनुहोस्',
+    g4Tag: 'स्थानिक स्मृति',
+    g4Instruction: 'सामानहरू कहाँ थिए सम्झनुहोस्',
+
+    g5Title: 'मेरो दैनिक तालिका',
+    g5Desc: 'दैनिक कार्यहरू सही क्रममा मिलाउनुहोस्',
+    g5Tag: 'दैनिक नियम',
+    g5Instruction: 'नियमित कामहरू एकपछि अर्को मिलाउनुहोस्',
+
+    g6Title: 'सुन्नुहोस् र सम्झनुहोस्',
+    g6Desc: 'ध्यान दिएर सुनेर उत्तर दिनुहोस्',
+    g6Tag: 'एकाग्रता',
+    g6Instruction: 'आवाज सुनेर सही उत्तर रोज्नुहोस्',
+
+    g7Title: 'बाँसको धुन अनुक्रम',
+    g7Desc: 'चम्किलो ढाँचा दोहोर्याउनुहोस्',
+    g7Tag: 'ढाँचा स्मृति',
+    g7Instruction: 'चम्किएका बाँसका प्याडहरू हेरेर क्रम दोहोर्याउनुहोस्'
   }
+
 };
 
 function getNested(obj, path) {
@@ -857,7 +1458,10 @@ const I18n = {
       as: 'Assam',
       hi: 'National',
       bn: 'Bengal',
-      en: 'Assam'
+      en: 'Assam',
+      mni: 'Manipur',
+      brx: 'Bodoland',
+      ne: 'Sikkim'
     };
     const targetRegion = regionMap[lang] || Storage.getPreferences()?.regionalState || 'Assam';
     document.body.setAttribute('data-region', targetRegion);
@@ -912,11 +1516,16 @@ const I18n = {
   getAvailableLanguages() {
     return [
       { code: 'en', name: 'English', native: 'English' },
-      { code: 'as', name: 'অসমীয়া (Assamese)', native: 'অসমীয়া' },
       { code: 'hi', name: 'हिन्दी (Hindi)', native: 'हिन्दी' },
-      { code: 'bn', name: 'বাংলা (Bengali)', native: 'বাংলা' }
+      { code: 'bn', name: 'বাংলা (Bengali)', native: 'বাংলা' },
+      { code: 'as', name: 'অসমীয়া (Assamese)', native: 'অসমীয়া' },
+      { code: 'mni', name: 'মৈতৈলোন্ (Manipuri)', native: 'মৈতৈলোন্' },
+      { code: 'brx', name: 'बड़ो (Bodo)', native: 'बड़ो' },
+      { code: 'ne', name: 'नेपाली (Nepali)', native: 'नेपाली' }
     ];
-  }
+  },
 };
 
 export default I18n;
+
+export { LanguageContext, useLanguage } from './context/LanguageContext.js';

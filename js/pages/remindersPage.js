@@ -42,6 +42,42 @@ export default function RemindersPage(container) {
       filterAft = "দুপুর 🌤️";
       filterEve = "সন্ধ্যা 🌆";
       filterNight = "রাত 🌙";
+    } else if (lang === 'as') {
+      pageTitle = "দৈনিক যত্নশীল সোঁৱৰণী";
+      pageSub = "ঔষধ, পানী খোৱা, মুকলি বতাহ আৰু পৰিয়ালৰ লগত কথা পতাৰ মৰমীয়াল সংকেত।";
+      addBtnText = "➕ নতুন সোঁৱৰণী যোগ কৰক";
+      filterAll = "গোটেই দিন 🗓️";
+      filterMorn = "পুৱা ☀️";
+      filterAft = "দুপৰীয়া 🌤️";
+      filterEve = "গধূলি 🌆";
+      filterNight = "ৰাতি 🌙";
+    } else if (lang === 'mni') {
+      pageTitle = "নুমিৎ খুদিংগী নিংসিংবা";
+      pageSub = "হিদাক-লাংথক, ঈশিং থকপা অমসুং ইমুংগা ৱারী শানবগী নিংসিংবা।";
+      addBtnText = "➕ অনৌবা নিংসিংবা হাপচিনবা";
+      filterAll = "নুমিৎ চুপ্পা 🗓️";
+      filterMorn = "অয়ুক ☀️";
+      filterAft = "নুমিংদাং 🌤️";
+      filterEve = "নুমিৎলেপ 🌆";
+      filterNight = "অহিং 🌙";
+    } else if (lang === 'brx') {
+      pageTitle = "सानफ्रोमबोनि गोसोखांहोग्रा";
+      pageSub = "मुलि, दै लोंनाय आरो नखरजों रायलायनो गोसोखांहोग्रा।";
+      addBtnText = "➕ गोदान गोसोखांहोग्रा दाजाब";
+      filterAll = "गासै सान 🗓️";
+      filterMorn = "फुं ☀️";
+      filterAft = "सानजौफुं 🌤️";
+      filterEve = "बेलासे 🌆";
+      filterNight = "हर 🌙";
+    } else if (lang === 'ne') {
+      pageTitle = "दैनिक सौम्य अनुस्मारकहरू";
+      pageSub = "औषधि, पानी पिउने, ताजा हावा र परिवारसँग कुराकानीका लागि प्यारा सङ्केतहरू।";
+      addBtnText = "➕ नयाँ अनुस्मारक थप्नुहोस्";
+      filterAll = "दिनभर 🗓️";
+      filterMorn = "बिहान ☀️";
+      filterAft = "दिउँसो 🌤️";
+      filterEve = "साँझ 🌆";
+      filterNight = "रात 🌙";
     }
 
     const filtered = activeFilter === 'all' 

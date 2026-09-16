@@ -2171,3 +2171,56 @@ body.has-nav {
   background: var(--maroon);
   margin-top: 2px;
 }
+
+/* ============================================================
+   SMRITI — Senior Accessibility & Live Language In-Place Transition
+   ============================================================ */
+
+/* 48px+ Senior Touch Targets across controls */
+.stitch-pill-btn {
+  min-height: 48px !important;
+  padding: 0 1rem !important;
+  font-size: 0.95rem !important;
+  touch-action: manipulation;
+}
+
+.stitch-sos-btn {
+  min-height: 48px !important;
+  min-width: 80px !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  border: 2px solid #EF4444 !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4) !important;
+}
+
+.lang-opt-btn {
+  min-height: 48px !important;
+  touch-action: manipulation;
+}
+
+.lang-opt-btn:hover,
+.lang-opt-btn:focus-visible {
+  background: #F3F4F6 !important;
+  outline: none;
+}
+
+.lang-opt-btn.active-lang {
+  background: #EFF6FF !important;
+  color: #1D4ED8 !important;
+}
+
+/* In-place gentle crossfade animation when language switches */
+.lang-transition-active {
+  animation: smritiLangFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes smritiLangFade {
+  0% {
+    opacity: 0.65;
+    transform: translateY(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

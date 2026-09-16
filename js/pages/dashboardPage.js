@@ -112,15 +112,42 @@ export default function DashboardPage(container) {
         </div>
 
         <!-- Caregiver Scope Tabs: 1. Patient Analytics | 2. Medicine Reminders | 3. Print Clinical Details -->
-        <div style="display: flex; gap: 0.6rem; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
-          <button class="chip-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" style="font-size: 1rem; font-weight: 700;">
-            📊 Patient Analytics
+        <div style="display: flex; gap: 0.6rem; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.75rem; margin-bottom: 1.5rem; overflow-x: auto;">
+          <button class="chip-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" style="min-height: 48px; font-size: 1rem; font-weight: 700;">
+            📊 ${(() => {
+              const l = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
+              if (l === 'hi') return 'रोगी विश्लेषण';
+              if (l === 'bn') return 'রোগীর বিশ্লেষণ';
+              if (l === 'as') return 'ৰোগীৰ পৰ্যালোচনা';
+              if (l === 'mni') return 'অনাবগী য়েংশিনবা';
+              if (l === 'brx') return 'बेमारिनि आनजाद';
+              if (l === 'ne') return 'बिरामी विश्लेषण';
+              return 'Patient Analytics';
+            })()}
           </button>
-          <button class="chip-btn ${activeTab === 'medicines' ? 'active' : ''}" data-tab="medicines" style="font-size: 1rem; font-weight: 700;">
-            ⏰ Medicine Reminders
+          <button class="chip-btn ${activeTab === 'medicines' ? 'active' : ''}" data-tab="medicines" style="min-height: 48px; font-size: 1rem; font-weight: 700;">
+            ⏰ ${(() => {
+              const l = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
+              if (l === 'hi') return 'दवा अनुस्मारक';
+              if (l === 'bn') return 'ওষুধের অনুস্মারক';
+              if (l === 'as') return 'ঔষধৰ সোঁৱৰণী';
+              if (l === 'mni') return 'হিদাক্কী নিংসিংবা';
+              if (l === 'brx') return 'मुलिनि गोसोखांहोग्रा';
+              if (l === 'ne') return 'औषधि अनुस्मारक';
+              return 'Medicine Reminders';
+            })()}
           </button>
-          <button class="chip-btn ${activeTab === 'print' ? 'active' : ''}" data-tab="print" style="font-size: 1rem; font-weight: 700;">
-            🖨️ Print Clinical Details
+          <button class="chip-btn ${activeTab === 'print' ? 'active' : ''}" data-tab="print" style="min-height: 48px; font-size: 1rem; font-weight: 700;">
+            🖨️ ${(() => {
+              const l = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
+              if (l === 'hi') return 'रिपोर्ट प्रिंट करें';
+              if (l === 'bn') return 'রিপোর্ট প্রিন্ট করুন';
+              if (l === 'as') return 'প্ৰতিবেদন প্ৰিণ্ট কৰক';
+              if (l === 'mni') return 'রিপোর্ত প্রিন্ত তৌবা';
+              if (l === 'brx') return 'रिपर्ट प्रिन्ट खालाम';
+              if (l === 'ne') return 'विवरण प्रिन्ट गर्नुहोस्';
+              return 'Print Clinical Details';
+            })()}
           </button>
         </div>
 

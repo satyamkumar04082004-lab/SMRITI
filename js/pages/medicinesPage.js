@@ -5,6 +5,7 @@
 
 import AIService from '../aiService.js';
 import Storage from '../storage.js';
+import I18n from '../i18n.js';
 
 export default function MedicinesPage(container) {
   let medicines = Storage.getMedicines();
@@ -21,8 +22,30 @@ export default function MedicinesPage(container) {
         <!-- Header Banner -->
         <div class="card card-elevated text-center" style="background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1px solid #BFDBFE; padding: 1.5rem; margin-bottom: 1.5rem;">
           <div style="font-size: 3rem; margin-bottom: 0.5rem;">💊📋</div>
-          <h2 style="color: #1E40AF; font-size: 1.7rem; margin-bottom: 0.25rem;">My Medicines & Prescriptions</h2>
-          <p style="color: #1D4ED8; font-size: 1.05rem; margin-bottom: 0;">Easily scan prescriptions, view medication cards, and set gentle reminders.</p>
+          <h2 style="color: #1E40AF; font-size: 1.7rem; margin-bottom: 0.25rem;">
+            ${(() => {
+              const l = I18n.lang || 'en';
+              if (l === 'hi') return 'मेरी दवाइयाँ एवं नुस्खे';
+              if (l === 'bn') return 'আমার ওষুধ ও প্রেসক্রিপশন';
+              if (l === 'as') return 'মোৰ ঔষধ আৰু প্ৰেছক্ৰিপশ্বন';
+              if (l === 'mni') return 'ঐগী হিদাক-লাংথক';
+              if (l === 'brx') return 'आंनि मुलिफोर';
+              if (l === 'ne') return 'मेरा औषधिहरू र प्रेस्क्रिप्सन';
+              return 'My Medicines & Prescriptions';
+            })()}
+          </h2>
+          <p style="color: #1D4ED8; font-size: 1.05rem; margin-bottom: 0;">
+            ${(() => {
+              const l = I18n.lang || 'en';
+              if (l === 'hi') return 'दवाइयों के कार्ड देखें और समय पर सौम्य अनुस्मारक पाएं।';
+              if (l === 'bn') return 'ওষুধের তালিকা দেখুন এবং সময়মতো রিমাইন্ডার পান।';
+              if (l === 'as') return 'ঔষধৰ তালিকা চাওক আৰু নিয়মীয়া সোঁৱৰণী লাভ কৰক।';
+              if (l === 'mni') return 'হিদাক্কী কাৰ্দ য়েংবীয়ু অমসুং নিংসিংবা থম্মু।';
+              if (l === 'brx') return 'मुलिफोरनि फारिलाय नाय आरो गोसोखांहोग्रा दोन।';
+              if (l === 'ne') return 'औषधि कार्डहरू हेर्नुहोस् र समयमै अनुस्मारक पाउनुहोस्।';
+              return 'Easily scan prescriptions, view medication cards, and set gentle reminders.';
+            })()}
+          </p>
         </div>
 
         <!-- Scanner Actions Card -->
@@ -33,11 +56,29 @@ export default function MedicinesPage(container) {
           <input type="file" id="prescription-file-input" accept="image/*,.pdf" style="display: none;" />
 
           <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
-            <button id="btn-scan-camera" class="btn btn-primary" style="flex: 1; min-width: 180px;">
-              📷 Scan Prescription
+            <button id="btn-scan-camera" class="btn btn-primary" style="flex: 1; min-width: 180px; min-height: 48px;">
+              📷 ${(() => {
+                const l = I18n.lang || 'en';
+                if (l === 'hi') return 'पर्चा स्कैन करें';
+                if (l === 'bn') return 'প্রেসক্রিপশন স্ক্যান করুন';
+                if (l === 'as') return 'প্ৰেছক্ৰিপশ্বন স্কেন কৰক';
+                if (l === 'mni') return 'হিদাক্কী চে স্কেন তৌবা';
+                if (l === 'brx') return 'मुलिनि बिलाइ नाय';
+                if (l === 'ne') return 'प्रेस्क्रिप्सन स्क्यान गर्नुहोस्';
+                return 'Scan Prescription';
+              })()}
             </button>
-            <button id="btn-upload-file" class="btn btn-secondary" style="flex: 1; min-width: 180px;">
-              📁 Upload Image / PDF
+            <button id="btn-upload-file" class="btn btn-secondary" style="flex: 1; min-width: 180px; min-height: 48px;">
+              📁 ${(() => {
+                const l = I18n.lang || 'en';
+                if (l === 'hi') return 'फ़ाइल अपलोड करें';
+                if (l === 'bn') return 'ফাইল আপলোড করুন';
+                if (l === 'as') return 'ফাইল আপলোড কৰক';
+                if (l === 'mni') return 'ফাইল অপলোদ তৌবা';
+                if (l === 'brx') return 'फाइल थिसन';
+                if (l === 'ne') return 'फाइल अपलोड गर्नुहोस्';
+                return 'Upload Image / PDF';
+              })()}
             </button>
           </div>
 

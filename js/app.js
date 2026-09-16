@@ -10,7 +10,7 @@
    ============================================================ */
 
 import Storage from './storage.js';
-import I18n from './i18n.js';
+import I18n, { LanguageContext } from './i18n.js';
 import Auth from './auth.js';
 import Coins from './coins.js';
 import TTS from './tts.js';
@@ -125,6 +125,18 @@ let quickHelpModalEl = null;
 function getFormattedRegionalDate() {
   const istDate = new Date();
   const options = { day: 'numeric', month: 'short', weekday: 'short' };
+  const lang = I18n.lang || 'en';
+  const localeMap = {
+    hi: 'hi-IN',
+    bn: 'bn-IN',
+    as: 'as-IN',
+    mni: 'mni-IN',
+    brx: 'brx-IN',
+    ne: 'ne-NP',
+    en: 'en-IN'
+  };
+  return istDate.toLocaleDateString(localeMap[lang] || 'en-IN', options);
+};
   return istDate.toLocaleDateString(I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN', options);
 }
 
@@ -380,19 +392,16 @@ function renderHeader() {
             <span>🌐</span>
             <span id="current-lang-display">${currentLangCode}</span>
           </button>
-          <div id="lang-dropdown-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 6px; background: #FFFFFF; border-radius: 16px; box-shadow: var(--shadow-xl); border: 1.5px solid #E5E7EB; padding: 6px 0; z-index: 60; min-width: 175px;">
-            <button class="lang-opt-btn" data-lang="en" style="width: 100%; text-align: left; padding: 10px 16px; font-size: 0.95rem; font-weight: 700; border: none; background: transparent; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #1F2937;">
-              <span>English</span> <span style="font-size: 0.75rem; color: #9CA3AF; font-family: monospace;">EN</span>
-            </button>
-            <button class="lang-opt-btn" data-lang="hi" style="width: 100%; text-align: left; padding: 10px 16px; font-size: 0.95rem; font-weight: 700; border: none; background: transparent; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #1F2937;">
-              <span>हिन्दी</span> <span style="font-size: 0.75rem; color: #9CA3AF; font-family: monospace;">HI</span>
-            </button>
-            <button class="lang-opt-btn" data-lang="bn" style="width: 100%; text-align: left; padding: 10px 16px; font-size: 0.95rem; font-weight: 700; border: none; background: transparent; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #1F2937;">
-              <span>বাংলা</span> <span style="font-size: 0.75rem; color: #9CA3AF; font-family: monospace;">BN</span>
-            </button>
-            <button class="lang-opt-btn" data-lang="as" style="width: 100%; text-align: left; padding: 10px 16px; font-size: 0.95rem; font-weight: 700; border: none; background: transparent; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #1F2937;">
-              <span>অসমীয়া</span> <span style="font-size: 0.75rem; color: #9CA3AF; font-family: monospace;">AS</span>
-            </button>
+          <div id="lang-dropdown-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 6px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); border: 1.5px solid #E5E7EB; padding: 6px 0; z-index: 100; min-width: 195px; max-height: 380px; overflow-y: auto;">
+            ${I18n.getAvailableLanguages().map(l => `
+              <button class="lang-opt-btn ${l.code === (I18n.lang || 'en') ? 'active-lang' : ''}" data-lang="${l.code}" style="min-height: 48px; width: 100%; text-align: left; padding: 12px 18px; font-size: 0.98rem; font-weight: 700; border: none; background: ${l.code === (I18n.lang || 'en') ? '#EFF6FF' : 'transparent'}; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #111827; transition: background 0.15s ease;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  ${l.code === (I18n.lang || 'en') ? '<span style="color: #2563EB; font-size: 1.1rem;">●</span>' : '<span style="color: transparent; font-size: 1.1rem;">●</span>'}
+                  ${l.native}
+                </span>
+                <span style="font-size: 0.76rem; color: #6B7280; font-family: monospace; font-weight: 800; background: #F3F4F6; padding: 2px 6px; border-radius: 6px;">${l.code.toUpperCase()}</span>
+              </button>
+            `).join('')}
           </div>
         </div>
 
@@ -449,7 +458,7 @@ function renderHeader() {
         e.stopPropagation();
         const selectedLang = btn.getAttribute('data-lang');
         langPanel.style.display = 'none';
-        I18n.setLanguage(selectedLang);
+        LanguageContext ? LanguageContext.setLanguage(selectedLang) : I18n.setLanguage(selectedLang);
         if (window.SmritiToast) {
           window.SmritiToast.show(`Language switched to ${btn.querySelector('span').textContent} 🌐`, 'success');
         }
@@ -880,6 +889,13 @@ function init() {
 
   // Reactive Language Event Handlers for zero-reload live re-render
   const handleLangRefresh = () => {
+    // Add smooth in-place transition class to content container
+    if (contentEl) {
+      contentEl.classList.remove('lang-transition-active');
+      void contentEl.offsetWidth; // Trigger DOM reflow for CSS animation restart
+      contentEl.classList.add('lang-transition-active');
+    }
+
     I18n.updateAllText();
     renderHeader();
     const hash = window.location.hash || '#/home';
@@ -891,7 +907,7 @@ function init() {
     if (saathiDrawerEl) {
       renderSaathiDrawer();
     }
-    // Instantly re-render active page content with new language
+    // Instantly re-render active page content with new language in-place without modifying window.location
     if (route && contentEl && typeof route.page === 'function') {
       try {
         if (currentCleanup) {
@@ -905,6 +921,10 @@ function init() {
         console.warn('Page re-render on language change error:', e);
       }
     }
+
+    setTimeout(() => {
+      if (contentEl) contentEl.classList.remove('lang-transition-active');
+    }, 300);
   };
 
   window.addEventListener('smriti:languageChanged', handleLangRefresh);
