@@ -97,9 +97,14 @@ export default function SmritiPage(container) {
           <h2 style="color: var(--maroon); margin-top: 0.5rem; font-size: 1.6rem;">${I18n.t('chatbotTitle')}</h2>
           <p class="text-muted" style="margin-bottom: 0.75rem; font-size: 1.05rem;">${I18n.t('chatbotSubtitle')}</p>
           
-          <div class="companion-status-pill ${companionState.toLowerCase().replace(/[^a-z]/g, '')}">
-            <span class="status-dot"></span>
-            <span id="companion-state-text">${companionState}</span>
+          <div style="display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="companion-status-pill ${companionState.toLowerCase().replace(/[^a-z]/g, '')}">
+              <span class="status-dot"></span>
+              <span id="companion-state-text">${companionState}</span>
+            </div>
+            <button id="btn-page-sound-toggle" class="btn btn-sm" style="min-height: 38px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; padding: 4px 14px; background: ${!Storage.getAISettings().soundEnabled ? '#FEE2E2' : '#DCFCE7'}; color: ${!Storage.getAISettings().soundEnabled ? '#991B1B' : '#166534'}; border: 1.5px solid ${!Storage.getAISettings().soundEnabled ? '#F87171' : '#86EFAC'}; cursor: pointer;">
+              ${!Storage.getAISettings().soundEnabled ? '🔇 Sound Muted' : '🔊 Sound ON'}
+            </button>
           </div>
         </div>
 
@@ -205,14 +210,28 @@ export default function SmritiPage(container) {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.getAttribute('data-idx'), 10);
         const item = conversation[idx];
-        if (item && item.text) {
+        const currentAI = Storage.getAISettings();
+        if (item && item.text && currentAI.soundEnabled) {
           companionState = 'SPEAKING...';
           updateUI();
           TTS.speak(item.text);
           setTimeout(() => { companionState = 'READY'; updateUI(); }, 2500);
+        } else if (!currentAI.soundEnabled) {
+          alert('Sound is muted. Tap "🔇 Sound Muted" on top to unmute.');
         }
       });
     });
+
+    // Sound toggle in companion header
+    const pageSoundToggle = container.querySelector('#btn-page-sound-toggle');
+    if (pageSoundToggle) {
+      pageSoundToggle.addEventListener('click', () => {
+        const curr = Storage.getAISettings();
+        const upd = Storage.setAISettings({ soundEnabled: !curr.soundEnabled });
+        if (!upd.soundEnabled) TTS.stop();
+        render();
+      });
+    }
 
     // Text input send
     const input = container.querySelector('#chat-text-input');
@@ -299,7 +318,8 @@ export default function SmritiPage(container) {
 
           if (isFinal) {
             render();
-            if (aiSettings.autoSpeak !== false && conversation[assistantIndex].text) {
+            const currentAI = Storage.getAISettings();
+            if (currentAI.soundEnabled && aiSettings.autoSpeak !== false && conversation[assistantIndex].text) {
               TTS.speak(conversation[assistantIndex].text);
             }
             setTimeout(() => {
@@ -325,7 +345,8 @@ export default function SmritiPage(container) {
       companionState = 'SPEAKING...';
       render();
 
-      if (aiSettings.autoSpeak !== false) {
+      const currentAI = Storage.getAISettings();
+      if (currentAI.soundEnabled && aiSettings.autoSpeak !== false) {
         TTS.speak(reply);
       }
       setTimeout(() => {

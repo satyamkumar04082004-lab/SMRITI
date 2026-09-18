@@ -448,6 +448,18 @@ const AIService = {
       );
     }
 
+    // 3b. FAQ: Cognitive Scores Clarification (Scores !== Medical Diagnosis)
+    if (text.includes('score') || text.includes('marks') || text.includes('result') || text.includes('accuracy') || text.includes('percent') || text.includes('fail') || text.includes('test') || text.includes('ank') || text.includes('स्कोर') || text.includes('नंबर') || text.includes('फेल')) {
+      return pickLang(
+        `Dear ${firstName}, your game scores are simply fun, gentle brain exercises, NOT a clinical diagnosis or medical test. Daily scores naturally fluctuate depending on sleep, rest, and mood. You are doing wonderfully just by participating! 🌸✨`,
+        `प्रिय ${firstName}, खेल के ये अंक केवल आपके मानसिक मनोरंजन और हल्के अभ्यास के लिए हैं, यह कोई चिकित्सीय निदान या मेडिकल टेस्ट नहीं है। नींद, आराम और मनोदशा के अनुसार स्कोर में स्वाभाविक उतार-चढ़ाव आता रहता है। आपका प्रयास ही सबसे सुंदर है! 🌸✨`,
+        `মৰমৰ ${firstName}, এই খেলৰ নম্বৰসমূহ কেৱল আনন্দদায়ক মানসিক অনুশীলনৰ বাবেহে, ই কোনো চিকিৎসাজনিত ৰোগ নিৰ্ণয় নহয়। টোপনি আৰু জিৰণি অনুসৰি নম্বৰৰ তাৰতম্য ঘটাটো একেবাৰে স্বাভাৱিক। আপোনাৰ প্ৰচেষ্টাই আমাৰ বাবে অমূল্য! 🌸✨`,
+        `প্রিয় ${firstName}, এই খেলার স্কোরগুলি কেবল আনন্দদায়ক ব্রেন এক্সারসাইজের জন্য, এটি কোনো চিকিৎসাগত রোগ নির্ণয় বা পরীক্ষা নয়। ঘুম বা শারীরিক ক্লান্তিভেদে স্কোরে ওঠানামা হওয়া খুব স্বাভাবিক। আপনার হাসিখুশি অংশগ্রহণই সবচেয়ে বড় প্রাপ্তি! 🌸✨`,
+        `प्रिय ${firstName}, खेलको यो प्राप्ताङ्क केवल रमाइलो मानसिक अभ्यासका लागि हो, कुनै चिकित्सकीय निदान होइन। निद्रा र आराम अनुसार स्कोरमा घटबढ हुनु एकदमै स्वाभाविक हो। हजुरको सक्रियता नै सबैभन्दा ठूलो कुरा हो! 🌸✨`,
+        `Nungshiba ${firstName}, masigi scorsi nungaina pukning thouna amani, laigi test natte. Nangna saruk yabasi yamna phajei! 🌸✨`
+      );
+    }
+
     // 4. Predefined FAQ 1: What is Dementia?
     if (text.includes('dementia') || text.includes('what is dementia') || text.includes('डिमेंशिया') || text.includes('ডিমেনচিয়া') || text.includes('ডিমেনশিয়া') || text.includes('डिमेन्सिया')) {
       return pickLang(
@@ -554,8 +566,7 @@ const AIService = {
       { id: 'familiar-faces', name: 'Familiar Faces', icon: '👨‍👩‍👧', tag: 'Social Recognition', route: '#/games/familiar-faces', desc: 'Connect friendly faces with warm hints', area: 'Face Recognition' },
       { id: 'remember-home', name: 'Remember My Home', icon: '🏠', tag: 'Spatial Focus', route: '#/games/remember-home', desc: 'Spot and remember household objects in rooms', area: 'Spatial Memory' },
       { id: 'my-day', name: 'My Day', icon: '☀️', tag: 'Routine Sequencing', route: '#/games/my-day', desc: 'Arrange healthy daily steps in sequential order', area: 'Executive Function' },
-      { id: 'listen-remember', name: 'Listen & Remember', icon: '👂', tag: 'Auditory Attention', route: '#/games/listen-remember', desc: 'Listen to clear uplifting sentences and recall words', area: 'Auditory Memory' },
-      { id: 'bamboo-sequence', name: 'Bamboo Sequence', icon: '🎋', tag: 'Pattern Attention', route: '#/games/bamboo-sequence', desc: 'Repeat peaceful glowing bamboo rhythm pads', area: 'Sequential Memory' }
+      { id: 'listen-remember', name: 'Listen & Remember', icon: '👂', tag: 'Auditory Attention', route: '#/games/listen-remember', desc: 'Listen to clear uplifting sentences and recall words', area: 'Auditory Memory' }
     ];
 
     const mood = overrideMood || (Storage.getTodayMood() ? Storage.getTodayMood().mood : null);
@@ -566,9 +577,9 @@ const AIService = {
       return { ...games[2], reason: 'Recommended because you felt low or worried today — connecting with familiar friendly faces brings comfort and reassurance.' };
     }
     if (mood === 'great' || mood === 'good') {
-      return { ...games[6], reason: 'Recommended because of your great positive energy today — challenge your pattern memory with glowing bamboo rhythms!' };
+      return { ...games[0], reason: 'Recommended because of your great positive energy today — challenge your visual memory with Hornbill Memory Nest!' };
     }
-    return { ...games[0], reason: 'Recommended for a peaceful memory workout — matching nature cards to refresh your thoughts.' };
+    return { ...games[5], reason: 'Recommended for a peaceful memory workout — listening to gentle sounds to refresh your thoughts.' };
   }
 };
 

@@ -408,6 +408,11 @@ class GameController {
       coinsEarned: coinDelta,
     });
 
+    // Adaptive Level Progression: >75% accuracy unlocks next level
+    const diffToLevel = { easy: 1, medium: 2, hard: 3 };
+    const currentLevel = diffToLevel[this.difficulty] || 1;
+    Storage.recordGameLevelResult(this.config.gameId, currentLevel, accuracy);
+
     // Determine encouragement
     let emoji, title, message;
     if (accuracy >= 90) {

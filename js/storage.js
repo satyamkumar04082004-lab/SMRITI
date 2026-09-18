@@ -1280,7 +1280,134 @@ const Storage = {
     }
     this.set('allUsers', users);
     return record;
+  },
+
+  // ------------------------------------------------------------
+  // SAFETY & EMERGENCY ALERTS (Module 3 & 4 Sync)
+  // ------------------------------------------------------------
+  saveEmergencyAlert(alert) {
+    const alerts = this.get('emergency_alerts') || [];
+    const entry = {
+      id: 'alert_' + Date.now(),
+      type: alert.type || 'SOS',
+      location: alert.location || '',
+      lat: alert.lat || null,
+      lng: alert.lng || null,
+      notes: alert.notes || 'Emergency 1-Tap SOS broadcasted',
+      timestamp: alert.timestamp || new Date().toISOString()
+    };
+    alerts.unshift(entry);
+    this.set('emergency_alerts', alerts.slice(0, 50));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiEmergencyAlert', { detail: entry }));
+    }
+    return entry;
+  },
+
+  getEmergencyAlerts() {
+    return this.get('emergency_alerts') || [];
+  },
+
+  // ------------------------------------------------------------
+  // CLINICAL NOTES (Caregiver -> Doctor Sync - Module 4 & 6)
+  // ------------------------------------------------------------
+  saveClinicalNote(note) {
+    const notes = this.get('clinical_notes') || [];
+    const entry = {
+      id: 'note_' + Date.now(),
+      author: note.author || 'Caregiver',
+      patientUsername: note.patientUsername || 'meera_das',
+      observation: note.observation || '',
+      behavior: note.behavior || 'Calm & responsive',
+      date: note.date || new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString()
+    };
+    notes.unshift(entry);
+    this.set('clinical_notes', notes);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiClinicalNoteAdded', { detail: entry }));
+    }
+    return entry;
+  },
+
+  getClinicalNotes(patientUsername = 'meera_das') {
+    const notes = this.get('clinical_notes') || [];
+    return notes.filter(n => (n.patientUsername || '').toLowerCase() === (patientUsername || '').toLowerCase());
+  },
+
+  // ------------------------------------------------------------
+  // REMOTE REMINDERS & APPOINTMENTS (Module 4 & 6 Sync)
+  // ------------------------------------------------------------
+  saveNextAppointment(appt) {
+    this.set('next_appointment_' + (appt.patientUsername || 'meera_das'), appt);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiAppointmentUpdated', { detail: appt }));
+    }
+    return appt;
+  },
+
+  getNextAppointment(patientUsername = 'meera_das') {
+    return this.get('next_appointment_' + (patientUsername || 'meera_das')) || {
+      doctorName: 'Dr. A. K. Barua',
+      specialization: 'Neurologist / Geriatric Specialist',
+      hospitalClinic: 'Guwahati Neurological Care Center',
+      date: '2026-09-25',
+      time: '11:00 AM',
+      type: 'Cognitive Review & Follow-up',
+      instructions: 'Bring blood test reports and daily adherence diary.'
+    };
+  },
+
+  // ------------------------------------------------------------
+  // ADAPTIVE GAMES PROGRESSION (>75% Accuracy Unlock - Module 5)
+  // ------------------------------------------------------------
+  getGameLevelStatus(gameId) {
+    const key = 'game_levels_' + gameId;
+    const progress = this.get(key) || {
+      level1: { unlocked: true, bestAcc: 0 },
+      level2: { unlocked: false, bestAcc: 0 },
+      level3: { unlocked: false, bestAcc: 0 }
+    };
+    return progress;
+  },
+
+  recordGameLevelResult(gameId, level, accuracy) {
+    const key = 'game_levels_' + gameId;
+    const progress = this.getGameLevelStatus(gameId);
+    const lvlKey = 'level' + level;
+    if (progress[lvlKey]) {
+      progress[lvlKey].bestAcc = Math.max(progress[lvlKey].bestAcc || 0, accuracy);
+      // Progression Logic: Next level unlocked if accuracy > 75%
+      if (accuracy > 75) {
+        if (level === 1 && progress.level2) progress.level2.unlocked = true;
+        if (level === 2 && progress.level3) progress.level3.unlocked = true;
+      }
+    }
+    this.set(key, progress);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiGameProgressUpdated', { detail: { gameId, progress } }));
+    }
+    return progress;
+  },
+
+  // ------------------------------------------------------------
+  // AI COMPANION SETTINGS (Sound Mute & Audio Preferences)
+  // ------------------------------------------------------------
+  getAISettings() {
+    return this.get('ai_settings') || {
+      soundEnabled: true,
+      speechRate: 0.9,
+      pitch: 1.0
+    };
+  },
+
+  setAISettings(settings) {
+    const current = this.getAISettings();
+    const updated = Object.assign({}, current, settings);
+    this.set('ai_settings', updated);
+    return updated;
   }
 };
 
 export default Storage;
+

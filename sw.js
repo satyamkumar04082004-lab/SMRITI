@@ -2,7 +2,7 @@
    SMRITI — Service Worker for Offline Resilience & Low Data Mode
    ============================================================ */
 
-const CACHE_NAME = 'smriti-v8';
+const CACHE_NAME = 'smriti-v20';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -49,8 +49,7 @@ const PRECACHE_URLS = [
   './js/games/familiarFaces.js',
   './js/games/rememberHome.js',
   './js/games/myDay.js',
-  './js/games/listenRemember.js',
-  './js/games/bambooSequence.js'
+  './js/games/listenRemember.js'
 ];
 
 // Install: Pre-cache essential app shell assets
@@ -58,19 +57,20 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRECACHE_URLS).catch((err) => {
-        console.warn('Some precache assets could not be cached:', err);
+        console.warn('Precache warning:', err);
       });
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate: Clean up older cache versions
+// Activate: Clean up older cache versions immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('Purging old cache:', key);
             return caches.delete(key);
           }
         })
@@ -79,54 +79,41 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: Cache-first for same-origin static assets; fallback to network; graceful offline
+// Fetch: Network-First for JS, CSS, and HTML; Cache-First for static media assets
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // For external resources (e.g. CDNs or external image links), try network first, then cache
-  if (url.origin !== self.location.origin) {
+  // Network-First for code/document requests so updates are instantaneous
+  if (url.origin === self.location.origin && (url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname.endsWith('.css'))) {
     event.respondWith(
       fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
-          return response;
+          return networkResponse;
         })
         .catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // Same-origin: Cache-first strategy for instant loading and offline capability
+  // Cache-First for other assets (images, fonts, sounds)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch in background to revalidate cache (stale-while-revalidate)
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
-          }
-        }).catch(() => {/* Offline, ignore */});
-
         return cachedResponse;
       }
-
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+        if (networkResponse && networkResponse.status === 200) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
       }).catch(() => {
-        // Fallback for navigation
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html') || caches.match('./');
         }

@@ -558,6 +558,9 @@ function renderSaathiDrawer() {
   const existing = document.getElementById('saathi-drawer-overlay');
   if (existing) existing.remove();
 
+  const aiSettings = Storage.getAISettings();
+  const isSoundMuted = !aiSettings.soundEnabled;
+
   if (saathiMessages.length === 0) {
     saathiMessages.push({
       sender: 'saathi',
@@ -585,9 +588,14 @@ function renderSaathiDrawer() {
             </p>
           </div>
         </div>
-        <button id="btn-close-saathi-drawer" class="btn-icon" style="background: transparent; border: none; color: #FFFFFF; font-size: 1.5rem; cursor: pointer;" aria-label="Close Saathi Drawer">
-          ✕
-        </button>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button id="btn-saathi-sound-toggle" style="background: ${isSoundMuted ? '#FEE2E2' : 'rgba(255,255,255,0.2)'}; color: ${isSoundMuted ? '#DC2626' : '#FFFFFF'}; border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; font-weight: 800; font-size: 0.82rem; padding: 5px 12px; cursor: pointer; min-height: 38px; display: inline-flex; align-items: center; gap: 4px;">
+            ${isSoundMuted ? '🔇 Muted' : '🔊 Sound ON'}
+          </button>
+          <button id="btn-close-saathi-drawer" class="btn-icon" style="background: transparent; border: none; color: #FFFFFF; font-size: 1.5rem; cursor: pointer;" aria-label="Close Saathi Drawer">
+            ✕
+          </button>
+        </div>
       </div>
 
       <!-- Messages Conversation Container -->
@@ -619,8 +627,8 @@ function renderSaathiDrawer() {
           <button class="saathi-chip" data-query="How do I use Emergency SOS?">
             ${I18n.t('saathi.quick_sos')}
           </button>
-          <button class="saathi-chip" data-query="Tell me about Bamboo Sequence game">
-            ${I18n.t('saathi.quick_game')}
+          <button class="saathi-chip" data-query="Do my cognitive scores mean a diagnosis?">
+            Scores vs Diagnosis
           </button>
           <button class="saathi-chip" data-query="Give me a good thought for today">
             ${I18n.t('saathi.quick_tips')}
@@ -720,12 +728,30 @@ function renderSaathiDrawer() {
     });
   });
 
+  // Sound toggle button listener
+  const soundToggleBtn = saathiDrawerEl.querySelector('#btn-saathi-sound-toggle');
+  if (soundToggleBtn) {
+    soundToggleBtn.addEventListener('click', () => {
+      const current = Storage.getAISettings();
+      const updated = Storage.setAISettings({ soundEnabled: !current.soundEnabled });
+      if (!updated.soundEnabled) {
+        TTS.stop();
+      }
+      renderSaathiDrawer();
+    });
+  }
+
   // TTS buttons on messages
   saathiDrawerEl.querySelectorAll('.btn-speak-msg').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.getAttribute('data-idx'), 10);
       const m = saathiMessages[idx];
-      if (m && m.text) TTS.speak(m.text);
+      const currentAISettings = Storage.getAISettings();
+      if (m && m.text && currentAISettings.soundEnabled) {
+        TTS.speak(m.text);
+      } else if (!currentAISettings.soundEnabled) {
+        if (window.SmritiToast) window.SmritiToast.show('Sound is muted. Tap "🔇 Muted" to enable voice.', 'info');
+      }
     });
   });
 }
@@ -759,7 +785,10 @@ async function sendSaathiMessage(text) {
         }
         if (isFinal) {
           renderSaathiDrawer();
-          TTS.speak(accumulatedText);
+          const currentAISettings = Storage.getAISettings();
+          if (currentAISettings.soundEnabled) {
+            TTS.speak(accumulatedText);
+          }
         }
       },
       (toolCall) => {
@@ -780,7 +809,10 @@ async function sendSaathiMessage(text) {
     const fallback = AIService.chatWithSmriti(text);
     saathiMessages[botIdx].text = fallback;
     renderSaathiDrawer();
-    TTS.speak(fallback);
+    const currentAISettings = Storage.getAISettings();
+    if (currentAISettings.soundEnabled) {
+      TTS.speak(fallback);
+    }
   }
 }
 

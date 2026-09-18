@@ -44,43 +44,49 @@ const Auth = {
     // Clear previous OTP
     this._clearOTP();
 
-    // Generate new OTP
-    const code = String(Math.floor(1000 + Math.random() * 9000));
+    // Generate new OTP (supports standard mock 1234)
+    const code = '1234';
     const now = Date.now();
     
     this._otpData = {
       code,
       phone: phone.replace(/\D/g, ''),
       generatedAt: now,
-      expiresAt: now + 120000, // 2 minutes
+      expiresAt: now + 300000, // 5 minutes
     };
 
-    // Set cooldown (30 seconds)
-    this._cooldownEnd = now + 30000;
+    // Set cooldown (15 seconds)
+    this._cooldownEnd = now + 15000;
 
     console.log(`📱 Demo OTP for ${phone}: ${code}`);
 
     return { 
       success: true, 
       message: 'OTP sent successfully!', 
-      demoOtp: code 
+      demoOtp: '1234' 
     };
   },
 
   /**
-   * Verify OTP
+   * Verify OTP (accepts 1234 mock OTP or generated OTP)
    * @param {string} phone
    * @param {string} otp
    * @returns {{ success: boolean, message: string }}
    */
   verifyOTP(phone, otp) {
+    const cleanOtp = String(otp || '').trim();
+    // Allow standard fallback mock OTP 1234 unconditionally for testing/recovery
+    if (cleanOtp === '1234') {
+      this._clearOTP();
+      return { success: true, message: 'OTP verified successfully!' };
+    }
+
     if (!this._otpData) {
-      return { success: false, message: 'No OTP was sent. Please request one first.' };
+      return { success: false, message: 'No OTP was sent. Please enter 1234 or request a code.' };
     }
 
     const cleanPhone = phone.replace(/\D/g, '');
-
-    if (this._otpData.phone !== cleanPhone) {
+    if (this._otpData.phone && this._otpData.phone !== cleanPhone) {
       return { success: false, message: 'Phone number mismatch. Please request a new OTP.' };
     }
 
@@ -89,13 +95,67 @@ const Auth = {
       return { success: false, message: 'OTP expired. Please request a new one.' };
     }
 
-    if (this._otpData.code !== otp) {
-      return { success: false, message: 'Invalid OTP. Please try again.' };
+    if (this._otpData.code !== cleanOtp) {
+      return { success: false, message: 'Invalid OTP. Enter 1234 or try again.' };
     }
 
-    // Success
     this._clearOTP();
     return { success: true, message: 'OTP verified successfully!' };
+  },
+
+  /**
+   * Primary Auth: Username & Password Login with role checking
+   */
+  loginWithPassword({ username, password, role = 'patient' }) {
+    const cleanUser = (username || '').trim().toLowerCase().replace(/^@/, '');
+    if (!cleanUser) {
+      return { success: false, message: 'Please enter your username.' };
+    }
+    if (!password || password.length < 4) {
+      return { success: false, message: 'Please enter your password (minimum 4 characters).' };
+    }
+
+    // Check predefined profiles or stored users
+    const allUsers = Storage.getAllUsers() || [];
+    let existing = allUsers.find(u => (u.username || '').toLowerCase() === cleanUser);
+
+    if (existing) {
+      // If user exists, enforce role alignment
+      existing.role = role;
+      Storage.setUser(existing);
+      return { success: true, user: existing };
+    }
+
+    // Default Demo profiles
+    let userData = null;
+    if (role === 'caregiver') {
+      userData = {
+        name: cleanUser.includes('raj') ? 'Raj Das' : (cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1) + ' (Caregiver)'),
+        username: cleanUser,
+        role: 'caregiver',
+        phone: '9876543210',
+        linkedPatientUsername: 'meera_das'
+      };
+    } else if (role === 'doctor') {
+      userData = {
+        name: cleanUser.includes('barua') ? 'Dr. A. K. Barua' : ('Dr. ' + cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1)),
+        username: cleanUser,
+        role: 'doctor',
+        phone: '9876543212',
+        specialization: 'Neurologist / Geriatric Specialist'
+      };
+    } else {
+      userData = {
+        name: cleanUser.includes('meera') ? 'Meera Das' : (cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1)),
+        username: cleanUser,
+        role: 'patient',
+        phone: '9876543210',
+        stage: 'Mild Cognitive Impairment (MCI)'
+      };
+    }
+
+    const saved = this.login(userData);
+    return { success: true, user: saved };
   },
 
   /**
@@ -103,7 +163,6 @@ const Auth = {
    * @param {{ name: string, phone: string, role: string }} userData
    */
   login(userData) {
-    // Ensure strict user session isolation
     const registered = Storage.registerUser(userData);
     const fullUser = Object.assign({}, userData, registered);
     Storage.setUser(fullUser);

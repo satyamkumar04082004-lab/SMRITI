@@ -16,16 +16,14 @@ import Coins from '../coins.js';
 export default function Home(container) {
   let todayMood = Storage.getTodayMood();
   const journey = Storage.getJourneyStats();
-  const reminders = Storage.getReminders();
+  let reminders = Storage.getReminders();
   const emergency = Storage.getEmergencyContacts();
+  const activeUser = Storage.getUser() || { name: 'Meera Das' };
 
-  // Affirmations collection
-  const thoughts = [
-    "Your presence in the lives of those who love you is irreplaceable.",
-    "Every small moment of today carries peace, memory, and joy.",
-    "You have shared so much warmth, and the world is better for it.",
-    "Take gentle breaths; you are safe, cherished, and surrounded by care.",
-    "Just as the morning sun rises gently, take today step by peaceful step."
+  // Pure Literary Regional Thoughts / Suvichar List
+  let thoughts = I18n.getSuvicharList ? I18n.getSuvicharList(I18n.lang) : [
+    "धैर्य और शांति ही जीवन की सबसे बड़ी शक्ति हैं। अपने आज को स्नेह और आनंद के साथ जिएं।",
+    "सत्य, संतोष और सरलता ही मन को वास्तविक शांति और आरोग्य प्रदान करते हैं।"
   ];
   let thoughtIndex = 0;
 
@@ -33,11 +31,171 @@ export default function Home(container) {
   let defaultTasks = [
     { id: 'bp_med', title: 'Morning Blood Pressure Medicine', completed: false },
     { id: 'morning_water', title: 'Drink 2 glasses of warm water', completed: true },
-    { id: 'memory_game', title: 'Play 1 Cognitive Game (Bamboo Sequence)', completed: false },
+    { id: 'memory_game', title: 'Play 1 Cognitive Game (Hornbill Memory Nest)', completed: false },
     { id: 'deep_breath', title: '5-Minute Mindful Breathing', completed: true },
     { id: 'photo_reminisce', title: 'View 1 Family Memory in Vault', completed: false },
     { id: 'evening_walk', title: 'Gentle 15-Minute Garden Walk', completed: false }
   ];
+
+  // Calculate missed reminders on load
+  function getMissedReminders() {
+    const list = Storage.getReminders() || [];
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    return list.filter(r => {
+      if (r.completedToday || r.active === false || !r.time) return false;
+      // Parse 12h or 24h format e.g. "08:30 AM" or "08:30"
+      const match = r.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+      if (!match) return false;
+      let h = parseInt(match[1], 10);
+      const m = parseInt(match[2], 10);
+      const ampm = match[3] ? match[3].toUpperCase() : null;
+      if (ampm === 'PM' && h < 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      const remMins = h * 60 + m;
+      return remMins < currentMins;
+    });
+  }
+
+  let missedReminders = getMissedReminders();
+  let speechRecognizer = null;
+  let geofenceAlertActive = false;
+  let geofenceDistance = 0;
+
+  // Haversine distance calculator for safe zone geofencing (Default home: Guwahati Assam)
+  function checkGeofenceSafety() {
+    if (!('geolocation' in navigator)) return;
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const homeLat = 26.1445;
+      const homeLng = 91.7362;
+      const R = 6371e3; // Earth radius in meters
+      const dLat = (lat - homeLat) * Math.PI / 180;
+      const dLng = (lng - homeLng) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(homeLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const dist = R * c;
+
+      if (dist > 500) { // 500m safe perimeter
+        geofenceAlertActive = true;
+        geofenceDistance = Math.round(dist);
+        Storage.saveEmergencyAlert({
+          type: 'Geofence Breach',
+          distance: geofenceDistance,
+          lat,
+          lng,
+          location: `https://www.google.com/maps?q=${lat},${lng}`,
+          notes: `Patient stepped ${geofenceDistance}m outside the safe zone`
+        });
+        const banner = container.querySelector('#geofence-warning-banner');
+        if (banner) banner.style.display = 'block';
+      }
+    }, () => {});
+  }
+
+  // Voice-Activated SOS Listener ("Help", "Bachao", "Madad")
+  function initVoiceActivatedSOS() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) return;
+    try {
+      speechRecognizer = new SpeechRec();
+      speechRecognizer.continuous = true;
+      speechRecognizer.interimResults = false;
+      speechRecognizer.lang = I18n.lang === 'hi' ? 'hi-IN' : 'en-IN';
+
+      speechRecognizer.onresult = (e) => {
+        const last = e.results[e.results.length - 1];
+        if (!last || !last[0]) return;
+        const transcript = last[0].transcript.toLowerCase();
+        console.log('🎙️ Ambient Voice SOS Listener detected:', transcript);
+
+        if (
+          transcript.includes('help') ||
+          transcript.includes('bachao') ||
+          transcript.includes('madad') ||
+          transcript.includes('मदद') ||
+          transcript.includes('बचाओ') ||
+          transcript.includes('सहायता')
+        ) {
+          trigger1TapEmergencySOS('Voice Trigger: ' + transcript);
+        }
+      };
+
+      speechRecognizer.onerror = (err) => {
+        // Softly ignore speech recognizer aborts or ambient silence
+      };
+
+      speechRecognizer.start();
+    } catch (e) {
+      console.warn('Voice SOS listener init:', e);
+    }
+  }
+
+  // 1-Tap Emergency SOS Routine
+  function trigger1TapEmergencySOS(reason = '1-Tap Fixed Button') {
+    TTS.speak('Emergency alert activated. Sending your location to your caregiver and connecting you right now.');
+
+    let mapLink = 'https://www.google.com/maps?q=26.1445,91.7362';
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+          Storage.saveEmergencyAlert({
+            type: '1-Tap SOS',
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            location: mapLink,
+            notes: reason
+          });
+          showEmergencyModal(mapLink, reason);
+        },
+        () => {
+          Storage.saveEmergencyAlert({ type: '1-Tap SOS', location: mapLink, notes: reason });
+          showEmergencyModal(mapLink, reason);
+        },
+        { timeout: 5000 }
+      );
+    } else {
+      Storage.saveEmergencyAlert({ type: '1-Tap SOS', location: mapLink, notes: reason });
+      showEmergencyModal(mapLink, reason);
+    }
+  }
+
+  function showEmergencyModal(mapLink, reason) {
+    const existing = document.getElementById('home-sos-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'home-sos-modal';
+    modal.className = 'fixed inset-0 bg-black/75 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 animate-fade-in';
+    modal.innerHTML = `
+      <div class="bg-white max-w-md w-full p-6 rounded-3xl border-4 border-red-500 shadow-2xl text-center">
+        <div class="text-5xl mb-3 animate-bounce">🚨</div>
+        <h2 class="text-2xl font-black text-red-700 mb-1">EMERGENCY SOS BROADCASTED</h2>
+        <p class="text-gray-700 text-sm font-medium mb-4">${reason}</p>
+        
+        <div class="p-3 bg-red-50 rounded-2xl border border-red-200 text-left text-xs mb-4">
+          <p class="font-bold text-red-900 mb-1">📍 Live GPS Coordinates Shared:</p>
+          <a href="${mapLink}" target="_blank" class="text-blue-600 underline break-all">${mapLink}</a>
+        </div>
+
+        <div class="space-y-3">
+          <a href="tel:${emergency.primaryPhone}" class="w-full flex items-center justify-center gap-2 py-4 px-6 bg-red-600 hover:bg-red-700 text-white font-extrabold text-lg rounded-2xl shadow-lg min-h-[56px]">
+            📞 Call ${escapeHtml(emergency.primaryName)}
+          </a>
+          <button id="btn-close-sos-modal" class="w-full py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl min-h-[48px] cursor-pointer">
+            Dismiss Alert
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('#btn-close-sos-modal')?.addEventListener('click', () => modal.remove());
+  }
 
   let completedTasksCount = defaultTasks.filter(t => t.completed).length;
   let totalTasksCount = 6;
@@ -60,7 +218,48 @@ export default function Home(container) {
     const greetingInfo = getTimeGreeting();
 
     container.innerHTML = `
-      <div class="sanctuary-container page-enter" style="max-width: 760px; margin: 0 auto; padding: 1rem 1rem 6rem 1rem;">
+      <div class="sanctuary-container page-enter" style="max-width: 760px; margin: 0 auto; padding: 1rem 1rem 6rem 1rem; position: relative;">
+
+        <!-- 0a. Missed Reminders Soothing Alert Banner (Module 3) -->
+        ${missedReminders.length > 0 ? `
+          <div id="missed-reminder-banner" class="p-4 mb-4 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3 animate-pulse">
+            <div class="flex items-center gap-3 text-left w-full sm:w-auto">
+              <span class="text-3xl">⚠️</span>
+              <div>
+                <h4 class="text-amber-900 font-black text-base m-0">Gentle Medication / Schedule Reminder</h4>
+                <p class="text-amber-800 text-sm m-0 mt-0.5 font-medium">
+                  <strong>${escapeHtml(missedReminders[0].title)}</strong> was scheduled for ${missedReminders[0].time}. Please take it now or alert your caregiver.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button id="btn-take-missed-now" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl min-h-[48px] shadow cursor-pointer whitespace-nowrap">
+                ✅ Take Now
+              </button>
+              <button id="btn-alert-caregiver-missed" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl min-h-[48px] shadow cursor-pointer whitespace-nowrap">
+                📞 Alert Caregiver
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- 0b. Geofencing Safe Zone Warning Banner (Module 3) -->
+        <div id="geofence-warning-banner" style="display: ${geofenceAlertActive ? 'block' : 'none'};" class="p-4 mb-4 rounded-2xl bg-red-50 border-2 border-red-400 shadow-md">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 text-left">
+              <span class="text-3xl">📍</span>
+              <div>
+                <h4 class="text-red-900 font-black text-base m-0">Safe Zone Distance Notice</h4>
+                <p class="text-red-800 text-sm m-0 mt-0.5">
+                  You are currently <strong id="geofence-dist-val">${geofenceDistance}m</strong> from your safe home sanctuary. Saathi and ${escapeHtml(emergency.primaryName)} are right here with you.
+                </p>
+              </div>
+            </div>
+            <button onclick="window.location.hash='#/emergency'" class="px-4 py-2 bg-red-600 text-white text-xs font-black rounded-xl min-h-[48px] whitespace-nowrap cursor-pointer">
+              Call ${escapeHtml(emergency.primaryName)}
+            </button>
+          </div>
+        </div>
 
         <!-- 1. Caregiver Connection Banner -->
         <section class="stitch-caregiver-banner" data-purpose="caregiver-banner">
@@ -72,6 +271,11 @@ export default function Home(container) {
             <span>📋</span> <span>${I18n.t('caregiver.viewReport')}</span>
           </button>
         </section>
+
+        <!-- Fixed 1-Tap Floating SOS Button with Live Location (Module 3) -->
+        <button id="btn-fixed-1tap-sos" class="fixed bottom-24 right-5 w-16 h-16 rounded-full bg-red-600 text-white text-3xl font-black shadow-2xl flex items-center justify-center border-4 border-white hover:scale-105 active:scale-95 transition-all cursor-pointer z-[9999] animate-pulse" title="1-Tap Emergency SOS (Shares Live GPS Location)">
+          🚨
+        </button>
 
         <!-- 2. Welcome Hero Card with 6-Task Progress Meter -->
         <section class="stitch-hero-card" style="background: linear-gradient(135deg, #FFF9F2, #FFF2E2); border: 2px solid #F3E8DC; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm);">
@@ -236,35 +440,35 @@ export default function Home(container) {
           </div>
         </section>
 
-        <!-- 6. Personalized Cognitive Activity Card (Bamboo Sequence) -->
+        <!-- 6. Personalized Cognitive Activity Card (Hornbill Memory Nest) -->
         <section class="stitch-activity-card" style="background: #FFFFFF; border: 2px solid #99F6E4; border-radius: 20px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm);" data-purpose="personalized-cognitive-activity">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;">
             <div>
               <span style="font-size: 0.78rem; font-weight: 800; color: #0F766E; letter-spacing: 0.5px;">
-                ${I18n.t('activity.subhead')}
+                DAILY MINDFUL CHALLENGE
               </span>
               <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--maroon); margin-top: 2px;">
-                ${I18n.t('activity.title')}
+                🦅 Hornbill Memory Nest
               </h2>
             </div>
             <span style="background: #E6F4F1; color: #0F766E; border: 1px solid #99F6E4; padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 0.8rem;">
-              ${I18n.t('activity.category')}
+              Visual Recall
             </span>
           </div>
 
           <p style="color: #4B5563; font-size: 0.95rem; margin-top: 8px; line-height: 1.4;">
-            ${I18n.t('activity.description')}
+            Gently pair beautiful Northeast nature symbols to exercise visual working memory and attention.
           </p>
 
           <div style="margin: 0.85rem 0; padding: 0.85rem; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 16px; display: flex; align-items: flex-start; gap: 0.65rem;">
             <span style="font-size: 1.4rem;">💡</span>
             <p style="font-size: 0.88rem; font-weight: 600; color: #166534; margin: 0; line-height: 1.45;">
-              ${I18n.t('activity.reason')}
+              Tailored for your gentle morning focus — adaptive difficulty with level lock progression.
             </p>
           </div>
 
-          <button id="btn-start-bamboo-activity" class="stitch-primary-btn" onclick="window.location.hash='#/games/bamboo-sequence'" style="width: 100%; height: 50px; background: #800020; color: #FFFFFF; border: none; border-radius: 14px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: var(--shadow-sm);">
-            <span>▶</span> <span>${I18n.t('activity.start_btn')}</span>
+          <button id="btn-start-hornbill-activity" class="stitch-primary-btn" onclick="window.location.hash='#/games/hornbill'" style="width: 100%; height: 50px; background: #800020; color: #FFFFFF; border: none; border-radius: 14px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: var(--shadow-sm);">
+            <span>▶</span> <span>Play Hornbill Memory Nest</span>
           </button>
         </section>
 
@@ -470,15 +674,54 @@ export default function Home(container) {
       });
     }
 
-    // Affirmation Cycle
+    // Affirmation Cycle (Pure Hindi & Regional)
     const cycleAffBtn = container.querySelector('#btn-cycle-affirmation');
     if (cycleAffBtn) {
       cycleAffBtn.addEventListener('click', () => {
+        thoughts = I18n.getSuvicharList ? I18n.getSuvicharList(I18n.lang) : thoughts;
         thoughtIndex = (thoughtIndex + 1) % thoughts.length;
         const quoteEl = container.querySelector('#affirmation-quote');
         if (quoteEl) {
           quoteEl.textContent = `"${thoughts[thoughtIndex]}"`;
         }
+      });
+    }
+
+    // Fixed 1-Tap SOS Floating Button Event
+    const fixedSosBtn = container.querySelector('#btn-fixed-1tap-sos');
+    if (fixedSosBtn) {
+      fixedSosBtn.addEventListener('click', () => {
+        trigger1TapEmergencySOS('1-Tap Fixed Button');
+      });
+    }
+
+    // Missed Reminders Action Listeners
+    const takeMissedBtn = container.querySelector('#btn-take-missed-now');
+    if (takeMissedBtn && missedReminders.length > 0) {
+      takeMissedBtn.addEventListener('click', () => {
+        const item = missedReminders[0];
+        item.completedToday = true;
+        // Update in Storage
+        const all = Storage.getReminders() || [];
+        const found = all.find(r => r.id === item.id);
+        if (found) found.completedToday = true;
+        Storage.setReminders(all);
+
+        Coins.add(10, `Overdue routine completed: ${item.title}`);
+        if (window.SmritiToast) {
+          window.SmritiToast.show(`Great job! Completed: ${item.title}. +10 Coins 🪙`, 'success');
+        }
+
+        const banner = container.querySelector('#missed-reminder-banner');
+        if (banner) banner.remove();
+        missedReminders = getMissedReminders();
+      });
+    }
+
+    const alertCaregiverMissedBtn = container.querySelector('#btn-alert-caregiver-missed');
+    if (alertCaregiverMissedBtn && missedReminders.length > 0) {
+      alertCaregiverMissedBtn.addEventListener('click', () => {
+        trigger1TapEmergencySOS('Missed Schedule Assistance: ' + missedReminders[0].title);
       });
     }
 
@@ -494,15 +737,11 @@ export default function Home(container) {
       });
     }
 
-    // Emergency Grid Trigger (if element present)
+    // Emergency Grid Trigger
     const gridSosBtn = container.querySelector('#btn-grid-sos');
     if (gridSosBtn) {
       gridSosBtn.addEventListener('click', () => {
-        if (typeof window.triggerEmergencySOSModal === 'function') {
-          window.triggerEmergencySOSModal();
-        } else {
-          window.location.hash = '#/emergency';
-        }
+        trigger1TapEmergencySOS('Navigation Grid SOS');
       });
     }
   }
@@ -516,17 +755,29 @@ export default function Home(container) {
 
   // Subscribe to reactive user and language changes
   const unsubUser = UserState.subscribe(() => render());
-  const handleLangChange = () => render();
+  const handleLangChange = () => {
+    thoughts = I18n.getSuvicharList ? I18n.getSuvicharList(I18n.lang) : thoughts;
+    render();
+  };
   window.addEventListener('smriti:languageChanged', handleLangChange);
   window.addEventListener('languageChanged', handleLangChange);
 
   // Initial render
   render();
 
+  // Initialize Voice-Activated SOS & Geofencing safe zone
+  initVoiceActivatedSOS();
+  checkGeofenceSafety();
+
   // Cleanup on route navigation
   return function cleanup() {
     unsubUser();
     window.removeEventListener('smriti:languageChanged', handleLangChange);
     window.removeEventListener('languageChanged', handleLangChange);
+    if (speechRecognizer) {
+      try {
+        speechRecognizer.stop();
+      } catch (e) {}
+    }
   };
 }

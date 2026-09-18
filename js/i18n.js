@@ -1524,6 +1524,44 @@ const I18n = {
       { code: 'ne', name: 'नेपाली (Nepali)', native: 'नेपाली' }
     ];
   },
+
+  getSuvicharList(lang = this.lang) {
+    const suvicharMap = {
+      hi: [
+        "धैर्य और शांति ही जीवन की सबसे बड़ी शक्ति हैं। अपने आज को स्नेह और आनंद के साथ जिएं।",
+        "सत्य, संतोष और सरलता ही मन को वास्तविक शांति और आरोग्य प्रदान करते हैं।",
+        "जैसे प्रातःकालीन सूर्य अंधकार को दूर करता है, वैसे ही सकारात्मक विचार जीवन में प्रकाश भरते हैं।",
+        "प्रत्येक नया प्रभात ईश्वर का सुंदर उपहार है; इसे कृतज्ञता और प्रसन्नता के साथ स्वीकार करें।",
+        "शांत चित्त और स्नेहपूर्ण वाणी ही उत्तम स्वास्थ्य और दीर्घायु की सच्ची कुंजी हैं।"
+      ],
+      bn: [
+        "ধৈর্য ও আনন্দই অন্তরের পরম শান্তি। আজকের প্রতিটি মুহূর্ত শান্তিতে অতিবাহিত করুন।",
+        "সততা ও নির্মল মনই প্রকৃত সুখ এবং সুস্বাস্থ্যের উৎস।",
+        "প্রতিটি নতুন সকাল জীবনের এক অনন্য উপহার; শান্ত মনে এগিয়ে চলুন।"
+      ],
+      as: [
+        "ধৈৰ্য্য আৰু শান্তিয়েই মনৰ প্ৰকৃত বল। আজিৰ দিনটো আনন্দৰে কটাওক।",
+        "প্ৰতিটো নতুন পুৱা আশা আৰু নতুন সম্ভাৱনাৰ বতৰা লৈ আহে।",
+        "শান্ত মন আৰু সন্তোষেই মানৱ জীৱনৰ সৰ্বশ্ৰেষ্ঠ সম্পদ।"
+      ],
+      mni: [
+        "নুংশিবা অমসুং শান্তিনা পুন্সিগী অহিংবা মঙালনি। ঙসিগী নুমিৎ অসিবু নুংঙাইনা লেপসি।",
+        "পুকনিংগী অচুম্বা অমসুং চেন্দবা ৱাখল্লোন্না পরম শান্তি পীবনি।"
+      ],
+      ne: [
+        "शान्ति र सन्तोष नै जीवनको सबैभन्दा ठूलो धन हो। आजको दिन आनन्दपूर्वक बिताउनुहोस्।",
+        "हरेक नयाँ बिहानीले जीवनमा नयाँ आशा, स्नेह र उमंग लिएर आउँछ।",
+        "सकारात्मक सोच र धैर्यले नै मनलाई सधैं स्वस्थ र प्रफुल्ल राख्छ।"
+      ],
+      en: [
+        "Patience and peace are the greatest strengths of the soul. Embrace today with warmth and gentleness.",
+        "Every small moment of today carries serenity, remembrance, and loving care.",
+        "Take gentle breaths; you are safe, cherished, and surrounded by kindness.",
+        "Just as the morning sun rises gently, take today step by peaceful step."
+      ]
+    };
+    return suvicharMap[lang] || suvicharMap.en;
+  }
 };
 
 export const LanguageContext = {
@@ -1581,6 +1619,10 @@ export const LanguageContext = {
 
   getAvailableLanguages() {
     return I18n.getAvailableLanguages();
+  },
+
+  getSuvicharList(lang) {
+    return I18n.getSuvicharList(lang || this.getLanguage());
   }
 };
 
@@ -1589,7 +1631,8 @@ export function useLanguage() {
     language: LanguageContext.getLanguage(),
     setLanguage: (lang) => LanguageContext.setLanguage(lang),
     t: (key, vars) => LanguageContext.t(key, vars),
-    availableLanguages: LanguageContext.getAvailableLanguages()
+    availableLanguages: LanguageContext.getAvailableLanguages(),
+    suvicharList: LanguageContext.getSuvicharList()
   };
 }
 
