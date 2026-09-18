@@ -17,65 +17,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS & React 18 Integration -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            maroon: { DEFAULT: '#800020', dark: '#5B0017', light: '#9B2C2C' },
-            healing: { DEFAULT: '#0D9488', dark: '#0F766E', light: '#CCFBF1' },
-            calm: { DEFAULT: '#0284C7', dark: '#0369A1', light: '#E0F2FE' },
-            wellness: { DEFAULT: '#15803D', dark: '#166534', light: '#DCFCE7' },
-            sanctuary: '#FDFBF7'
-          }
-        }
-      }
-    };
-  </script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Design System Stylesheets -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/style.css">
 
   <script>
-    // Global error catcher
+    // Global error catcher — shows JS errors on screen in debug environments
     window.onerror = function(msg, src, line, col, err) {
       console.error('SMRITI Global Error:', msg, src, line, col, err);
       const root = document.getElementById('root');
-      if (root && root.querySelector('.loading-state')) {
+      if (root && !root.hasChildNodes()) {
         root.innerHTML =
           '<div style="padding:24px;color:#800020;font-family:monospace;white-space:pre-wrap;background:#FFF5F5;border:2px solid #FEB2B2;border-radius:16px;margin:16px;">' +
-          '<h3>Recovery Refresh:</h3>' + msg + '\n\nFile: ' + src +
-          '<div style="margin-top:12px;"><button onclick="if(\'caches\' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}location.reload(true);" style="padding:10px 18px;background:#800020;color:white;border-radius:10px;font-weight:700;cursor:pointer;">Clear Cache & Refresh</button></div>' +
-          '</div>';
+          '<h3>Application Error:</h3>' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col +
+          (err && err.stack ? '\n\nStack:\n' + err.stack : '') + '</div>';
       }
     };
     window.addEventListener('unhandledrejection', function(e) {
       console.warn('SMRITI Unhandled Promise Rejection:', e.reason);
     });
-
-    // Auto-rescue watchdog: if app doesn't mount in 3s due to stale ServiceWorker cache, purge and refresh
-    setTimeout(() => {
-      const root = document.getElementById('root');
-      if (root && root.querySelector('.loading-state')) {
-        console.warn('Watchdog triggered: clearing stale caches...');
-        if ('caches' in window) {
-          caches.keys().then(names => {
-            names.forEach(name => {
-              if (name !== 'smriti-v20') caches.delete(name);
-            });
-          });
-        }
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(regs => {
-            regs.forEach(reg => reg.update());
-          });
-        }
-      }
-    }, 2500);
   </script>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-[#FDFBF7]" data-region="Assam" data-lang="en">
+<body class="min-h-screen flex flex-col justify-between" data-region="Assam" data-lang="en">
   <!-- Accessibility Skip Link -->
   <a href="#page-content" class="skip-link sr-only focus:not-sr-only">Skip to main content</a>
 
@@ -91,18 +54,15 @@
   <!-- Accessible Modals & Slide-over Drawers Container Mount Points -->
   <div id="modal-container" aria-live="polite"></div>
 
-  <!-- App Entry Point (Cache Busted to guarantee instant updates) -->
-  <script type="module" src="js/app.js?v=2026.09.18.1"></script>
+  <!-- App Entry Point -->
+  <script type="module" src="js/app.js"></script>
 
   <!-- Service Worker Registration for Offline & Edge Resilience -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=2026.09.18.1')
-          .then((reg) => {
-            reg.update();
-            console.log('SMRITI ServiceWorker registered with scope:', reg.scope);
-          })
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('SMRITI ServiceWorker registered with scope:', reg.scope))
           .catch((err) => console.warn('SMRITI ServiceWorker registration warning:', err));
       });
     }

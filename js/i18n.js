@@ -1507,10 +1507,6 @@ const I18n = {
       const key = el.getAttribute('data-i18n-placeholder');
       el.placeholder = this.t(key);
     });
-
-    const eventPayload = { lang: this._currentLang, language: this._currentLang };
-    window.dispatchEvent(new CustomEvent('smriti:languageChanged', { detail: eventPayload }));
-    window.dispatchEvent(new CustomEvent('languageChanged', { detail: eventPayload }));
   },
 
   getAvailableLanguages() {
@@ -1564,6 +1560,8 @@ const I18n = {
   }
 };
 
+let isUpdatingLanguageContext = false;
+
 export const LanguageContext = {
   currentLanguage: 'en',
   subscribers: new Set(),
@@ -1579,21 +1577,26 @@ export const LanguageContext = {
   },
 
   setLanguage(lang) {
-    if (!lang) return;
-    this.currentLanguage = lang;
-    
-    // Update I18n engine
-    I18n.setLanguage(lang);
+    if (!lang || isUpdatingLanguageContext) return;
+    isUpdatingLanguageContext = true;
+    try {
+      this.currentLanguage = lang;
+      
+      // Update I18n engine
+      I18n.setLanguage(lang);
 
-    // Dispatch global events for DOM & external listeners
-    if (typeof window !== 'undefined') {
-      const detail = { lang, language: lang };
-      window.dispatchEvent(new CustomEvent('smriti:languageChanged', { detail }));
-      window.dispatchEvent(new CustomEvent('languageChanged', { detail }));
+      // Dispatch global events for DOM & external listeners
+      if (typeof window !== 'undefined') {
+        const detail = { lang, language: lang };
+        window.dispatchEvent(new CustomEvent('smriti:languageChanged', { detail }));
+        window.dispatchEvent(new CustomEvent('languageChanged', { detail }));
+      }
+
+      // Notify all subscribed components
+      this.notify();
+    } finally {
+      isUpdatingLanguageContext = false;
     }
-
-    // Notify all subscribed components
-    this.notify();
   },
 
   subscribe(callback) {

@@ -918,43 +918,50 @@ function init() {
   window.addEventListener('hashchange', navigate);
 
   // Reactive Language Event Handlers for zero-reload live re-render
+  let isRefreshingLang = false;
   const handleLangRefresh = () => {
-    // Add smooth in-place transition class to content container
-    if (contentEl) {
-      contentEl.classList.remove('lang-transition-active');
-      void contentEl.offsetWidth; // Trigger DOM reflow for CSS animation restart
-      contentEl.classList.add('lang-transition-active');
-    }
-
-    I18n.updateAllText();
-    renderHeader();
-    const hash = window.location.hash || '#/home';
-    const route = routes[hash];
-    if (route && route.nav && Auth.isLoggedIn()) {
-      renderNav(hash);
-    }
-    // Re-render Saathi drawer if initialized
-    if (saathiDrawerEl) {
-      renderSaathiDrawer();
-    }
-    // Instantly re-render active page content with new language in-place without modifying window.location
-    if (route && contentEl && typeof route.page === 'function') {
-      try {
-        if (currentCleanup) {
-          if (typeof currentCleanup === 'function') currentCleanup();
-          else if (typeof currentCleanup.cleanup === 'function') currentCleanup.cleanup();
-          currentCleanup = null;
-        }
-        contentEl.innerHTML = '';
-        currentCleanup = route.page(contentEl);
-      } catch (e) {
-        console.warn('Page re-render on language change error:', e);
+    if (isRefreshingLang) return;
+    isRefreshingLang = true;
+    try {
+      // Add smooth in-place transition class to content container
+      if (contentEl) {
+        contentEl.classList.remove('lang-transition-active');
+        void contentEl.offsetWidth; // Trigger DOM reflow for CSS animation restart
+        contentEl.classList.add('lang-transition-active');
       }
-    }
 
-    setTimeout(() => {
-      if (contentEl) contentEl.classList.remove('lang-transition-active');
-    }, 300);
+      I18n.updateAllText();
+      renderHeader();
+      const hash = window.location.hash || '#/home';
+      const route = routes[hash];
+      if (route && route.nav && Auth.isLoggedIn()) {
+        renderNav(hash);
+      }
+      // Re-render Saathi drawer if open
+      if (saathiDrawerEl && saathiDrawerOpen) {
+        renderSaathiDrawer();
+      }
+      // Instantly re-render active page content with new language in-place without modifying window.location
+      if (route && contentEl && typeof route.page === 'function') {
+        try {
+          if (currentCleanup) {
+            if (typeof currentCleanup === 'function') currentCleanup();
+            else if (typeof currentCleanup.cleanup === 'function') currentCleanup.cleanup();
+            currentCleanup = null;
+          }
+          contentEl.innerHTML = '';
+          currentCleanup = route.page(contentEl);
+        } catch (e) {
+          console.warn('Page re-render on language change error:', e);
+        }
+      }
+
+      setTimeout(() => {
+        if (contentEl) contentEl.classList.remove('lang-transition-active');
+      }, 300);
+    } finally {
+      isRefreshingLang = false;
+    }
   };
 
   window.addEventListener('smriti:languageChanged', handleLangRefresh);

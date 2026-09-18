@@ -566,7 +566,8 @@ const AIService = {
       { id: 'familiar-faces', name: 'Familiar Faces', icon: '👨‍👩‍👧', tag: 'Social Recognition', route: '#/games/familiar-faces', desc: 'Connect friendly faces with warm hints', area: 'Face Recognition' },
       { id: 'remember-home', name: 'Remember My Home', icon: '🏠', tag: 'Spatial Focus', route: '#/games/remember-home', desc: 'Spot and remember household objects in rooms', area: 'Spatial Memory' },
       { id: 'my-day', name: 'My Day', icon: '☀️', tag: 'Routine Sequencing', route: '#/games/my-day', desc: 'Arrange healthy daily steps in sequential order', area: 'Executive Function' },
-      { id: 'listen-remember', name: 'Listen & Remember', icon: '👂', tag: 'Auditory Attention', route: '#/games/listen-remember', desc: 'Listen to clear uplifting sentences and recall words', area: 'Auditory Memory' }
+      { id: 'listen-remember', name: 'Listen & Remember', icon: '👂', tag: 'Auditory Attention', route: '#/games/listen-remember', desc: 'Listen to clear uplifting sentences and recall words', area: 'Auditory Memory' },
+      { id: 'bamboo-sequence', name: 'Bamboo Sequence', icon: '🎋', tag: 'Pattern Attention', route: '#/games/bamboo-sequence', desc: 'Repeat peaceful glowing bamboo rhythm pads', area: 'Sequential Memory' }
     ];
 
     const mood = overrideMood || (Storage.getTodayMood() ? Storage.getTodayMood().mood : null);
@@ -577,9 +578,9 @@ const AIService = {
       return { ...games[2], reason: 'Recommended because you felt low or worried today — connecting with familiar friendly faces brings comfort and reassurance.' };
     }
     if (mood === 'great' || mood === 'good') {
-      return { ...games[0], reason: 'Recommended because of your great positive energy today — challenge your visual memory with Hornbill Memory Nest!' };
+      return { ...games[6], reason: 'Recommended because of your great positive energy today — challenge your pattern memory with glowing bamboo rhythms!' };
     }
-    return { ...games[5], reason: 'Recommended for a peaceful memory workout — listening to gentle sounds to refresh your thoughts.' };
+    return { ...games[0], reason: 'Recommended for a peaceful memory workout — matching nature cards to refresh your thoughts.' };
   }
 };
 

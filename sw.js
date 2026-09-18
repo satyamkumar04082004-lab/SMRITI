@@ -49,7 +49,8 @@ const PRECACHE_URLS = [
   './js/games/familiarFaces.js',
   './js/games/rememberHome.js',
   './js/games/myDay.js',
-  './js/games/listenRemember.js'
+  './js/games/listenRemember.js',
+  './js/games/bambooSequence.js'
 ];
 
 // Install: Pre-cache essential app shell assets

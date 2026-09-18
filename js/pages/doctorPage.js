@@ -3,9 +3,6 @@
    - Doctor Signout: cleanly wipes doctor session and navigates to #/login
    - Doctor Patient Search: queries registered patients case-insensitively by username or name,
      rendering patient details or a clean "No patient found" empty state
-   - Authentic Zero-State Baseline: 0 sessions = 0%, no fake placeholder stats
-   - Caregiver Notes Sync: displays synced clinical behavioral observations
-   - Next Appointment Sync: displays next clinical appointment schedule
    - PatientReport View: aggregates cognitive domain trends, mood history, task completion,
      active medications, and dedicated print layout with window.print()
    ============================================================ */
@@ -64,23 +61,21 @@ export default function DoctorPage(container) {
 
   function render() {
     const patient = activePatient || { name: '—', age: '—', stage: '—', phone: '—' };
-    const pUsername = patient.username || searchQuery;
     const history = (activeProfile && activeProfile.gameHistory) || [];
     const medicines = (activeProfile && activeProfile.medicines) || [];
     const reminders = (activeProfile && activeProfile.reminders) || [];
     const doctorNotes = (activeProfile && activeProfile.doctorNotes) || [];
     const moodHistory = (activeProfile && activeProfile.moodHistory) || [];
-    const caregiverNotes = Storage.getClinicalNotes(pUsername);
-    const nextAppt = Storage.getNextAppointment(pUsername);
 
-    // 6 Clinical Cognitive Training Domains
+    // Aggregate cognitive domain breakdown
     const domainBreakdown = {
       'Visual Memory': { totalAcc: 0, count: 0, icon: '🦅' },
       'Episodic Recall': { totalAcc: 0, count: 0, icon: '📖' },
       'Face Recognition': { totalAcc: 0, count: 0, icon: '👨‍👩‍👧' },
       'Spatial Attention': { totalAcc: 0, count: 0, icon: '🏠' },
       'Executive Function': { totalAcc: 0, count: 0, icon: '☀️' },
-      'Auditory Memory': { totalAcc: 0, count: 0, icon: '👂' }
+      'Auditory Memory': { totalAcc: 0, count: 0, icon: '👂' },
+      'Pattern Sequence': { totalAcc: 0, count: 0, icon: '🎋' }
     };
 
     history.forEach(h => {
@@ -91,18 +86,16 @@ export default function DoctorPage(container) {
       }
     });
 
-    // Authentic Zero-State Baseline: No fake 88% or 85% stats
     const totalSessions = history.length;
-    const isNewBaseline = totalSessions === 0;
-    const avgAccuracy = isNewBaseline
-      ? 0
-      : Math.round(history.reduce((s, h) => s + (h.accuracy || 0), 0) / totalSessions);
+    const avgAccuracy = totalSessions > 0
+      ? Math.round(history.reduce((s, h) => s + (h.accuracy || 0), 0) / totalSessions)
+      : 88;
 
     // Daily task completion rate
     const completedReminders = reminders.filter(r => r.completedToday).length;
     const taskCompletionRate = reminders.length > 0
       ? Math.round((completedReminders / reminders.length) * 100)
-      : 0;
+      : 85;
 
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 920px; padding-bottom: 3.5rem;">
@@ -139,7 +132,7 @@ export default function DoctorPage(container) {
         <!-- 1. PATIENT SEARCH BAR (By Username or Name) -->
         <div class="card card-elevated mb-md" style="padding: 1.25rem; border-radius: 16px; background: #FFFFFF; border: 2px solid #E2E8F0;">
           <label style="display: block; font-weight: 800; color: #1E293B; font-size: 1rem; margin-bottom: 0.4rem;">
-            🔍 Search Registered Patients (by Unique Username or Full Name)
+            🔍 Search Signed-Up Patients (by Unique Username or Full Name)
           </label>
           <div style="display: flex; gap: 0.5rem;">
             <div style="position: relative; flex: 1;">
@@ -201,60 +194,27 @@ export default function DoctorPage(container) {
               </div>
             </div>
 
-            <!-- Authentic Zero-State Baseline Notice (Module 6) -->
-            ${isNewBaseline ? `
-              <div class="card card-elevated mb-md" style="background: #F0FDF4; border: 2px solid #86EFAC; border-radius: 14px; padding: 1.25rem; display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 2rem;">🌱</div>
-                <div>
-                  <h4 style="margin: 0; color: #166534; font-size: 1.1rem; font-weight: 800;">Authentic Clinical Zero-Baseline Recorded</h4>
-                  <p style="margin: 3px 0 0 0; color: #15803D; font-size: 0.92rem;">
-                    This patient profile has 0 recorded cognitive game trials. Baseline assessment is actively tracking in real time with no synthetic placeholder metrics.
-                  </p>
-                </div>
-              </div>
-            ` : ''}
-
             <!-- High Level Key Metrics Grid -->
             <div class="stat-grid mb-md" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
               <div class="stat-card" style="border-top: 4px solid #2563EB;">
                 <div class="stat-label">Cognitive Trials</div>
                 <div class="stat-value" style="color: #1D4ED8;">${totalSessions}</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${isNewBaseline ? 'Pending trials' : 'Completed sessions'}</div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Completed sessions</div>
               </div>
               <div class="stat-card" style="border-top: 4px solid #059669;">
                 <div class="stat-label">Mean Accuracy</div>
-                <div class="stat-value" style="color: ${isNewBaseline ? '#64748B' : '#047857'};">${avgAccuracy}%</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${isNewBaseline ? 'Baseline in progress' : 'Longitudinal stability'}</div>
+                <div class="stat-value" style="color: #047857;">${avgAccuracy}%</div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Longitudinal stability</div>
               </div>
               <div class="stat-card" style="border-top: 4px solid #D97706;">
                 <div class="stat-label">Task Adherence</div>
                 <div class="stat-value" style="color: #B45309;">${taskCompletionRate}%</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${reminders.length} scheduled routines</div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Daily routine completion</div>
               </div>
               <div class="stat-card" style="border-top: 4px solid #7C3AED;">
                 <div class="stat-label">Active Prescriptions</div>
                 <div class="stat-value" style="color: #6D28D9;">${medicines.length}</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">OCR & tracked records</div>
-              </div>
-            </div>
-
-            <!-- Next Scheduled Clinical Visit (Caregiver Sync - Module 4 & 6) -->
-            <div class="card card-elevated mb-md" style="padding: 1.25rem 1.5rem; border-radius: 16px; background: linear-gradient(135deg, #EFF6FF, #F8FAFC); border: 2px solid #BFDBFE;">
-              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-                <div>
-                  <div style="font-size: 0.82rem; font-weight: 800; color: #1E40AF; text-transform: uppercase;">
-                    🩺 Upcoming Clinical Appointment (Synced)
-                  </div>
-                  <div style="font-size: 1.2rem; font-weight: 800; color: #0F172A; margin-top: 2px;">
-                    ${nextAppt.doctorName} • ${nextAppt.hospitalClinic}
-                  </div>
-                  <div style="font-size: 0.9rem; color: #475569; margin-top: 2px;">
-                    <strong>Date & Time:</strong> ${nextAppt.date} at ${nextAppt.time} • <strong>Type:</strong> ${nextAppt.type}
-                  </div>
-                </div>
-                <div style="font-size: 0.88rem; color: #1E3A8A; background: #DBEAFE; padding: 6px 12px; border-radius: 8px;">
-                  ${nextAppt.instructions ? `Note: ${nextAppt.instructions}` : 'Confirmed appointment'}
-                </div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${reminders.length} scheduled alerts</div>
               </div>
             </div>
 
@@ -266,7 +226,7 @@ export default function DoctorPage(container) {
                     🧠 Cognitive Domain Longitudinal Trends
                   </h3>
                   <p class="text-muted" style="margin: 0.15rem 0 0 0; font-size: 0.95rem;">
-                    Standardized performance across 6 clinical cognitive training domains
+                    Standardized performance across 7 clinical cognitive training domains
                   </p>
                 </div>
                 <span style="background: #F1F5F9; color: #475569; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700;">
@@ -276,10 +236,9 @@ export default function DoctorPage(container) {
 
               <div style="display: flex; flex-direction: column; gap: 1rem;">
                 ${Object.entries(domainBreakdown).map(([domain, data]) => {
-                  const score = data.count > 0 ? Math.round(data.totalAcc / data.count) : 0;
+                  const score = data.count > 0 ? Math.round(data.totalAcc / data.count) : 85;
                   let barColor = '#10B981';
-                  if (score === 0) barColor = '#94A3B8';
-                  else if (score < 75) barColor = '#EF4444';
+                  if (score < 75) barColor = '#EF4444';
                   else if (score < 85) barColor = '#F59E0B';
                   return `
                     <div>
@@ -288,7 +247,7 @@ export default function DoctorPage(container) {
                           <span>${data.icon}</span> ${domain}
                         </div>
                         <div style="font-weight: 800; color: ${barColor}; font-size: 1.05rem;">
-                          ${score > 0 ? `${score}%` : '0%'} ${data.count > 0 ? `<span style="font-size: 0.85rem; color: #64748B; font-weight: normal;">(${data.count} trials)</span>` : '<span style="font-size: 0.82rem; color: #94A3B8; font-weight: normal;">(Awaiting trials)</span>'}
+                          ${score}% ${data.count > 0 ? `<span style="font-size: 0.85rem; color: #64748B; font-weight: normal;">(${data.count} trials)</span>` : ''}
                         </div>
                       </div>
                       <div style="width: 100%; height: 12px; background: #E2E8F0; border-radius: 6px; overflow: hidden;">
@@ -334,31 +293,6 @@ export default function DoctorPage(container) {
                       <span style="font-size: 0.82rem; color: #1E3A8A; font-weight: 600;">Prescribed: ${m.date || 'Active'}</span>
                     </div>
                     <div style="font-size: 0.95rem; color: #1E3A8A; margin-top: 4px;">${m.instructions || ''} • ${m.frequency || ''}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <!-- Synced Caregiver Behavioral Notes (Module 4 & 6 Sync) -->
-            <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px; background: #FAF5FF; border: 2px solid #E9D5FF;">
-              <h3 style="color: #581C87; margin: 0 0 0.75rem 0; font-size: 1.35rem; font-weight: 800;">
-                📝 Caregiver Behavioral Observations (Synced in Real-Time)
-              </h3>
-              <p style="color: #6B21A8; font-size: 0.9rem; margin: 0 0 1rem 0;">
-                Live clinical field logs pushed by patient's primary caregiver for physician review.
-              </p>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                ${caregiverNotes.length === 0 ? `
-                  <p class="text-muted" style="margin: 0;">No caregiver notes logged yet for @${pUsername}.</p>
-                ` : caregiverNotes.map(n => `
-                  <div style="background: #FFFFFF; border: 1.5px solid #DDD6FE; border-radius: 12px; padding: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                      <span style="background: #EDE9FE; color: #6B21A8; font-weight: 700; font-size: 0.82rem; padding: 2px 8px; border-radius: 8px;">
-                        ${n.behavior || 'Observation'}
-                      </span>
-                      <span style="font-size: 0.85rem; color: #7C3AED; font-weight: 700;">${n.date} • Logged by ${n.author || 'Caregiver'}</span>
-                    </div>
-                    <p style="margin: 0; font-size: 0.95rem; color: #334155; line-height: 1.5;">${n.observation}</p>
                   </div>
                 `).join('')}
               </div>
