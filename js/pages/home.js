@@ -19,14 +19,21 @@ export default function Home(container) {
   const reminders = Storage.getReminders();
   const emergency = Storage.getEmergencyContacts();
 
-  // Affirmations collection
-  const thoughts = [
-    "Your presence in the lives of those who love you is irreplaceable.",
-    "Every small moment of today carries peace, memory, and joy.",
-    "You have shared so much warmth, and the world is better for it.",
-    "Take gentle breaths; you are safe, cherished, and surrounded by care.",
-    "Just as the morning sun rises gently, take today step by peaceful step."
-  ];
+  // Aaj Ka Suvichar / Affirmations collection (strictly localized)
+  function getLocalizedQuotes() {
+    const currentLang = (typeof I18n !== 'undefined' && I18n.lang) || Storage.getLanguage() || 'en';
+    if (typeof I18n !== 'undefined' && typeof I18n.getSuvicharList === 'function') {
+      return I18n.getSuvicharList(currentLang);
+    }
+    return [
+      "Your presence in the lives of those who love you is irreplaceable.",
+      "Every small moment of today carries peace, memory, and joy.",
+      "You have shared so much warmth, and the world is better for it.",
+      "Take gentle breaths; you are safe, cherished, and surrounded by care."
+    ];
+  }
+
+  let thoughts = getLocalizedQuotes();
   let thoughtIndex = 0;
 
   // Real-time 6-task tracking
@@ -85,7 +92,13 @@ export default function Home(container) {
     ` : '';
     const user = Storage.getUser() || { name: 'Meera Das' };
     const prefs = Storage.getPreferences();
-    const displayName = prefs.preferredName || UserState.getDisplayName() || user.name.split(' ')[0] || 'Meera';
+    // Persistent identity takes priority over default 'Meera' placeholder
+    const userFirst = user.name ? user.name.split(' ')[0] : '';
+    const displayName = user.preferredName || (prefs.preferredName && prefs.preferredName !== 'Meera' ? prefs.preferredName : (userFirst || 'Meera'));
+    
+    // Always refresh localized thoughts matching current active language
+    thoughts = getLocalizedQuotes();
+    if (thoughtIndex >= thoughts.length) thoughtIndex = 0;
     const greetingInfo = getTimeGreeting();
 
     container.innerHTML = `
@@ -299,28 +312,36 @@ export default function Home(container) {
           </button>
         </section>
 
-        <!-- 7. Rotating Daily Affirmation with Web Speech Audio -->
-        <section class="stitch-card" style="background: rgba(254, 243, 199, 0.35); border: 2px solid #FDE68A; border-radius: 20px; padding: 1.25rem; margin-bottom: 1.25rem;" data-purpose="daily-affirmation">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 800; color: #1F2937; font-size: 1.05rem;">
-              <span>💭</span> <span>${I18n.t('affirmation.header')}</span>
+        <!-- 7. Rotating Daily Affirmation / Aaj Ka Suvichar with Web Speech Audio & Refresh Button -->
+        <section class="stitch-card" style="background: rgba(254, 243, 199, 0.45); border: 2px solid #FCD34D; border-radius: 20px; padding: 1.25rem; margin-bottom: 1.25rem;" data-purpose="daily-affirmation">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 800; color: #78350F; font-size: 1.1rem;">
+              <span>💭</span> <span>${(() => {
+                const cur = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
+                if (cur === 'hi') return 'आज का सुविचार';
+                if (cur === 'bn') return 'আজকের সুচিন্তা';
+                if (cur === 'as') return 'আজিৰ সুচিন্তা';
+                if (cur === 'ne') return 'आजको सुविचार';
+                if (cur === 'mni') return 'ঙসিগী অফবা ৱাখল্লোন';
+                return I18n.t('affirmation.header') || 'Quote of the Day (Suvichar)';
+              })()}</span>
             </span>
-            <span style="background: #FEF3C7; color: #92400E; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">
-              ${I18n.t('affirmation.badge')}
-            </span>
+            <button id="btn-refresh-suvichar" class="stitch-pill-btn" style="background: #FFFBEB; border: 1.5px solid #F59E0B; color: #B45309; font-weight: 800; font-size: 0.85rem; padding: 0.35rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;" title="Refresh Quote in this language">
+              <span>🔄</span> <span>Refresh</span>
+            </button>
           </div>
 
-          <blockquote id="affirmation-quote" style="font-size: 1.25rem; font-style: italic; font-family: 'Plus Jakarta Sans', Georgia, serif; color: #1F2937; margin: 0.75rem 0; line-height: 1.5;">
+          <blockquote id="affirmation-quote" style="font-size: 1.2rem; font-style: italic; font-family: 'Plus Jakarta Sans', Georgia, serif; color: #1F2937; margin: 0.85rem 0; line-height: 1.55; background: #FFFFFF; padding: 1rem 1.25rem; border-radius: 14px; border-left: 4px solid #F59E0B;">
             "${thoughts[thoughtIndex]}"
           </blockquote>
 
-          <div style="display: flex; align-items: center; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid #FDE68A;">
-            <button id="btn-listen-affirmation" class="stitch-pill-btn" style="background: #FFFFFF; border-color: #FCD34D; color: #1F2937;">
-              <span>🔊</span> <span>${I18n.t('affirmation.listen')}</span>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding-top: 0.5rem;">
+            <button id="btn-listen-affirmation" class="stitch-pill-btn" style="background: #FFFFFF; border-color: #FCD34D; color: #78350F; font-weight: 700;">
+              <span>🔊</span> <span>${I18n.t('affirmation.listen') || 'Listen Aloud'}</span>
             </button>
-            <button id="btn-cycle-affirmation" class="stitch-pill-btn" style="background: #FFFFFF; border-color: #FCD34D; color: #1F2937;">
-              <span>🔄</span> <span>${I18n.t('affirmation.new')}</span>
-            </button>
+            <span style="font-size: 0.8rem; color: #92400E; font-weight: 600;">
+              ${thoughtIndex + 1} of ${thoughts.length}
+            </span>
           </div>
         </section>
 
@@ -522,20 +543,21 @@ export default function Home(container) {
       });
     });
 
-    // Affirmation TTS
+    // Affirmation TTS in current language
     const listenAffBtn = container.querySelector('#btn-listen-affirmation');
     if (listenAffBtn) {
       listenAffBtn.addEventListener('click', () => {
         const quote = container.querySelector('#affirmation-quote')?.textContent?.replace(/"/g, '') || thoughts[thoughtIndex];
-        TTS.speak(quote);
+        const curLang = (typeof I18n !== 'undefined' && I18n.lang) || Storage.getLanguage() || 'en';
+        TTS.speak(quote, curLang);
       });
     }
 
-    // Affirmation Cycle
-    const cycleAffBtn = container.querySelector('#btn-cycle-affirmation');
-    if (cycleAffBtn) {
-      cycleAffBtn.addEventListener('click', () => {
-        thoughts = I18n.getSuvicharList ? I18n.getSuvicharList(I18n.lang) : thoughts;
+    // Suvichar Instant Refresh Button in currently selected language
+    const refreshSuvicharBtn = container.querySelector('#btn-refresh-suvichar') || container.querySelector('#btn-cycle-affirmation');
+    if (refreshSuvicharBtn) {
+      refreshSuvicharBtn.addEventListener('click', () => {
+        thoughts = getLocalizedQuotes();
         thoughtIndex = (thoughtIndex + 1) % thoughts.length;
         const quoteEl = container.querySelector('#affirmation-quote');
         if (quoteEl) {
@@ -586,11 +608,18 @@ export default function Home(container) {
         isEstimated
       });
 
-      // Dispatch SMS
+      // 1. Open SMS app with live GPS coordinates link
       try {
         window.open(`sms:${cleanPhone}?body=${encodeURIComponent(alertMsg)}`, '_blank');
       } catch (e) {
         console.warn('SMS dispatch error:', e);
+      }
+
+      // 2. Simultaneously trigger direct emergency phone call (tel:)
+      try {
+        window.location.href = `tel:${cleanPhone}`;
+      } catch (e) {
+        console.warn('Call dispatch error:', e);
       }
 
       if (typeof window.triggerEmergencySOSModal === 'function') {
@@ -612,6 +641,7 @@ export default function Home(container) {
   }
 
   let speechRecognizer = null;
+  let isVoiceGuardActive = true;
   function initVoiceActivatedSOS() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -619,21 +649,33 @@ export default function Home(container) {
       speechRecognizer = new SpeechRecognition();
       speechRecognizer.continuous = true;
       speechRecognizer.interimResults = false;
-      speechRecognizer.lang = I18n.lang === 'hi' ? 'hi-IN' : 'en-IN';
+      const curLang = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
+      speechRecognizer.lang = curLang === 'hi' ? 'hi-IN' : (curLang === 'bn' ? 'bn-IN' : 'en-IN');
+      
       speechRecognizer.onresult = (e) => {
         const text = (e.results[e.results.length - 1][0].transcript || '').toLowerCase();
         if (text.includes('help') || text.includes('bachao') || text.includes('madad') || text.includes('emergency')) {
           trigger1TapEmergencySOS('VoiceGuard Distress Trigger: ' + text);
-          
-          // Immediate emergency phone call
-          const emergencyContacts = Storage.getEmergencyContacts() || [];
-          const profile = Storage.getPatientProfile();
-          const emergencyPhone = emergencyContacts[0]?.phone || profile?.patient?.emergencyPhone || profile?.patient?.caregiverPhone || '+919876543210';
-          const cleanPhone = emergencyPhone.replace(/[^0-9+]/g, '');
-          window.location.href = `tel:${cleanPhone}`;
         }
       };
-      speechRecognizer.onerror = () => {};
+
+      // Fix voice navigation stopping bug: automatically restart listener when browser triggers onend
+      speechRecognizer.onend = () => {
+        if (isVoiceGuardActive) {
+          try {
+            speechRecognizer.start();
+          } catch (e) {}
+        }
+      };
+
+      speechRecognizer.onerror = (err) => {
+        if (isVoiceGuardActive && err.error !== 'aborted') {
+          setTimeout(() => {
+            try { speechRecognizer.start(); } catch (e) {}
+          }, 1000);
+        }
+      };
+
       speechRecognizer.start();
     } catch (err) {}
   }
@@ -693,6 +735,7 @@ export default function Home(container) {
     unsubUser();
     window.removeEventListener('smriti:languageChanged', handleLangChange);
     window.removeEventListener('languageChanged', handleLangChange);
+    isVoiceGuardActive = false;
     if (speechRecognizer) {
       try {
         speechRecognizer.stop();

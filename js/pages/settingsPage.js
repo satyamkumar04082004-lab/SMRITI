@@ -68,6 +68,7 @@ export default function SettingsPage(container) {
                 <select id="select-prof-role" class="form-select">
                   <option value="patient" ${user.role === 'patient' ? 'selected' : ''}>Elder / Patient</option>
                   <option value="caregiver" ${user.role === 'caregiver' ? 'selected' : ''}>Caregiver / Family</option>
+                  <option value="doctor" ${user.role === 'doctor' ? 'selected' : ''}>Doctor / Specialist</option>
                 </select>
               </div>
             </div>

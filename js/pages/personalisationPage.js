@@ -65,6 +65,13 @@ export default function PersonalisationPage(container) {
     
     Storage.setPreferences(newPrefs);
     
+    // Persist identity to active user in localStorage
+    const activeUser = Storage.getUser();
+    if (activeUser && newPrefs.preferredName) {
+      activeUser.preferredName = newPrefs.preferredName;
+      Storage.setUser(activeUser);
+    }
+    
     const toast = document.getElementById('save-toast');
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 3000);

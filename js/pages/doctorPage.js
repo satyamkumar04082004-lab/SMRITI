@@ -20,6 +20,12 @@ export default function DoctorPage(container) {
   let searchFailed = false;
   let timeFilter = '30d';
   let showAddNoteModal = false;
+  let editingNoteId = null;
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+  }
 
   function loadPatientData(query) {
     const clean = (query || '').trim().toLowerCase().replace(/^@/, '');
@@ -420,32 +426,51 @@ container.innerHTML = `
                 </button>
               </div>
 
-              ${showAddNoteModal ? `
+              ${(() => {
+                const activeEditingNote = editingNoteId ? doctorNotes.find(n => n.id === editingNoteId) : null;
+                return showAddNoteModal ? `
                 <div style="background: #F8FAFC; border: 2px solid #94A3B8; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem;">
-                  <h4 style="margin: 0 0 0.75rem 0; color: #0F172A;">Record New Clinical Note for ${patient.name}</h4>
+                  <h4 style="margin: 0 0 0.75rem 0; color: #0F172A;">
+                    ${activeEditingNote ? `✏️ Edit Clinical Note for ${patient.name}` : `📝 Record New Clinical Note for ${patient.name}`}
+                  </h4>
                   <form id="form-doc-note" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <input type="text" id="note-title" class="form-input" placeholder="Title (e.g. Monthly Routine Assessment)" required />
-                    <textarea id="note-body" class="form-input" rows="3" placeholder="Clinical observations, dosage tweaks, or cognitive progress feedback..." required></textarea>
+                    <input type="text" id="note-title" class="form-input" placeholder="Title (e.g. Monthly Routine Assessment)" value="${activeEditingNote ? escapeHtml(activeEditingNote.title) : ''}" required />
+                    <textarea id="note-body" class="form-input" rows="3" placeholder="Clinical observations, dosage tweaks, or cognitive progress feedback..." required>${activeEditingNote ? escapeHtml(activeEditingNote.notes || activeEditingNote.note || '') : ''}</textarea>
                     <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
                       <button type="button" id="btn-cancel-note" class="btn btn-outline btn-sm">Cancel</button>
-                      <button type="submit" class="btn btn-primary btn-sm" style="background: #1D4ED8; border-color: #1D4ED8;">Save Clinical Note</button>
+                      <button type="submit" class="btn btn-primary btn-sm" style="background: #1D4ED8; border-color: #1D4ED8;">
+                        ${activeEditingNote ? 'Update Clinical Note' : 'Save Clinical Note'}
+                      </button>
                     </div>
                   </form>
                 </div>
-              ` : ''}
+              ` : '';
+              })()}
 
               <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                ${doctorNotes.length === 0 ? '<p class="text-muted">No physician notes recorded yet.</p>' : doctorNotes.map(dn => `
+                ${doctorNotes.length === 0 ? '<p class="text-muted">No physician notes recorded yet.</p>' : doctorNotes.map((dn, idx) => {
+                  const noteId = dn.id || ('doc_note_' + idx);
+                  dn.id = noteId;
+                  return `
                   <div style="background: #FFFDF9; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 1.2rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                      <strong style="color: #0F172A; font-size: 1.15rem;">${dn.title}</strong>
-                      <span style="color: #64748B; font-size: 0.85rem; font-weight: 600;">${dn.date} • ${dn.doctorName}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                      <strong style="color: #0F172A; font-size: 1.15rem;">${escapeHtml(dn.title)}</strong>
+                      <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: #64748B; font-size: 0.85rem; font-weight: 600;">${dn.date} • ${escapeHtml(dn.doctorName)}</span>
+                        <button class="btn btn-sm btn-outline btn-edit-note" data-id="${noteId}" style="padding: 2px 8px; font-size: 0.8rem; border-color: #93C5FD; color: #1D4ED8; cursor: pointer;" title="Edit this note">
+                          ✏️ Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline btn-delete-note" data-id="${noteId}" style="padding: 2px 8px; font-size: 0.8rem; border-color: #FCA5A5; color: #DC2626; cursor: pointer;" title="Delete this note">
+                          🗑️ Delete
+                        </button>
+                      </div>
                     </div>
                     <p style="color: #334155; margin: 0 0 0.5rem 0; font-size: 1rem; line-height: 1.5;">
-                      ${dn.notes || dn.note}
+                      ${escapeHtml(dn.notes || dn.note || '')}
                     </p>
                   </div>
-                `).join('')}
+                `;
+                }).join('')}
               </div>
             </div>
 
@@ -518,10 +543,11 @@ container.innerHTML = `
       });
     }
 
-    // Clinical Notes Form
+    // Clinical Notes Form (Add, Edit, Delete)
     const addNoteBtn = container.querySelector('#btn-open-add-note');
     if (addNoteBtn) {
       addNoteBtn.addEventListener('click', () => {
+        editingNoteId = null;
         showAddNoteModal = true;
         render();
       });
@@ -530,10 +556,38 @@ container.innerHTML = `
     const cancelNoteBtn = container.querySelector('#btn-cancel-note');
     if (cancelNoteBtn) {
       cancelNoteBtn.addEventListener('click', () => {
+        editingNoteId = null;
         showAddNoteModal = false;
         render();
       });
     }
+
+    // Edit Note click listeners
+    container.querySelectorAll('.btn-edit-note').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        editingNoteId = id;
+        showAddNoteModal = true;
+        render();
+      });
+    });
+
+    // Delete Note click listeners
+    container.querySelectorAll('.btn-delete-note').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this clinical note?')) {
+          if (activeProfile && activeProfile.doctorNotes) {
+            activeProfile.doctorNotes = activeProfile.doctorNotes.filter(n => n.id !== id);
+            Storage.savePatientProfile(activeProfile);
+            if (window.SmritiToast) {
+              window.SmritiToast.show('Clinical note deleted successfully! ✓', 'info');
+            }
+            render();
+          }
+        }
+      });
+    });
 
     const noteForm = container.querySelector('#form-doc-note');
     if (noteForm) {
@@ -542,15 +596,36 @@ container.innerHTML = `
         const title = container.querySelector('#note-title')?.value.trim();
         const notes = container.querySelector('#note-body')?.value.trim();
         if (title && notes && activeProfile) {
-          const newNote = {
-            doctorName: currentDoctor.name || 'Dr. A. K. Barua',
-            title,
-            notes,
-            date: new Date().toLocaleDateString('en-IN')
-          };
           activeProfile.doctorNotes = activeProfile.doctorNotes || [];
-          activeProfile.doctorNotes.unshift(newNote);
+          
+          if (editingNoteId) {
+            // Update existing note
+            const noteIndex = activeProfile.doctorNotes.findIndex(n => n.id === editingNoteId);
+            if (noteIndex !== -1) {
+              activeProfile.doctorNotes[noteIndex].title = title;
+              activeProfile.doctorNotes[noteIndex].notes = notes;
+              activeProfile.doctorNotes[noteIndex].date = new Date().toLocaleDateString('en-IN');
+            }
+            if (window.SmritiToast) {
+              window.SmritiToast.show('Clinical note updated successfully! ✓', 'success');
+            }
+          } else {
+            // Add new note
+            const newNote = {
+              id: 'doc_' + Date.now(),
+              doctorName: currentDoctor.name || 'Dr. A. K. Barua',
+              title,
+              notes,
+              date: new Date().toLocaleDateString('en-IN')
+            };
+            activeProfile.doctorNotes.unshift(newNote);
+            if (window.SmritiToast) {
+              window.SmritiToast.show('New clinical note recorded! ✓', 'success');
+            }
+          }
+
           Storage.savePatientProfile(activeProfile);
+          editingNoteId = null;
           showAddNoteModal = false;
           render();
         }

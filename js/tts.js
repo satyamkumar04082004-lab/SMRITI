@@ -34,12 +34,19 @@ const TTS = {
       'bn': 'bn-IN',
       'mni': 'mni-IN',
       'brx': 'brx-IN',
-      'lus': 'en-IN', // fallback
-      'nag': 'en-IN', // fallback
+      'ne': 'ne-NP',
+      'lus': 'en-IN',
+      'nag': 'en-IN',
+      'ta': 'ta-IN',
+      'te': 'te-IN',
+      'mr': 'mr-IN',
+      'gu': 'gu-IN',
+      'kn': 'kn-IN'
     };
 
+    const targetLang = lang || (typeof I18n !== 'undefined' ? I18n.lang : null) || 'en';
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = langMap[lang || I18n.lang] || 'en-IN';
+    utterance.lang = langMap[targetLang] || 'en-IN';
     utterance.rate = 0.85; // Slower for elderly
     utterance.pitch = 1.0;
     utterance.volume = 1.0;

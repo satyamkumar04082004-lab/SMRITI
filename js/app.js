@@ -787,21 +787,17 @@ async function sendSaathiMessage(text) {
           renderSaathiDrawer();
           const currentAISettings = Storage.getAISettings();
           if (currentAISettings.soundEnabled) {
-            TTS.speak(accumulatedText);
+            TTS.speak(accumulatedText, I18n.lang || Storage.getLanguage() || 'en');
           }
         }
       },
       (toolCall) => {
         if (toolCall.name === 'startGame') {
-          setTimeout(() => {
-            toggleSaathiDrawer(false);
-            window.location.hash = `#/games/${toolCall.args.gameId}`;
-          }, 1200);
+          toggleSaathiDrawer(false);
+          window.location.hash = `#/games/${toolCall.args.gameId}`;
         } else if (toolCall.name === 'triggerSOS') {
-          setTimeout(() => {
-            toggleSaathiDrawer(false);
-            showQuickHelpModal();
-          }, 1200);
+          toggleSaathiDrawer(false);
+          showQuickHelpModal();
         }
       }
     );
@@ -811,7 +807,7 @@ async function sendSaathiMessage(text) {
     renderSaathiDrawer();
     const currentAISettings = Storage.getAISettings();
     if (currentAISettings.soundEnabled) {
-      TTS.speak(fallback);
+      TTS.speak(fallback, I18n.lang || Storage.getLanguage() || 'en');
     }
   }
 }

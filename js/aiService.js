@@ -231,18 +231,7 @@ const AIService = {
     // Check 50 Predefined Validation Therapy FAQs
     const faqMatch = findBestFAQMatch(userMessage);
     if (faqMatch && faqMatch.faq) {
-      const words = faqMatch.faq.answer.split(' ');
-      let wIdx = 0;
-      const interval = setInterval(() => {
-        if (wIdx < words.length) {
-          const chunk = (wIdx > 0 ? ' ' : '') + words[wIdx];
-          onChunk(chunk, false);
-          wIdx++;
-        } else {
-          clearInterval(interval);
-          onChunk('', true);
-        }
-      }, 25);
+      onChunk(faqMatch.faq.answer, true);
       return;
     }
 
@@ -378,18 +367,7 @@ const AIService = {
       if (typeof onToolCall === 'function') onToolCall(tc, res);
     }
 
-    const words = fallbackText.split(' ');
-    let wIdx = 0;
-    const interval = setInterval(() => {
-      if (wIdx < words.length) {
-        const chunk = (wIdx > 0 ? ' ' : '') + words[wIdx];
-        onChunk(chunk, false);
-        wIdx++;
-      } else {
-        clearInterval(interval);
-        onChunk('', true);
-      }
-    }, 35);
+    onChunk(fallbackText, true);
   },
 
   chatWithSmriti(userMessage, history = []) {

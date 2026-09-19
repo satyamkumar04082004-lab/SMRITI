@@ -496,9 +496,15 @@ const Storage = {
   // ------------------------------------------------------------
   getUser() {
     try {
-      const raw = localStorage.getItem(this._key('currentUser'));
-      if (raw) return JSON.parse(raw);
-      if (localStorage.getItem(this._key('loggedOut')) === 'true') return null;
+      // Check both namespaced key and fallback key for persistent identity
+      const raw = localStorage.getItem(this._key('currentUser')) || localStorage.getItem('currentUser');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.name && parsed.role) return parsed;
+      }
+      if (localStorage.getItem(this._key('loggedOut')) === 'true' || localStorage.getItem('loggedOut') === 'true') {
+        return null;
+      }
       // Default initial session is patient
       const defaultUser = { name: 'Meera Das', phone: '9876543210', role: 'patient', patientId: 'patient_meera_01' };
       this.setUser(defaultUser);
@@ -511,10 +517,28 @@ const Storage = {
   setUser(user) {
     try {
       localStorage.removeItem(this._key('loggedOut'));
+      localStorage.removeItem('loggedOut');
       if (user && user.patientId) {
         this.setActivePatientId(user.patientId);
       }
-      localStorage.setItem(this._key('currentUser'), JSON.stringify(user));
+      const serialized = JSON.stringify(user);
+      localStorage.setItem(this._key('currentUser'), serialized);
+      localStorage.setItem('currentUser', serialized);
+
+      // Keep patient profile aligned with user name to prevent name resetting on refresh
+      if (user && user.role === 'patient' && user.name) {
+        const profile = this.getPatientProfile(user.patientId);
+        if (profile) {
+          if (profile.patient) {
+            profile.patient.name = user.name;
+          }
+          if (profile.preferences) {
+            profile.preferences.preferredName = user.preferredName || user.name.split(' ')[0] || user.name;
+          }
+          this.savePatientProfile(profile);
+        }
+      }
+
       window.dispatchEvent(new CustomEvent('smritiUserChanged', { detail: { user } }));
     } catch (e) {
       console.warn('setUser failed:', e);
@@ -523,10 +547,12 @@ const Storage = {
 
   clearUser() {
     try {
-      // Clear all active user session keys and active patient pointer to prevent session bleed
+      // Clear all active user session keys and active patient pointer
       localStorage.removeItem(this._key('currentUser'));
+      localStorage.removeItem('currentUser');
       localStorage.removeItem(this._key('active_patient_id'));
       localStorage.setItem(this._key('loggedOut'), 'true');
+      localStorage.setItem('loggedOut', 'true');
       // Dispatch event
       window.dispatchEvent(new CustomEvent('smritiUserChanged', { detail: { user: null } }));
     } catch {}
@@ -1077,6 +1103,26 @@ const Storage = {
     note.id = note.id || 'doc_' + Date.now();
     note.date = note.date || new Date().toISOString().split('T')[0];
     profile.doctorNotes.unshift(note);
+    this.savePatientProfile(profile);
+    return profile.doctorNotes;
+  },
+
+  updateDoctorNote(noteId, updatedFields) {
+    const profile = this.getPatientProfile();
+    profile.doctorNotes = profile.doctorNotes || [];
+    const idx = profile.doctorNotes.findIndex(n => n.id === noteId);
+    if (idx !== -1) {
+      profile.doctorNotes[idx] = { ...profile.doctorNotes[idx], ...updatedFields, date: new Date().toISOString().split('T')[0] };
+      this.savePatientProfile(profile);
+      return profile.doctorNotes[idx];
+    }
+    return null;
+  },
+
+  deleteDoctorNote(noteId) {
+    const profile = this.getPatientProfile();
+    profile.doctorNotes = profile.doctorNotes || [];
+    profile.doctorNotes = profile.doctorNotes.filter(n => n.id !== noteId);
     this.savePatientProfile(profile);
     return profile.doctorNotes;
   },
