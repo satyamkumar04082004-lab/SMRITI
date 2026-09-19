@@ -89,15 +89,21 @@ export default function DoctorPage(container) {
     const totalSessions = history.length;
     const avgAccuracy = totalSessions > 0
       ? Math.round(history.reduce((s, h) => s + (h.accuracy || 0), 0) / totalSessions)
-      : 88;
+      : 0;
 
     // Daily task completion rate
     const completedReminders = reminders.filter(r => r.completedToday).length;
     const taskCompletionRate = reminders.length > 0
       ? Math.round((completedReminders / reminders.length) * 100)
-      : 85;
+      : 0;
 
-    container.innerHTML = `
+    // Data Synchronization: Caregiver Notes, Last Prescription (OCR), Next Appointment
+    const patientUsername = patient.username || 'meera_das';
+    const caregiverNotes = Storage.getClinicalNotes(patientUsername) || [];
+    const lastPrescription = Storage.getLastPrescription(patientUsername);
+    const nextAppointment = Storage.getNextAppointment(patientUsername);
+
+container.innerHTML = `
       <div class="container page-enter" style="max-width: 920px; padding-bottom: 3.5rem;">
         
         <!-- Doctor Top Bar -->
