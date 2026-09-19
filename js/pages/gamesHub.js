@@ -40,11 +40,11 @@ export default function GamesHub(container) {
             <div style="text-align: center; margin-bottom: 10px;">
               <span style="background: #E6F4F1; color: #0D9488; padding: 5px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: bold;">${I18n.t(g.tagKey) || 'Cognitive'}</span>
             </div>
-            <!-- Adaptive Level Progression (AI Analysis: >75% unlocks next level) -->
+            <!-- Crucial Level Progression (Easy unlocked; Medium unlocked if Easy >=80%; Hard unlocked if Medium >=80%) -->
             <div style="display: flex; justify-content: center; gap: 8px; font-size: 0.82rem; font-weight: 700; padding-top: 8px; border-top: 1px dashed #E2E8F0;">
               <span style="color: #0D9488; background: #E6F4F1; padding: 2px 8px; border-radius: 8px;">L1 ✓</span>
-              <span style="color: ${l2Unlocked ? '#0D9488' : '#94A3B8'}; background: ${l2Unlocked ? '#E6F4F1' : '#F1F5F9'}; padding: 2px 8px; border-radius: 8px;">${l2Unlocked ? 'L2 ✓' : '🔒 L2 (>75%)'}</span>
-              <span style="color: ${l3Unlocked ? '#0D9488' : '#94A3B8'}; background: ${l3Unlocked ? '#E6F4F1' : '#F1F5F9'}; padding: 2px 8px; border-radius: 8px;">${l3Unlocked ? 'L3 ✓' : '🔒 L3 (>75%)'}</span>
+              <span style="color: ${l2Unlocked ? '#0D9488' : '#94A3B8'}; background: ${l2Unlocked ? '#E6F4F1' : '#F1F5F9'}; padding: 2px 8px; border-radius: 8px;">${l2Unlocked ? 'L2 ✓' : '🔒 L2 (≥80%)'}</span>
+              <span style="color: ${l3Unlocked ? '#0D9488' : '#94A3B8'}; background: ${l3Unlocked ? '#E6F4F1' : '#F1F5F9'}; padding: 2px 8px; border-radius: 8px;">${l3Unlocked ? 'L3 ✓' : '🔒 L3 (≥80%)'}</span>
             </div>
           </div>
         `;

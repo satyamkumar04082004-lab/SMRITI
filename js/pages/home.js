@@ -54,6 +54,35 @@ export default function Home(container) {
   }
 
   function render() {
+    const allReminders = Storage.getReminders() || [];
+    const missedReminder = allReminders.find(r => !r.completedToday && r.active);
+
+    const missedBannerHtml = missedReminder ? `
+        <!-- Missed Reminders Soothing Alert Banner -->
+        <section class="stitch-missed-alert" style="background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 20px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+              ⏰
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1rem; font-weight: 800; color: #92400E;">
+                Gentle Routine Reminder
+              </h3>
+              <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: #78350F; line-height: 1.3;">
+                ${escapeHtml(missedReminder.title)} (${missedReminder.time || 'Scheduled for today'})
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+            <button id="btn-take-missed-now" class="stitch-pill-btn" style="background: #059669; color: #FFFFFF; font-weight: 800; border: none; border-radius: 12px; padding: 0.5rem 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; font-size: 0.88rem;">
+              <span>✓</span> <span>Take Now</span>
+            </button>
+            <button id="btn-alert-caregiver-missed" class="stitch-pill-btn" style="background: #FFFFFF; color: #D97706; border: 1.5px solid #FCD34D; font-weight: 800; border-radius: 12px; padding: 0.5rem 0.8rem; cursor: pointer; font-size: 0.88rem;">
+              <span>🔔</span> <span>Alert Caregiver</span>
+            </button>
+          </div>
+        </section>
+    ` : '';
     const user = Storage.getUser() || { name: 'Meera Das' };
     const prefs = Storage.getPreferences();
     const displayName = prefs.preferredName || UserState.getDisplayName() || user.name.split(' ')[0] || 'Meera';
@@ -72,6 +101,8 @@ export default function Home(container) {
             <span>📋</span> <span>${I18n.t('caregiver.viewReport')}</span>
           </button>
         </section>
+
+        ${missedBannerHtml}
 
         <!-- 2. Welcome Hero Card with 6-Task Progress Meter -->
         <section class="stitch-hero-card" style="background: linear-gradient(135deg, #FFF9F2, #FFF2E2); border: 2px solid #F3E8DC; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm);">
@@ -374,6 +405,36 @@ export default function Home(container) {
   }
 
   function bindEventHandlers() {
+    const allReminders = Storage.getReminders() || [];
+    const missedReminder = allReminders.find(r => !r.completedToday && r.active);
+    if (missedReminder) {
+      const takeNowBtn = container.querySelector('#btn-take-missed-now');
+      if (takeNowBtn) {
+        takeNowBtn.addEventListener('click', () => {
+          Storage.markReminderDone(missedReminder.id);
+          Coins.add(10, 'Routine reminder completed');
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Wonderful! Marked complete. +10 Coins 🪙', 'success');
+          }
+          render();
+        });
+      }
+      const alertCaregiverBtn = container.querySelector('#btn-alert-caregiver-missed');
+      if (alertCaregiverBtn) {
+        alertCaregiverBtn.addEventListener('click', () => {
+          Storage.saveEmergencyAlert({
+            type: 'Missed Routine Alert',
+            message: `Patient requested caregiver check for: ${missedReminder.title}`,
+            timestamp: new Date().toISOString()
+          });
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Caregiver notified softly. Help is on the way! 🌸', 'info');
+          }
+          alertCaregiverBtn.disabled = true;
+          alertCaregiverBtn.textContent = 'Caregiver Alerted ✓';
+        });
+      }
+    }
     // Quick Actions
     const callLovedBtn = container.querySelector('#btn-call-loved-one');
     if (callLovedBtn) {
@@ -505,36 +566,48 @@ export default function Home(container) {
   }
 
   function trigger1TapEmergencySOS(triggerType = 'Manual SOS') {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const { latitude, longitude } = pos.coords;
-        Storage.saveEmergencyAlert({
-          type: 'Emergency SOS Broadcast',
-          message: `SOS Triggered (${triggerType}) at Lat ${latitude.toFixed(4)}, Lng ${longitude.toFixed(4)}`,
-          lat: latitude,
-          lng: longitude
-        });
-      }, () => {
-        Storage.saveEmergencyAlert({
-          type: 'Emergency SOS Broadcast',
-          message: `SOS Triggered (${triggerType}) - GPS coordinates unavailable`,
-          lat: 26.1445,
-          lng: 91.7362
-        });
-      });
-    } else {
+    const user = Storage.getUser() || { name: 'Meera Das' };
+    const emergencyContacts = Storage.getEmergencyContacts() || [];
+    const profile = Storage.getPatientProfile();
+    const emergencyPhone = emergencyContacts[0]?.phone || profile?.patient?.emergencyPhone || profile?.patient?.caregiverPhone || '+919876543210';
+    const cleanPhone = emergencyPhone.replace(/[^0-9+]/g, '');
+
+    const dispatchAlert = (lat, lng, isEstimated = false) => {
+      const gpsLink = `https://maps.google.com/?q=${lat},${lng}`;
+      const alertMsg = `🚨 SMRITI EMERGENCY SOS ALERT: ${user.name} needs immediate assistance! Live GPS Location: ${gpsLink}`;
+
       Storage.saveEmergencyAlert({
         type: 'Emergency SOS Broadcast',
-        message: `SOS Triggered (${triggerType}) - GPS coordinates unavailable`,
-        lat: 26.1445,
-        lng: 91.7362
+        message: `SOS Triggered (${triggerType}) at Lat ${lat.toFixed(4)}, Lng ${lng.toFixed(4)}. Live Link: ${gpsLink}`,
+        lat: lat,
+        lng: lng,
+        trackingLink: gpsLink,
+        timestamp: new Date().toISOString(),
+        isEstimated
       });
-    }
 
-    if (typeof window.triggerEmergencySOSModal === 'function') {
-      window.triggerEmergencySOSModal();
+      // Dispatch SMS
+      try {
+        window.open(`sms:${cleanPhone}?body=${encodeURIComponent(alertMsg)}`, '_blank');
+      } catch (e) {
+        console.warn('SMS dispatch error:', e);
+      }
+
+      if (typeof window.triggerEmergencySOSModal === 'function') {
+        window.triggerEmergencySOSModal();
+      } else {
+        window.location.hash = '#/emergency';
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => dispatchAlert(pos.coords.latitude, pos.coords.longitude, false),
+        () => dispatchAlert(26.1445, 91.7362, true),
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
     } else {
-      window.location.hash = '#/emergency';
+      dispatchAlert(26.1445, 91.7362, true);
     }
   }
 
@@ -550,7 +623,14 @@ export default function Home(container) {
       speechRecognizer.onresult = (e) => {
         const text = (e.results[e.results.length - 1][0].transcript || '').toLowerCase();
         if (text.includes('help') || text.includes('bachao') || text.includes('madad') || text.includes('emergency')) {
-          trigger1TapEmergencySOS('Voice Distress Keyword: ' + text);
+          trigger1TapEmergencySOS('VoiceGuard Distress Trigger: ' + text);
+          
+          // Immediate emergency phone call
+          const emergencyContacts = Storage.getEmergencyContacts() || [];
+          const profile = Storage.getPatientProfile();
+          const emergencyPhone = emergencyContacts[0]?.phone || profile?.patient?.emergencyPhone || profile?.patient?.caregiverPhone || '+919876543210';
+          const cleanPhone = emergencyPhone.replace(/[^0-9+]/g, '');
+          window.location.href = `tel:${cleanPhone}`;
         }
       };
       speechRecognizer.onerror = () => {};
@@ -569,13 +649,18 @@ export default function Home(container) {
                 Math.cos(safeLat * Math.PI / 180) * Math.cos(latitude * Math.PI / 180) *
                 Math.sin(dLon/2) * Math.sin(dLon/2);
       const dist = 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      if (dist > 300) {
+      if (dist > 250) {
         Storage.saveEmergencyAlert({
           type: 'Geofence Safe Zone Breach',
-          message: `Patient departed designated perimeter (~${Math.round(dist)}m away).`,
+          message: `Patient departed designated safe zone perimeter (~${Math.round(dist)}m away).`,
           lat: latitude,
-          lng: longitude
+          lng: longitude,
+          trackingLink: `https://maps.google.com/?q=${latitude},${longitude}`,
+          timestamp: new Date().toISOString()
         });
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Safe zone boundary reached (~' + Math.round(dist) + 'm). Caregiver notified.', 'warning');
+        }
       }
     }, () => {});
   }

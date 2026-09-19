@@ -44,8 +44,8 @@ const Auth = {
     // Clear previous OTP
     this._clearOTP();
 
-    // Generate new OTP (supports standard mock 1234)
-    const code = '1234';
+    // Generate dynamic OTP using Math.random() — NEVER hardcoded
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
     const now = Date.now();
     
     this._otpData = {
@@ -55,38 +55,33 @@ const Auth = {
       expiresAt: now + 300000, // 5 minutes
     };
 
-    // Set cooldown (15 seconds)
-    this._cooldownEnd = now + 15000;
+    // Set cooldown (10 seconds)
+    this._cooldownEnd = now + 10000;
 
-    console.log(`📱 Demo OTP for ${phone}: ${code}`);
+    console.log(`📱 Dynamic OTP for ${phone}: ${code}`);
 
     return { 
       success: true, 
-      message: 'OTP sent successfully!', 
-      demoOtp: '1234' 
+      message: `OTP sent successfully!`, 
+      demoOtp: code 
     };
   },
 
   /**
-   * Verify OTP (accepts 1234 mock OTP or generated OTP)
+   * Verify OTP
    * @param {string} phone
    * @param {string} otp
    * @returns {{ success: boolean, message: string }}
    */
   verifyOTP(phone, otp) {
     const cleanOtp = String(otp || '').trim();
-    // Allow standard fallback mock OTP 1234 unconditionally for testing/recovery
-    if (cleanOtp === '1234') {
-      this._clearOTP();
-      return { success: true, message: 'OTP verified successfully!' };
-    }
 
     if (!this._otpData) {
-      return { success: false, message: 'No OTP was sent. Please enter 1234 or request a code.' };
+      return { success: false, message: 'No active OTP found. Please request a new code.' };
     }
 
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (this._otpData.phone && this._otpData.phone !== cleanPhone) {
+    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+    if (cleanPhone && this._otpData.phone && this._otpData.phone !== cleanPhone) {
       return { success: false, message: 'Phone number mismatch. Please request a new OTP.' };
     }
 
@@ -96,7 +91,7 @@ const Auth = {
     }
 
     if (this._otpData.code !== cleanOtp) {
-      return { success: false, message: 'Invalid OTP. Enter 1234 or try again.' };
+      return { success: false, message: 'Invalid OTP code. Please enter the correct code.' };
     }
 
     this._clearOTP();

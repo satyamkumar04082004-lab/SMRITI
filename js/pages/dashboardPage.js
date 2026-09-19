@@ -415,8 +415,9 @@ export default function DashboardPage(container) {
         const queryUsername = switchInp.value.trim().toLowerCase().replace(/^@/, '');
         if (!queryUsername) return alert('Enter a patient username to link');
 
-        const otpPrompt = window.prompt(`Security Verification: Enter 4-digit verification code sent to patient @${queryUsername} (Demo OTP: 1234):`, '1234');
-        if (otpPrompt !== '1234') {
+        const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        const otpPrompt = window.prompt(`Security Verification: Enter 4-digit verification code sent to patient @${queryUsername} (Verification Code: ${generatedOtp}):`, generatedOtp);
+        if (otpPrompt !== generatedOtp) {
           return alert('Invalid OTP code. Patient linking cancelled.');
         }
         

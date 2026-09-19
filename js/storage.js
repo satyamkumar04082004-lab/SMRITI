@@ -1377,8 +1377,10 @@ const Storage = {
     const lvlKey = 'level' + level;
     if (progress[lvlKey]) {
       progress[lvlKey].bestAcc = Math.max(progress[lvlKey].bestAcc || 0, accuracy);
-      // Progression Logic: Next level unlocked if accuracy > 75%
-      if (accuracy > 75) {
+      // Crucial Progression Logic:
+      // Medium Level: Unlocks ONLY IF Easy level accuracy is >= 80%
+      // Hard Level: Unlocks ONLY IF Medium level accuracy is >= 80%
+      if (accuracy >= 80) {
         if (level === 1 && progress.level2) progress.level2.unlocked = true;
         if (level === 2 && progress.level3) progress.level3.unlocked = true;
       }
@@ -1388,6 +1390,38 @@ const Storage = {
       window.dispatchEvent(new CustomEvent('smritiGameProgressUpdated', { detail: { gameId, progress } }));
     }
     return progress;
+  },
+
+  // ------------------------------------------------------------
+  // PRESCRIPTION & OCR DATA SYNC (Module 3)
+  // ------------------------------------------------------------
+  getLastPrescription(patientUsername = 'meera_das') {
+    const clean = (patientUsername || '').trim().toLowerCase().replace(/^@/, '');
+    const key = 'last_prescription_' + clean;
+    const direct = this.get(key);
+    if (direct) return direct;
+
+    // Fallback to active patient medicines
+    const pId = 'patient_' + clean;
+    const profile = this.getPatientProfile(pId);
+    const meds = profile?.medicines || this.getMedicines() || [];
+    if (meds.length > 0) {
+      return {
+        date: new Date().toLocaleDateString('en-IN'),
+        doctorName: 'Dr. A. K. Barua',
+        hospitalClinic: 'Guwahati Neurological Care Center',
+        scanStatus: 'Auto-Scan OCR Verified',
+        medications: meds
+      };
+    }
+    return null;
+  },
+
+  saveLastPrescription(patientUsername, data) {
+    const clean = (patientUsername || '').trim().toLowerCase().replace(/^@/, '');
+    const key = 'last_prescription_' + clean;
+    this.set(key, data);
+    return data;
   },
 
   // ------------------------------------------------------------

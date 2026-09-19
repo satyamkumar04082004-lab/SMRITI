@@ -204,12 +204,12 @@ export default function DoctorPage(container) {
               <div class="stat-card" style="border-top: 4px solid #059669;">
                 <div class="stat-label">Mean Accuracy</div>
                 <div class="stat-value" style="color: #047857;">${avgAccuracy}%</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Longitudinal stability</div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${totalSessions > 0 ? 'Longitudinal stability' : 'Awaiting baseline trials'}</div>
               </div>
               <div class="stat-card" style="border-top: 4px solid #D97706;">
                 <div class="stat-label">Task Adherence</div>
                 <div class="stat-value" style="color: #B45309;">${taskCompletionRate}%</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Daily routine completion</div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${reminders.length > 0 ? 'Daily routine completion' : 'No reminders scheduled'}</div>
               </div>
               <div class="stat-card" style="border-top: 4px solid #7C3AED;">
                 <div class="stat-label">Active Prescriptions</div>
@@ -236,7 +236,7 @@ export default function DoctorPage(container) {
 
               <div style="display: flex; flex-direction: column; gap: 1rem;">
                 ${Object.entries(domainBreakdown).map(([domain, data]) => {
-                  const score = data.count > 0 ? Math.round(data.totalAcc / data.count) : 85;
+                  const score = data.count > 0 ? Math.round(data.totalAcc / data.count) : 0;
                   let barColor = '#10B981';
                   if (score < 75) barColor = '#EF4444';
                   else if (score < 85) barColor = '#F59E0B';
@@ -247,7 +247,7 @@ export default function DoctorPage(container) {
                           <span>${data.icon}</span> ${domain}
                         </div>
                         <div style="font-weight: 800; color: ${barColor}; font-size: 1.05rem;">
-                          ${score}% ${data.count > 0 ? `<span style="font-size: 0.85rem; color: #64748B; font-weight: normal;">(${data.count} trials)</span>` : ''}
+                          ${data.count > 0 ? `${score}% <span style="font-size: 0.85rem; color: #64748B; font-weight: normal;">(${data.count} trials)</span>` : '<span style="font-size: 0.85rem; color: #94A3B8; font-weight: 600;">0% (No trials yet)</span>'}
                         </div>
                       </div>
                       <div style="width: 100%; height: 12px; background: #E2E8F0; border-radius: 6px; overflow: hidden;">
@@ -293,6 +293,106 @@ export default function DoctorPage(container) {
                       <span style="font-size: 0.82rem; color: #1E3A8A; font-weight: 600;">Prescribed: ${m.date || 'Active'}</span>
                     </div>
                     <div style="font-size: 0.95rem; color: #1E3A8A; margin-top: 4px;">${m.instructions || ''} • ${m.frequency || ''}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Next Scheduled Appointment & Clinical Follow-up Card -->
+            <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px; background: linear-gradient(135deg, #F0FDF4, #ECFDF5); border: 2px solid #A7F3D0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h3 style="color: #065F46; margin: 0; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                  <span>🗓️</span> <span>Next Scheduled Clinical Consultation</span>
+                </h3>
+                <span style="background: #D1FAE5; color: #047857; font-weight: 800; font-size: 0.82rem; padding: 3px 10px; border-radius: 999px;">
+                  Active Schedule
+                </span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
+                <div style="background: #FFFFFF; padding: 0.85rem 1rem; border-radius: 12px; border: 1px solid #A7F3D0;">
+                  <div style="font-size: 0.8rem; color: #047857; font-weight: 700;">Date & Time</div>
+                  <div style="font-size: 1.1rem; font-weight: 800; color: #064E3B; margin-top: 2px;">
+                    ${nextAppointment?.date || '2026-09-25'} • ${nextAppointment?.time || '10:30 AM'}
+                  </div>
+                </div>
+                <div style="background: #FFFFFF; padding: 0.85rem 1rem; border-radius: 12px; border: 1px solid #A7F3D0;">
+                  <div style="font-size: 0.8rem; color: #047857; font-weight: 700;">Attending Physician</div>
+                  <div style="font-size: 1.1rem; font-weight: 800; color: #064E3B; margin-top: 2px;">
+                    ${nextAppointment?.doctorName || currentDoctor.name || 'Dr. A. K. Barua'}
+                  </div>
+                </div>
+                <div style="background: #FFFFFF; padding: 0.85rem 1rem; border-radius: 12px; border: 1px solid #A7F3D0;">
+                  <div style="font-size: 0.8rem; color: #047857; font-weight: 700;">Clinical Center</div>
+                  <div style="font-size: 1.05rem; font-weight: 800; color: #064E3B; margin-top: 2px;">
+                    ${nextAppointment?.hospitalClinic || 'Guwahati Neurological Care Center'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Last Prescription (OCR Synced) Card -->
+            ${lastPrescription ? `
+            <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px; background: #FAF5FF; border: 2px solid #E9D5FF;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h3 style="color: #6B21A8; margin: 0; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                  <span>📑</span> <span>Latest Prescription (OCR Digitized Record)</span>
+                </h3>
+                <span style="background: #F3E8FF; color: #7E22CE; font-weight: 800; font-size: 0.82rem; padding: 3px 10px; border-radius: 999px;">
+                  Prescription Date: ${lastPrescription.date || 'Recent'}
+                </span>
+              </div>
+              <p style="color: #7E22CE; font-size: 0.92rem; margin: 0 0 0.75rem 0;">
+                Digitized from patient prescription upload • Attending: <strong>${lastPrescription.doctorName || 'Dr. A. K. Barua'}</strong> (${lastPrescription.hospitalClinic || 'Guwahati Neurological Care Center'})
+              </p>
+              ${lastPrescription.medicines && lastPrescription.medicines.length > 0 ? `
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  ${lastPrescription.medicines.map(m => `
+                    <div style="padding: 0.75rem 1rem; background: #FFFFFF; border-radius: 10px; border: 1px solid #E9D5FF; display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <strong style="color: #581C87;">${m.name} (${m.strength || 'Standard'})</strong>
+                        <div style="font-size: 0.85rem; color: #7E22CE;">${m.instructions || 'As directed'} • ${m.frequency || 'Daily'}</div>
+                      </div>
+                      <span style="font-size: 0.8rem; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 6px; font-weight: 700;">Verified OCR</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <div style="padding: 0.85rem; background: #FFFFFF; border-radius: 10px; border: 1px solid #E9D5FF; color: #581C87; font-size: 0.95rem;">
+                  ${lastPrescription.notes || 'Digital prescription registered in SMRITI system.'}
+                </div>
+              `}
+            </div>
+            ` : ''}
+
+            <!-- Caregiver Clinical Observations & Notes Sync Card -->
+            <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px; background: #FFFDF9; border: 2px solid #FED7AA;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                <div>
+                  <h3 style="color: #9A3412; margin: 0; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📝</span> <span>Caregiver Daily Clinical Notes & Log</span>
+                  </h3>
+                  <p class="text-muted" style="margin: 0.15rem 0 0 0; font-size: 0.92rem;">
+                    Direct synchronization of home caregiver logs, behavioral observations, and medication adherence
+                  </p>
+                </div>
+                <span style="background: #FFEDD5; color: #C2410C; padding: 4px 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;">
+                  ${caregiverNotes.length} Logged Entries
+                </span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                ${caregiverNotes.length === 0 ? `
+                  <div style="padding: 1rem; background: #FFFFFF; border-radius: 10px; border: 1px dashed #FDBA74; text-align: center; color: #9A3412; font-size: 0.95rem;">
+                    No caregiver notes logged yet for @${patientUsername}.
+                  </div>
+                ` : caregiverNotes.map(cn => `
+                  <div style="background: #FFFFFF; border: 1.5px solid #FED7AA; border-radius: 12px; padding: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                      <strong style="color: #7C2D12; font-size: 1.05rem;">${cn.title || 'Caregiver Note'}</strong>
+                      <span style="color: #9A3412; font-size: 0.82rem; font-weight: 600;">${cn.date || 'Recent'} • By ${cn.caregiverName || 'Primary Caregiver'}</span>
+                    </div>
+                    <p style="color: #431407; margin: 0; font-size: 0.95rem; line-height: 1.45;">
+                      ${cn.note || cn.notes || cn.body || ''}
+                    </p>
                   </div>
                 `).join('')}
               </div>

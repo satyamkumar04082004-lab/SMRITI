@@ -6,6 +6,7 @@
 
 import Storage from './storage.js';
 import I18n from './i18n.js';
+import { findBestFAQMatch } from './saathiKnowledgeBase.js';
 
 // ============================================================
 // CLIENT-SIDE TOOL EXECUTION DICTIONARY (TOOL_HANDLERS)
@@ -227,6 +228,24 @@ const AIService = {
   // 3. SMRITI AI COMPANION (STREAMING + TOOL EXECUTION + STRICT DYNAMIC LANGUAGE)
   // ------------------------------------------------------------
   async streamChatWithSmriti(userMessage, onChunk, onToolCall, history = []) {
+    // Check 50 Predefined Validation Therapy FAQs
+    const faqMatch = findBestFAQMatch(userMessage);
+    if (faqMatch && faqMatch.faq) {
+      const words = faqMatch.faq.answer.split(' ');
+      let wIdx = 0;
+      const interval = setInterval(() => {
+        if (wIdx < words.length) {
+          const chunk = (wIdx > 0 ? ' ' : '') + words[wIdx];
+          onChunk(chunk, false);
+          wIdx++;
+        } else {
+          clearInterval(interval);
+          onChunk('', true);
+        }
+      }, 25);
+      return;
+    }
+
     const profile = Storage.getPatientProfile();
     const user = Storage.getUser() || { name: 'Meera Das', role: 'patient' };
 
@@ -374,6 +393,12 @@ const AIService = {
   },
 
   chatWithSmriti(userMessage, history = []) {
+    // Check 50 Predefined Validation Therapy FAQs
+    const faqSyncMatch = findBestFAQMatch(userMessage);
+    if (faqSyncMatch && faqSyncMatch.faq) {
+      return faqSyncMatch.faq.answer;
+    }
+
     const profile = Storage.getPatientProfile();
     const currentLang = I18n.lang || Storage.getLanguage() || 'en';
     const patient = (profile && profile.patient) || { name: 'Meera', state: 'Assam' };

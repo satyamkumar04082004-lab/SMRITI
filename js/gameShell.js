@@ -70,13 +70,30 @@ class GameController {
           
           <div id="tts-container" style="margin-bottom: 1.25rem;"></div>
           
-          ${c.hasDifficulty ? `
-          <div class="difficulty-selector" id="diff-selector" style="margin-bottom: 1rem;">
-            <button class="diff-btn" data-diff="easy">${I18n.t('easy')}</button>
-            <button class="diff-btn active" data-diff="medium">${I18n.t('medium')}</button>
-            <button class="diff-btn" data-diff="hard">${I18n.t('hard')}</button>
-          </div>
-          ` : ''}
+          ${c.hasDifficulty ? (() => {
+            const levelStatus = Storage.getGameLevelStatus(c.gameId);
+            const isMediumUnlocked = levelStatus.level2 && levelStatus.level2.unlocked;
+            const isHardUnlocked = levelStatus.level3 && levelStatus.level3.unlocked;
+            if (!this.difficulty || (this.difficulty === 'hard' && !isHardUnlocked) || (this.difficulty === 'medium' && !isMediumUnlocked)) {
+              this.difficulty = 'easy';
+            }
+            return `
+            <div class="difficulty-selector" id="diff-selector" style="margin-bottom: 0.75rem;">
+              <button class="diff-btn ${this.difficulty === 'easy' ? 'active' : ''}" data-diff="easy">${I18n.t('easy')}</button>
+              <button class="diff-btn ${this.difficulty === 'medium' ? 'active' : ''} ${!isMediumUnlocked ? 'locked' : ''}" data-diff="medium" style="${!isMediumUnlocked ? 'opacity: 0.65;' : ''}">
+                ${I18n.t('medium')} ${!isMediumUnlocked ? '🔒' : ''}
+              </button>
+              <button class="diff-btn ${this.difficulty === 'hard' ? 'active' : ''} ${!isHardUnlocked ? 'locked' : ''}" data-diff="hard" style="${!isHardUnlocked ? 'opacity: 0.65;' : ''}">
+                ${I18n.t('hard')} ${!isHardUnlocked ? '🔒' : ''}
+              </button>
+            </div>
+            ${(!isMediumUnlocked || !isHardUnlocked) ? `
+              <div style="font-size: 0.82rem; color: #B45309; margin-bottom: 1rem; font-weight: 600;">
+                ℹ️ Crucial Progression: Medium unlocks at ≥80% on Easy; Hard unlocks at ≥80% on Medium.
+              </div>
+            ` : ''}
+            `;
+          })() : ''}
 
           <!-- Large, Senior-Friendly Time Control Option -->
           <div class="timer-config-box" style="margin: 1rem auto 1.5rem auto; padding: 1rem; background: #FFFDF9; border: 2px solid #FCD34D; border-radius: 16px; max-width: 380px;">
@@ -118,9 +135,23 @@ class GameController {
     if (c.hasDifficulty) {
       this.container.querySelectorAll('.diff-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+          const diff = btn.dataset.diff;
+          const levelStatus = Storage.getGameLevelStatus(c.gameId);
+          const isMediumUnlocked = levelStatus.level2 && levelStatus.level2.unlocked;
+          const isHardUnlocked = levelStatus.level3 && levelStatus.level3.unlocked;
+
+          if (diff === 'medium' && !isMediumUnlocked) {
+            alert('🔒 Medium level is locked. Achieve ≥80% accuracy on Easy level to unlock!');
+            return;
+          }
+          if (diff === 'hard' && !isHardUnlocked) {
+            alert('🔒 Hard level is locked. Achieve ≥80% accuracy on Medium level to unlock!');
+            return;
+          }
+
           this.container.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          this.difficulty = btn.dataset.diff;
+          this.difficulty = diff;
         });
       });
     }
@@ -408,7 +439,7 @@ class GameController {
       coinsEarned: coinDelta,
     });
 
-    // Adaptive Level Progression: >75% accuracy unlocks next level
+    // Crucial Progression Logic: >=80% accuracy unlocks next level
     const diffToLevel = { easy: 1, medium: 2, hard: 3 };
     const currentLevel = diffToLevel[this.difficulty] || 1;
     Storage.recordGameLevelResult(this.config.gameId, currentLevel, accuracy);
