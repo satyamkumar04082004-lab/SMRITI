@@ -22,20 +22,42 @@
   <link rel="stylesheet" href="css/style.css">
 
   <script>
-    // Global error catcher — shows JS errors on screen in debug environments
+    // Global error catcher — shows JS errors on screen and dismisses loading state
     window.onerror = function(msg, src, line, col, err) {
       console.error('SMRITI Global Error:', msg, src, line, col, err);
       const root = document.getElementById('root');
-      if (root && !root.hasChildNodes()) {
+      if (root) {
         root.innerHTML =
-          '<div style="padding:24px;color:#800020;font-family:monospace;white-space:pre-wrap;background:#FFF5F5;border:2px solid #FEB2B2;border-radius:16px;margin:16px;">' +
-          '<h3>Application Error:</h3>' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col +
-          (err && err.stack ? '\n\nStack:\n' + err.stack : '') + '</div>';
+          '<div style="max-width:560px;margin:40px auto;padding:24px;color:#800020;font-family:\'Plus Jakarta Sans\',sans-serif;background:#FFF5F5;border:2px solid #FEB2B2;border-radius:18px;box-shadow:0 10px 25px rgba(0,0,0,0.08);">' +
+          '<div style="font-size:2.5rem;margin-bottom:8px;">⚠️</div>' +
+          '<h3 style="margin:0 0 8px 0;color:#991B1B;font-size:1.3rem;">SMRITI Boot Diagnostic</h3>' +
+          '<p style="color:#7F1D1D;font-size:0.95rem;margin:0 0 12px 0;">An error occurred while starting SMRITI:</p>' +
+          '<div style="font-family:monospace;font-size:0.82rem;background:#FEE2E2;padding:12px;border-radius:10px;white-space:pre-wrap;word-break:break-all;color:#7F1D1D;margin-bottom:16px;">' +
+          msg + (src ? ('\nFile: ' + src + (line ? (':' + line + ':' + col) : '')) : '') + 
+          (err && err.stack ? ('\n\nStack:\n' + err.stack) : '') + '</div>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+          '<button onclick="window.location.reload()" style="padding:10px 18px;background:#800020;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700;">🔄 Refresh Page</button>' +
+          '<button onclick="try{localStorage.clear();sessionStorage.clear();}catch(e){}window.location.href=\'#/login\';window.location.reload();" style="padding:10px 18px;background:#fff;color:#800020;border:1.5px solid #800020;border-radius:10px;cursor:pointer;font-weight:700;">🧹 Clear Cache & Sign In</button>' +
+          '</div></div>';
       }
     };
     window.addEventListener('unhandledrejection', function(e) {
       console.warn('SMRITI Unhandled Promise Rejection:', e.reason);
     });
+
+    // Failsafe watchdog timer: If app hasn't cleared loading state after 3.5 seconds, offer recovery
+    setTimeout(function() {
+      const root = document.getElementById('root');
+      const loader = root ? root.querySelector('.loading-state') : null;
+      if (loader && !document.getElementById('page-content')) {
+        console.warn('SMRITI Boot Watchdog: App taking longer than expected to initialize.');
+        const hint = document.createElement('div');
+        hint.style.cssText = 'margin-top: 20px; font-size: 0.9rem; color: #64748B;';
+        hint.innerHTML = '<p>Initialization taking longer than usual?</p>' +
+          '<button onclick="window.location.href=\'#/login\';window.location.reload();" style="padding:8px 16px;background:#9B2C2C;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Go to Direct Login ➔</button>';
+        loader.appendChild(hint);
+      }
+    }, 3500);
   </script>
 </head>
 <body class="min-h-screen flex flex-col justify-between" data-region="Assam" data-lang="en">

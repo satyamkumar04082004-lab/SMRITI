@@ -6,7 +6,7 @@
 import I18n from './i18n.js';
 
 const TTS = {
-  _supported: 'speechSynthesis' in window,
+  _supported: typeof window !== 'undefined' && 'speechSynthesis' in window,
   _speaking: false,
 
   /**

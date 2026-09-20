@@ -885,14 +885,49 @@ async function sendSaathiMessage(text) {
   }
 }
 
+// --- Safe Boot Error Fallback Screen ---
+function renderBootFallback(err) {
+  const root = document.getElementById('root');
+  if (!root) return;
+  root.innerHTML = `
+    <div class="container page-enter" style="max-width: 580px; margin: 3rem auto; padding: 2rem; background: #FFF5F5; border: 2px solid #FEB2B2; border-radius: 20px; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.06);">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌸</div>
+      <h2 style="color: #9B2C2C; margin: 0 0 0.5rem 0; font-size: 1.6rem; font-weight: 800;">SMRITI Sanctuary Recovery</h2>
+      <p style="color: #4B5563; font-size: 1rem; line-height: 1.5; margin: 0 0 1.5rem 0;">
+        We encountered an issue restoring your previous session state. You can safely enter by refreshing or resetting your session to sign in.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <button onclick="window.location.reload();" class="btn btn-primary" style="background: #9B2C2C; border-color: #9B2C2C; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px; cursor: pointer;">
+          🔄 Refresh Sanctuary
+        </button>
+        <button onclick="try{localStorage.clear();sessionStorage.clear();}catch(e){}window.location.hash='#/login';window.location.reload();" class="btn btn-outline" style="border-color: #9B2C2C; color: #9B2C2C; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px; cursor: pointer;">
+          🧹 Reset Session & Sign In
+        </button>
+      </div>
+      ${err ? `
+        <details style="margin-top: 1.5rem; text-align: left; background: #FEE2E2; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem; color: #7F1D1D;">
+          <summary style="cursor: pointer; font-weight: 700;">Technical Diagnostics</summary>
+          <pre style="margin: 0.5rem 0 0 0; white-space: pre-wrap; word-break: break-all;">${err.stack || err.message || String(err)}</pre>
+        </details>
+      ` : ''}
+    </div>
+  `;
+}
+
 // --- Main Router Navigation Handler ---
 function navigate() {
+  // Always dismiss any static index.html loading screen immediately
+  const root = document.getElementById('root');
+  if (root) {
+    const loadingState = root.querySelector('.loading-state');
+    if (loadingState) loadingState.remove();
+  }
+
   let hash = window.location.hash;
   if (!hash || hash === '#' || hash === '#/') {
     const defaultHash = Auth.isLoggedIn() ? '#/home' : '#/login';
     if (window.location.hash !== defaultHash) {
       window.location.hash = defaultHash;
-      return;
     }
     hash = defaultHash;
   }
@@ -903,7 +938,7 @@ function navigate() {
   if (currentCleanup) {
     try {
       if (typeof currentCleanup === 'function') currentCleanup();
-      else if (currentCleanup.cleanup) currentCleanup.cleanup();
+      else if (currentCleanup && typeof currentCleanup.cleanup === 'function') currentCleanup.cleanup();
     } catch (e) {
       console.warn('Cleanup error:', e);
     }
@@ -914,28 +949,33 @@ function navigate() {
   if (!route || (route.auth && !Auth.isLoggedIn())) {
     if (window.location.hash !== '#/login') {
       window.location.hash = '#/login';
-      return;
     }
+    hash = '#/login';
     route = routes['#/login'];
   }
 
   // Redirect logged in user from login
   if (hash === '#/login' && Auth.isLoggedIn()) {
-    const user = Auth.getUser();
-    const target = (user && user.role === 'caregiver') ? '#/dashboard' : '#/home';
-    window.location.hash = target;
-    return;
+    const user = Auth.getUser() || {};
+    const target = (user.role === 'caregiver') ? '#/dashboard' : (user.role === 'doctor' ? '#/doctor' : '#/home');
+    if (window.location.hash !== target) {
+      window.location.hash = target;
+    }
+    hash = target;
+    route = routes[hash] || routes['#/home'];
   }
 
   // Role routing checks
   if (hash === '#/home' && Auth.isLoggedIn()) {
-    const user = Auth.getUser();
-    if (user && user.role === 'caregiver') {
-      window.location.hash = '#/dashboard';
-      return;
-    } else if (user && user.role === 'doctor') {
-      window.location.hash = '#/doctor';
-      return;
+    const user = Auth.getUser() || {};
+    if (user.role === 'caregiver') {
+      if (window.location.hash !== '#/dashboard') window.location.hash = '#/dashboard';
+      hash = '#/dashboard';
+      route = routes['#/dashboard'];
+    } else if (user.role === 'doctor') {
+      if (window.location.hash !== '#/doctor') window.location.hash = '#/doctor';
+      hash = '#/doctor';
+      route = routes['#/doctor'];
     }
   }
 
@@ -944,13 +984,16 @@ function navigate() {
   }
 
   // DOM Mount Construction
-  const root = document.getElementById('root');
   if (!root) return;
   root.innerHTML = '';
 
   // Render Header
   if (route.auth && Auth.isLoggedIn()) {
-    renderHeader();
+    try {
+      renderHeader();
+    } catch (headerErr) {
+      console.warn('Header render error (continuing):', headerErr);
+    }
   }
 
   // Content Container
@@ -968,87 +1011,111 @@ function navigate() {
   }
 
   // Render Bottom Navigation & Floating Saathi
-  if (route.nav && Auth.isLoggedIn()) {
-    renderNav(hash);
-    renderFloatingSaathi();
-  } else {
-    if (navEl) navEl.remove();
-    if (floatingMascotEl) floatingMascotEl.remove();
-    document.body.classList.remove('has-nav');
+  try {
+    if (route.nav && Auth.isLoggedIn()) {
+      renderNav(hash);
+      renderFloatingSaathi();
+    } else {
+      if (navEl) navEl.remove();
+      if (floatingMascotEl) floatingMascotEl.remove();
+      document.body.classList.remove('has-nav');
+    }
+  } catch (navErr) {
+    console.warn('Nav render warning:', navErr);
   }
 }
 
 // --- App Bootstrapping ---
 function init() {
-  I18n.init();
-  Toast.init();
-  ReminderScheduler.init();
+  try {
+    try { I18n.init(); } catch (e) { console.warn('I18n init warning:', e); }
+    try { Toast.init(); } catch (e) { console.warn('Toast init warning:', e); }
+    try { ReminderScheduler.init(); } catch (e) { console.warn('ReminderScheduler init warning:', e); }
 
-  window.addEventListener('hashchange', navigate);
+    window.addEventListener('hashchange', () => {
+      try {
+        navigate();
+      } catch (err) {
+        console.error('SMRITI Router Error on hashchange:', err);
+        renderBootFallback(err);
+      }
+    });
 
-  // Reactive Language Event Handlers for zero-reload live re-render
-  let isRefreshingLang = false;
-  const handleLangRefresh = () => {
-    if (isRefreshingLang) return;
-    isRefreshingLang = true;
-    try {
-      // Add smooth in-place transition class to content container
-      if (contentEl) {
-        contentEl.classList.remove('lang-transition-active');
-        void contentEl.offsetWidth; // Trigger DOM reflow for CSS animation restart
-        contentEl.classList.add('lang-transition-active');
-      }
-
-      I18n.updateAllText();
-      renderHeader();
-      const hash = window.location.hash || '#/home';
-      const route = routes[hash];
-      if (route && route.nav && Auth.isLoggedIn()) {
-        renderNav(hash);
-      }
-      // Re-render Saathi drawer if open
-      if (saathiDrawerEl && saathiDrawerOpen) {
-        renderSaathiDrawer();
-      }
-      // Instantly re-render active page content with new language in-place without modifying window.location
-      if (route && contentEl && typeof route.page === 'function') {
-        try {
-          if (currentCleanup) {
-            if (typeof currentCleanup === 'function') currentCleanup();
-            else if (typeof currentCleanup.cleanup === 'function') currentCleanup.cleanup();
-            currentCleanup = null;
-          }
-          contentEl.innerHTML = '';
-          currentCleanup = route.page(contentEl);
-        } catch (e) {
-          console.warn('Page re-render on language change error:', e);
+    // Reactive Language Event Handlers for zero-reload live re-render
+    let isRefreshingLang = false;
+    const handleLangRefresh = () => {
+      if (isRefreshingLang) return;
+      isRefreshingLang = true;
+      try {
+        if (contentEl) {
+          contentEl.classList.remove('lang-transition-active');
+          void contentEl.offsetWidth;
+          contentEl.classList.add('lang-transition-active');
         }
+
+        I18n.updateAllText();
+        renderHeader();
+        const hash = window.location.hash || '#/home';
+        const route = routes[hash];
+        if (route && route.nav && Auth.isLoggedIn()) {
+          renderNav(hash);
+        }
+        if (saathiDrawerEl && saathiDrawerOpen) {
+          renderSaathiDrawer();
+        }
+        if (route && contentEl && typeof route.page === 'function') {
+          try {
+            if (currentCleanup) {
+              if (typeof currentCleanup === 'function') currentCleanup();
+              else if (currentCleanup && typeof currentCleanup.cleanup === 'function') currentCleanup.cleanup();
+              currentCleanup = null;
+            }
+            contentEl.innerHTML = '';
+            currentCleanup = route.page(contentEl);
+          } catch (e) {
+            console.warn('Page re-render on language change error:', e);
+          }
+        }
+
+        setTimeout(() => {
+          if (contentEl) contentEl.classList.remove('lang-transition-active');
+        }, 300);
+      } finally {
+        isRefreshingLang = false;
       }
+    };
 
-      setTimeout(() => {
-        if (contentEl) contentEl.classList.remove('lang-transition-active');
-      }, 300);
-    } finally {
-      isRefreshingLang = false;
+    window.addEventListener('smriti:languageChanged', handleLangRefresh);
+    window.addEventListener('languageChanged', handleLangRefresh);
+
+    // Synchronize dynamic header redeemed badge and coins across tabs/components
+    const handleRewardRedeemed = () => {
+      try {
+        Coins.updateBadge();
+        renderHeader();
+      } catch (e) {
+        console.warn('Reward badge update error:', e);
+      }
+    };
+    window.addEventListener('smriti:rewardRedeemed', handleRewardRedeemed);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'smriti_reward_redeemed' || e.key === 'smriti_coins') {
+        handleRewardRedeemed();
+      }
+    });
+
+    navigate();
+  } catch (bootErr) {
+    console.error('SMRITI Fatal Boot Error:', bootErr);
+    renderBootFallback(bootErr);
+  } finally {
+    // Guaranteed final dismiss of loading state
+    const root = document.getElementById('root');
+    const loadingState = root ? root.querySelector('.loading-state') : null;
+    if (loadingState && document.getElementById('page-content')) {
+      loadingState.remove();
     }
-  };
-
-  window.addEventListener('smriti:languageChanged', handleLangRefresh);
-  window.addEventListener('languageChanged', handleLangRefresh);
-
-  // Synchronize dynamic header redeemed badge and coins across tabs/components
-  const handleRewardRedeemed = () => {
-    Coins.updateBadge();
-    renderHeader();
-  };
-  window.addEventListener('smriti:rewardRedeemed', handleRewardRedeemed);
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'smriti_reward_redeemed' || e.key === 'smriti_coins') {
-      handleRewardRedeemed();
-    }
-  });
-
-  navigate();
+  }
 }
 
 if (document.readyState === 'loading') {

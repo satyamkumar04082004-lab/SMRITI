@@ -395,18 +395,35 @@ const Storage = {
 
   getPatientProfile(patientId = null) {
     const pid = patientId || this.getActivePatientId();
+    const defaultProfile = createDefaultPatientProfile(pid);
     try {
       const raw = localStorage.getItem(this._patientKey(pid));
       if (raw) {
         const parsed = JSON.parse(raw);
-        return parsed;
+        if (parsed && typeof parsed === 'object') {
+          return {
+            ...defaultProfile,
+            ...parsed,
+            patient: {
+              ...defaultProfile.patient,
+              ...(parsed.patient || {})
+            },
+            preferences: {
+              ...defaultProfile.preferences,
+              ...(parsed.preferences || {})
+            },
+            coins: typeof parsed.coins === 'number' ? parsed.coins : defaultProfile.coins,
+            gameHistory: Array.isArray(parsed.gameHistory) ? parsed.gameHistory : defaultProfile.gameHistory,
+            reminders: Array.isArray(parsed.reminders) ? parsed.reminders : defaultProfile.reminders,
+            medicines: Array.isArray(parsed.medicines) ? parsed.medicines : defaultProfile.medicines
+          };
+        }
       }
     } catch (e) {
       console.warn('Error reading patient profile from localStorage:', e);
     }
 
     // Default initialized profile
-    const defaultProfile = createDefaultPatientProfile(pid);
     this.savePatientProfile(defaultProfile, false);
     return defaultProfile;
   },

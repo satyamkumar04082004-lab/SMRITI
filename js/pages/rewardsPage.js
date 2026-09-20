@@ -380,6 +380,5 @@ export default function RewardsPage(container) {
       window.removeEventListener('languageChanged', onLangChange);
       window.removeEventListener('smriti:languageChanged', onLangChange);
     }
-    cleanup() {}
   };
 }
