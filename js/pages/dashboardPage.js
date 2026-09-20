@@ -492,6 +492,8 @@ export default function DashboardPage(container) {
   }
 
   function attachEvents() {
+    const patientUsername = (linkedPatient && linkedPatient.username) || 'meera_das';
+    const nextAppointment = Storage.getNextAppointment(patientUsername) || null;
     // Tab switcher
     container.querySelectorAll('.chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {

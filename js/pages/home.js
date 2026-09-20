@@ -97,6 +97,8 @@ export default function Home(container) {
         </section>
     ` : '';
     const user = Storage.getUser() || { name: 'Meera Das' };
+    const patientUsername = (user && user.username) || 'meera_das';
+    const nextAppointment = Storage.getNextAppointment(patientUsername) || null;
     const prefs = Storage.getPreferences();
     // Persistent identity takes priority over default 'Meera' placeholder
     const userFirst = user.name ? user.name.split(' ')[0] : '';

@@ -21,6 +21,8 @@ export default function DoctorPage(container) {
   let timeFilter = '30d';
   let showAddNoteModal = false;
   let editingNoteId = null;
+  let currentPatientUsername = 'meera_das';
+  let currentNextAppointment = null;
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -104,10 +106,12 @@ export default function DoctorPage(container) {
       : 0;
 
     // Data Synchronization: Caregiver Notes, Last Prescription (OCR), Next Appointment
-    const patientUsername = patient.username || 'meera_das';
+    const patientUsername = patient.username || (activePatient && activePatient.username) || 'meera_das';
+    currentPatientUsername = patientUsername;
     const caregiverNotes = Storage.getClinicalNotes(patientUsername) || [];
     const lastPrescription = Storage.getLastPrescription(patientUsername);
-    const nextAppointment = Storage.getNextAppointment(patientUsername);
+    const nextAppointment = Storage.getNextAppointment(patientUsername) || null;
+    currentNextAppointment = nextAppointment;
 
 container.innerHTML = `
       <div class="container page-enter" style="max-width: 920px; padding-bottom: 3.5rem;">
@@ -688,6 +692,10 @@ container.innerHTML = `
       });
     });
 
+    // Patient identity & Next Appointment Resolution (Safe Scope Declaration)
+    const patientUsername = (activePatient && activePatient.username) || currentPatientUsername || 'meera_das';
+    const nextAppointment = Storage.getNextAppointment(patientUsername) || currentNextAppointment || null;
+
     // Next Appointment Form Submission & Auto-Sync (Requirement 11)
     const apptForm = container.querySelector('#form-doc-appointment');
     if (apptForm) {
@@ -718,7 +726,7 @@ container.innerHTML = `
       });
     }
 
-    // Edit Visit button listener
+    // Edit Visit button listener (Strict Null Safe)
     const editApptBtn = container.querySelector('#btn-edit-appt');
     if (editApptBtn && nextAppointment) {
       editApptBtn.addEventListener('click', () => {
@@ -726,10 +734,10 @@ container.innerHTML = `
         const timeInp = container.querySelector('#inp-appt-time');
         const typeInp = container.querySelector('#inp-appt-type');
         const notesInp = container.querySelector('#inp-appt-notes');
-        if (dateInp && nextAppointment.date) dateInp.value = nextAppointment.date;
-        if (timeInp && nextAppointment.time) timeInp.value = nextAppointment.time;
-        if (typeInp && nextAppointment.type) typeInp.value = nextAppointment.type;
-        if (notesInp && nextAppointment.instructions) notesInp.value = nextAppointment.instructions;
+        if (dateInp && nextAppointment?.date) dateInp.value = nextAppointment.date;
+        if (timeInp && nextAppointment?.time) timeInp.value = nextAppointment.time;
+        if (typeInp && nextAppointment?.type) typeInp.value = nextAppointment.type;
+        if (notesInp && nextAppointment?.instructions) notesInp.value = nextAppointment.instructions;
         apptForm?.scrollIntoView({ behavior: 'smooth' });
         if (window.SmritiToast) {
           window.SmritiToast.show('Consultation details loaded into the form below. Tap Save to apply updates! ✏️', 'info');
