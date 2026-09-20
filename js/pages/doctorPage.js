@@ -206,12 +206,29 @@ container.innerHTML = `
               </div>
             </div>
 
+            <!-- Zero-State Baseline Alert for Fresh / Newly Linked Patients (Requirement 12) -->
+            ${totalSessions === 0 ? `
+              <div class="card mb-md" style="background: #F0FDF4; border: 2px solid #86EFAC; border-radius: 16px; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="font-size: 2.4rem; background: #DCFCE7; width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  🌱
+                </div>
+                <div>
+                  <h4 style="margin: 0; color: #166534; font-size: 1.15rem; font-weight: 800;">
+                    Authentic Clinical Zero-Baseline State
+                  </h4>
+                  <p style="margin: 3px 0 0 0; color: #14532D; font-size: 0.92rem; line-height: 1.4;">
+                    <strong>@${patientUsername}</strong> is newly registered with 0 prior trials. All cognitive metrics start at 0% baseline until the patient completes their initial exercises.
+                  </p>
+                </div>
+              </div>
+            ` : ''}
+
             <!-- High Level Key Metrics Grid -->
             <div class="stat-grid mb-md" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
               <div class="stat-card" style="border-top: 4px solid #2563EB;">
                 <div class="stat-label">Cognitive Trials</div>
                 <div class="stat-value" style="color: #1D4ED8;">${totalSessions}</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Completed sessions</div>
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${totalSessions > 0 ? 'Completed sessions' : '0 completed (Zero State)'}</div>
               </div>
               <div class="stat-card" style="border-top: 4px solid #059669;">
                 <div class="stat-label">Mean Accuracy</div>
@@ -410,6 +427,78 @@ container.innerHTML = `
               </div>
             </div>
 
+            <!-- Next Scheduled Consultation & Auto-Sync Card (Requirement 11) -->
+            <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px; background: #F8FAFC; border: 2px solid #CBD5E1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <h3 style="color: #0F172A; margin: 0; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📅</span> <span>Next Consultation & Routine Auto-Sync</span>
+                  </h3>
+                  <p class="text-muted" style="margin: 0.15rem 0 0 0; font-size: 0.92rem;">
+                    Schedule patient's upcoming consultation — automatically injects an active reminder into patient's daily routine.
+                  </p>
+                </div>
+                <span style="background: #E0E7FF; color: #3730A3; padding: 4px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 800;">
+                  Auto-Sync Active ⚡
+                </span>
+              </div>
+
+              ${nextAppointment ? `
+                <div style="background: #FFFFFF; border: 1.5px solid #93C5FD; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 2px 8px rgba(37,99,235,0.06);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                      <span style="background: #EFF6FF; color: #1D4ED8; font-size: 0.82rem; font-weight: 800; padding: 3px 10px; border-radius: 6px;">
+                        Confirmed Upcoming Visit
+                      </span>
+                      <h4 style="margin: 0.5rem 0 0.25rem 0; color: #1E3A8A; font-size: 1.2rem; font-weight: 800;">
+                        ${escapeHtml(nextAppointment.type || 'Cognitive Follow-up')} with ${escapeHtml(nextAppointment.doctorName || currentDoctor.name || 'Physician')}
+                      </h4>
+                      <div style="color: #475569; font-size: 0.95rem; line-height: 1.4;">
+                        <strong>Date:</strong> ${nextAppointment.date || 'Scheduled'} at <strong>${nextAppointment.time || '11:00 AM'}</strong><br/>
+                        <strong>Location:</strong> ${escapeHtml(nextAppointment.hospitalClinic || 'Guwahati Health Center')}<br/>
+                        <strong>Notes:</strong> ${escapeHtml(nextAppointment.instructions || 'Bring health records.')}
+                      </div>
+                    </div>
+                    <div style="background: #DCFCE7; color: #15803D; font-size: 0.82rem; font-weight: 800; padding: 6px 12px; border-radius: 10px; border: 1px solid #86EFAC;">
+                      ✓ Injected in Patient Reminders
+                    </div>
+                  </div>
+                </div>
+              ` : `
+                <div style="background: #FFFFFF; border: 1.5px dashed #CBD5E1; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; text-align: center; color: #64748B;">
+                  No upcoming visit scheduled yet for @${patientUsername}. Use form below to schedule.
+                </div>
+              `}
+
+              <!-- Schedule Form -->
+              <form id="form-doc-appointment" style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 1.25rem;">
+                <h4 style="margin: 0 0 0.85rem 0; color: #0F172A; font-size: 1.05rem; font-weight: 700;">
+                  📅 Schedule / Update Next Visit for @${patientUsername}
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; margin-bottom: 0.85rem;">
+                  <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Visit Date *</label>
+                    <input type="date" id="inp-appt-date" class="form-input" value="${new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]}" required style="width: 100%; height: 42px; font-size: 0.95rem;" />
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Visit Time *</label>
+                    <input type="text" id="inp-appt-time" class="form-input" value="11:00 AM" placeholder="e.g. 11:00 AM" required style="width: 100%; height: 42px; font-size: 0.95rem;" />
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Consultation Type *</label>
+                    <input type="text" id="inp-appt-type" class="form-input" value="Cognitive & Routine Review" placeholder="e.g. Follow-up Assessment" required style="width: 100%; height: 42px; font-size: 0.95rem;" />
+                  </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                  <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Instructions / Preparation for Patient</label>
+                  <input type="text" id="inp-appt-notes" class="form-input" value="Bring updated adherence logs and family observation notes." placeholder="Preparation notes..." style="width: 100%; height: 42px; font-size: 0.95rem;" />
+                </div>
+                <button type="submit" id="btn-save-appt" class="btn btn-primary" style="background: #1D4ED8; border-color: #1D4ED8; font-weight: 800; min-height: 44px; padding: 0.5rem 1.5rem; border-radius: 10px; cursor: pointer;">
+                  💾 Save & Auto-Sync to Patient Reminders
+                </button>
+              </form>
+            </div>
+
             <!-- Clinical Remarks & Directives Section -->
             <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -588,6 +677,36 @@ container.innerHTML = `
         }
       });
     });
+
+    // Next Appointment Form Submission & Auto-Sync (Requirement 11)
+    const apptForm = container.querySelector('#form-doc-appointment');
+    if (apptForm) {
+      apptForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const date = container.querySelector('#inp-appt-date')?.value;
+        const time = container.querySelector('#inp-appt-time')?.value.trim();
+        const type = container.querySelector('#inp-appt-type')?.value.trim();
+        const instructions = container.querySelector('#inp-appt-notes')?.value.trim();
+
+        if (!date || !time) return alert('Please provide a date and time for the consultation.');
+
+        const apptPayload = {
+          patientUsername,
+          doctorName: currentDoctor.name || 'Dr. A. K. Barua',
+          hospitalClinic: currentDoctor.hospitalClinic || 'Guwahati Neurological Care Center',
+          date,
+          time,
+          type,
+          instructions
+        };
+
+        Storage.saveNextAppointment(apptPayload);
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Next visit scheduled and auto-synced to patient reminders! ✓', 'success');
+        }
+        render();
+      });
+    }
 
     const noteForm = container.querySelector('#form-doc-note');
     if (noteForm) {

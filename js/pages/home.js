@@ -62,29 +62,35 @@ export default function Home(container) {
 
   function render() {
     const allReminders = Storage.getReminders() || [];
-    const missedReminder = allReminders.find(r => !r.completedToday && r.active);
+    const pendingReminders = allReminders.filter(r => !r.completedToday && r.active);
+    const missedReminder = pendingReminders[0] || null;
 
     const missedBannerHtml = missedReminder ? `
-        <!-- Missed Reminders Soothing Alert Banner -->
-        <section class="stitch-missed-alert" style="background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 20px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);">
+        <!-- Missed Reminders Soothing Alert Banner (Requirement 10) -->
+        <section class="stitch-missed-alert" style="background: #FFFBEB; border: 2.5px solid #F59E0B; border-radius: 20px; padding: 1.1rem 1.35rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; box-shadow: 0 6px 18px rgba(245, 158, 11, 0.15);">
           <div style="display: flex; align-items: center; gap: 0.85rem;">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; animation: gentlePulse 2s infinite ease-in-out;">
               ⏰
             </div>
             <div>
-              <h3 style="margin: 0; font-size: 1rem; font-weight: 800; color: #92400E;">
-                Gentle Routine Reminder
-              </h3>
-              <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: #78350F; line-height: 1.3;">
-                ${escapeHtml(missedReminder.title)} (${missedReminder.time || 'Scheduled for today'})
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #92400E;">
+                  Missed / Pending Routine Alert
+                </h3>
+                <span style="background: #FDE68A; color: #78350F; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 999px;">
+                  ${pendingReminders.length} pending
+                </span>
+              </div>
+              <p style="margin: 3px 0 0 0; font-size: 0.92rem; color: #78350F; line-height: 1.35;">
+                <strong>${escapeHtml(missedReminder.title)}</strong> (${missedReminder.time || 'Scheduled today'})
               </p>
             </div>
           </div>
-          <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-            <button id="btn-take-missed-now" class="stitch-pill-btn" style="background: #059669; color: #FFFFFF; font-weight: 800; border: none; border-radius: 12px; padding: 0.5rem 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; font-size: 0.88rem;">
+          <div style="display: flex; gap: 0.5rem; flex-shrink: 0; flex-wrap: wrap;">
+            <button id="btn-take-missed-now" class="stitch-pill-btn" style="background: #059669; color: #FFFFFF; font-weight: 800; border: none; border-radius: 12px; padding: 0.6rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; font-size: 0.92rem; box-shadow: 0 2px 6px rgba(5,150,105,0.25);">
               <span>✓</span> <span>Take Now</span>
             </button>
-            <button id="btn-alert-caregiver-missed" class="stitch-pill-btn" style="background: #FFFFFF; color: #D97706; border: 1.5px solid #FCD34D; font-weight: 800; border-radius: 12px; padding: 0.5rem 0.8rem; cursor: pointer; font-size: 0.88rem;">
+            <button id="btn-alert-caregiver-missed" class="stitch-pill-btn" style="background: #FFFFFF; color: #D97706; border: 2px solid #FCD34D; font-weight: 800; border-radius: 12px; padding: 0.6rem 0.9rem; cursor: pointer; font-size: 0.92rem;">
               <span>🔔</span> <span>Alert Caregiver</span>
             </button>
           </div>
@@ -151,6 +157,22 @@ export default function Home(container) {
             </div>
           </div>
         </section>
+
+        <!-- High-Visibility Live Location Button (Requirement 5) -->
+        <button id="btn-live-location-sms" class="stitch-pill-btn" style="width: 100%; min-height: 56px; background: linear-gradient(135deg, #DC2626, #B91C1C); color: #FFFFFF; border: none; border-radius: 20px; padding: 0.85rem 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; cursor: pointer; box-shadow: 0 6px 18px rgba(220,38,38,0.28); transition: transform 0.15s ease;">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+              📍
+            </div>
+            <div style="text-align: left;">
+              <div style="font-size: 1.05rem; font-weight: 800; letter-spacing: 0.2px;">Send Live Location to Family (SMS)</div>
+              <div style="font-size: 0.82rem; color: #FECDD3;">Instant GPS live map tracking link sent to ${escapeHtml(emergency.primaryName || 'Caregiver')}</div>
+            </div>
+          </div>
+          <span style="font-size: 1.1rem; font-weight: 800; background: rgba(255,255,255,0.22); padding: 5px 14px; border-radius: 999px; white-space: nowrap;">
+            1-Tap ➔
+          </span>
+        </button>
 
         <!-- 3. Quick Action Row -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
@@ -456,6 +478,23 @@ export default function Home(container) {
         });
       }
     }
+    // Live Location SMS Quick Action (Requirement 5)
+    const liveLocBtn = container.querySelector('#btn-live-location-sms');
+    if (liveLocBtn) {
+      liveLocBtn.addEventListener('click', () => {
+        liveLocBtn.style.opacity = '0.75';
+        liveLocBtn.innerHTML = '<span>📍</span> <span>Acquiring Live GPS & Dispatching SMS...</span>';
+        trigger1TapEmergencySOS('Patient Home Live Location Button');
+        setTimeout(() => {
+          if (container.contains(liveLocBtn)) {
+            liveLocBtn.style.opacity = '1';
+            liveLocBtn.innerHTML = '<span>✓</span> <span>Live Coordinates Dispatched to Family!</span>';
+            setTimeout(() => render(), 3000);
+          }
+        }, 2000);
+      });
+    }
+
     // Quick Actions
     const callLovedBtn = container.querySelector('#btn-call-loved-one');
     if (callLovedBtn) {

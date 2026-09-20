@@ -225,6 +225,8 @@ function showVoiceNavigationModal() {
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem;">
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/home">🏠 Home</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/games">🎮 Games</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/reminders">⏰ Routine</button>
+        <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/doctor">🩺 Doctor</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/memories">🖼️ Memories</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/wellness">🌿 Wellness</button>
         <button class="btn btn-outline btn-sm btn-voice-dest" data-route="#/emergency" style="border-color: #EF4444; color: #DC2626;">🛟 Help</button>
@@ -240,7 +242,7 @@ function showVoiceNavigationModal() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec = null;
 
-  function startListening() {
+  async function startListening() {
     const statusEl = modal.querySelector('#voice-nav-status');
     const iconEl = modal.querySelector('#voice-nav-icon');
 
@@ -252,6 +254,15 @@ function showVoiceNavigationModal() {
     }
 
     try {
+      // Cleanly verify/request microphone access before initializing recognition
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (permErr) {
+          console.warn('Microphone permission check:', permErr);
+        }
+      }
+
       if (rec) {
         try { rec.stop(); } catch {}
       }
@@ -260,8 +271,8 @@ function showVoiceNavigationModal() {
       rec.interimResults = false;
       rec.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
 
-      if (statusEl) statusEl.innerHTML = 'Listening now... <em>Speak your destination clearly</em>';
-      if (iconEl) iconEl.style.transform = 'scale(1.2)';
+      if (statusEl) statusEl.innerHTML = '🎙️ Listening now... <em>Speak your destination clearly</em>';
+      if (iconEl) iconEl.style.transform = 'scale(1.25)';
 
       rec.onresult = (event) => {
         const text = (event.results[0][0].transcript || '').toLowerCase();
@@ -290,14 +301,28 @@ function showVoiceNavigationModal() {
 
     if (text.includes('game') || text.includes('khel') || text.includes('play')) {
       target = '#/games'; name = 'Games Hub';
-    } else if (text.includes('memory') || text.includes('memories') || text.includes('story') || text.includes('photo')) {
+    } else if (text.includes('reminder') || text.includes('routine') || text.includes('task') || text.includes('yaad') || text.includes('schedule')) {
+      target = '#/reminders'; name = 'Daily Routine & Reminders';
+    } else if (text.includes('doctor') || text.includes('clinic') || text.includes('hospital') || text.includes('report') || text.includes('prescription')) {
+      target = '#/doctor'; name = 'Doctor & Clinical Reports';
+    } else if (text.includes('ritual') || text.includes('puja') || text.includes('prayer') || text.includes('morning ritual') || text.includes('subah')) {
+      target = '#/ritual'; name = 'Morning Daily Ritual';
+    } else if (text.includes('memory') || text.includes('memories') || text.includes('story') || text.includes('photo') || text.includes('chitra')) {
       target = '#/memories'; name = 'Life Story Memories';
-    } else if (text.includes('wellness') || text.includes('breath') || text.includes('health') || text.includes('shanti')) {
-      target = '#/wellness'; name = 'Wellness';
-    } else if (text.includes('medicine') || text.includes('dawa') || text.includes('pill')) {
+    } else if (text.includes('wellness') || text.includes('breath') || text.includes('health') || text.includes('shanti') || text.includes('meditation')) {
+      target = '#/wellness'; name = 'Wellness & Breathing';
+    } else if (text.includes('medicine') || text.includes('dawa') || text.includes('pill') || text.includes('goli')) {
       target = '#/medicines'; name = 'Medicines';
-    } else if (text.includes('emergency') || text.includes('help') || text.includes('sos') || text.includes('doctor')) {
+    } else if (text.includes('emergency') || text.includes('help') || text.includes('sos') || text.includes('bachao') || text.includes('madad')) {
       target = '#/emergency'; name = 'Emergency Help';
+    } else if (text.includes('setting') || text.includes('language') || text.includes('bhasha') || text.includes('profile')) {
+      target = '#/settings'; name = 'Settings';
+    } else if (text.includes('reward') || text.includes('coin') || text.includes('inam') || text.includes('points')) {
+      target = '#/rewards'; name = 'Rewards & Coins';
+    } else if (text.includes('entertainment') || text.includes('gaana') || text.includes('music') || text.includes('bhajan') || text.includes('radio')) {
+      target = '#/entertainment'; name = 'Entertainment & Melodies';
+    } else if (text.includes('social') || text.includes('friend') || text.includes('dost') || text.includes('family')) {
+      target = '#/social'; name = 'Social Circle';
     } else if (text.includes('home') || text.includes('ghar') || text.includes('bari')) {
       target = '#/home'; name = 'Home';
     }
@@ -664,13 +689,13 @@ function renderSaathiDrawer() {
     if (e.target === saathiDrawerEl) toggleSaathiDrawer(false);
   });
 
-  // Attach speech recognition
+  // Attach speech recognition with active pulse & auto-transcription (Requirement 8)
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const micBtn = saathiDrawerEl.querySelector('#btn-saathi-mic');
   let saathiRec = null;
 
   if (micBtn) {
-    micBtn.addEventListener('click', () => {
+    micBtn.addEventListener('click', async () => {
       if (!SpeechRecognition) {
         if (window.SmritiToast) window.SmritiToast.show('Speech recognition not supported in this browser', 'info');
         return;
@@ -680,24 +705,60 @@ function renderSaathiDrawer() {
           saathiRec.stop();
           saathiRec = null;
           micBtn.style.background = '#F3F4F6';
+          micBtn.style.boxShadow = 'none';
           return;
         }
+
+        // Cleanly ensure microphone permission is available
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+          } catch (permErr) {
+            console.warn('Microphone permission check:', permErr);
+          }
+        }
+
         saathiRec = new SpeechRecognition();
         saathiRec.continuous = false;
         saathiRec.interimResults = false;
         saathiRec.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
         
         micBtn.style.background = '#FECDD3';
+        micBtn.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.5)';
+        if (inputEl) inputEl.placeholder = '🎙️ Listening... Speak your thoughts to Saathi';
+
         saathiRec.onresult = (ev) => {
           const txt = ev.results[0][0].transcript;
           micBtn.style.background = '#F3F4F6';
+          micBtn.style.boxShadow = 'none';
+          if (inputEl) {
+            inputEl.placeholder = 'Type or speak a message...';
+            inputEl.value = txt;
+          }
           sendSaathiMessage(txt);
+          saathiRec = null;
         };
-        saathiRec.onerror = () => { micBtn.style.background = '#F3F4F6'; };
-        saathiRec.onend = () => { micBtn.style.background = '#F3F4F6'; };
+
+        saathiRec.onerror = () => {
+          micBtn.style.background = '#F3F4F6';
+          micBtn.style.boxShadow = 'none';
+          if (inputEl) inputEl.placeholder = 'Type or speak a message...';
+          saathiRec = null;
+          if (window.SmritiToast) window.SmritiToast.show('Could not catch your voice clearly. Tap mic to retry.', 'info');
+        };
+
+        saathiRec.onend = () => {
+          micBtn.style.background = '#F3F4F6';
+          micBtn.style.boxShadow = 'none';
+          if (inputEl) inputEl.placeholder = 'Type or speak a message...';
+          saathiRec = null;
+        };
+
         saathiRec.start();
       } catch (err) {
         console.warn('Saathi mic error:', err);
+        micBtn.style.background = '#F3F4F6';
+        micBtn.style.boxShadow = 'none';
       }
     });
   }

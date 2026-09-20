@@ -42,6 +42,8 @@ class GameController {
     this.difficulty = 'medium';
     this.timeLimit = this.config.parTime || 90;
     this.phase = 'start'; // start | play | result
+    this._voiceAnswerActive = false;
+    this._voiceRec = null;
 
     this._renderStart();
   }
@@ -200,11 +202,23 @@ class GameController {
           <button id="btn-game-leave" class="btn btn-ghost btn-sm" style="font-weight: 700; color: var(--gray-700); font-size: 1rem; padding: 0.35rem 0.75rem; border: 1px solid #E2E8F0; border-radius: 8px;">
             ← Leave
           </button>
+
+          <!-- Voice Answers for Patients with Motor Difficulties (Requirement 9) -->
+          <button id="btn-game-voice-answer" class="btn btn-outline btn-sm" style="font-weight: 700; font-size: 0.88rem; padding: 0.35rem 0.85rem; border-radius: 20px; border-color: #CBD5E1; display: inline-flex; align-items: center; gap: 0.4rem; background: #FFFFFF; cursor: pointer; transition: all 0.2s;" title="Speak answers instead of clicking">
+            <span>🎙️</span> <span id="voice-ans-label">Voice Answer: OFF</span>
+          </button>
+
           <div class="game-score" id="game-score">
             ${I18n.t('score')}: <span id="score-value">0</span>
           </div>
           <div class="game-timer" id="game-timer">0:00</div>
         </div>
+
+        <!-- Voice Answer Live Listening Indicator Banner -->
+        <div id="voice-ans-banner" style="display: none; background: #EFF6FF; border: 1.5px solid #93C5FD; border-radius: 12px; padding: 0.5rem 1rem; margin-bottom: 0.85rem; text-align: center; font-size: 0.92rem; color: #1E40AF; font-weight: 700;">
+          🎙️ <span id="voice-ans-status">Listening for spoken answer... Speak your choice clearly!</span>
+        </div>
+
         <div id="game-area"></div>
       </div>
     `;
@@ -251,6 +265,7 @@ class GameController {
 
     this.timer.bindDisplay(this.container.querySelector('#game-timer'));
     this.timer.start();
+    this._initVoiceAnswers();
 
     // Spoken instruction if Voice Guidance is enabled
     try {
@@ -533,10 +548,134 @@ class GameController {
     });
   }
 
+  _initVoiceAnswers() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const btn = this.container.querySelector('#btn-game-voice-answer');
+    const label = this.container.querySelector('#voice-ans-label');
+    const banner = this.container.querySelector('#voice-ans-banner');
+
+    if (!btn || !SpeechRecognition) return;
+
+    btn.addEventListener('click', async () => {
+      this._voiceAnswerActive = !this._voiceAnswerActive;
+      if (this._voiceAnswerActive) {
+        btn.style.background = '#ECFDF5';
+        btn.style.borderColor = '#10B981';
+        btn.style.color = '#065F46';
+        if (label) label.textContent = 'Voice Answer: ON';
+        if (banner) banner.style.display = 'block';
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try { await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) {}
+        }
+        this._startVoiceListening();
+      } else {
+        btn.style.background = '#FFFFFF';
+        btn.style.borderColor = '#CBD5E1';
+        btn.style.color = 'inherit';
+        if (label) label.textContent = 'Voice Answer: OFF';
+        if (banner) banner.style.display = 'none';
+        if (this._voiceRec) {
+          try { this._voiceRec.stop(); } catch {}
+          this._voiceRec = null;
+        }
+      }
+    });
+  }
+
+  _startVoiceListening() {
+    if (!this._voiceAnswerActive || this.phase !== 'play') return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    try {
+      if (this._voiceRec) {
+        try { this._voiceRec.stop(); } catch {}
+      }
+      this._voiceRec = new SpeechRecognition();
+      this._voiceRec.continuous = true;
+      this._voiceRec.interimResults = false;
+      this._voiceRec.lang = I18n.lang === 'hi' ? 'hi-IN' : (I18n.lang === 'bn' ? 'bn-IN' : (I18n.lang === 'as' ? 'as-IN' : 'en-IN'));
+
+      this._voiceRec.onresult = (e) => {
+        const transcript = (e.results[e.results.length - 1][0].transcript || '').trim().toLowerCase();
+        this._handleSpokenAnswer(transcript);
+      };
+
+      this._voiceRec.onerror = () => {
+        if (this._voiceAnswerActive && this.phase === 'play') {
+          setTimeout(() => this._startVoiceListening(), 1200);
+        }
+      };
+
+      this._voiceRec.onend = () => {
+        if (this._voiceAnswerActive && this.phase === 'play') {
+          setTimeout(() => this._startVoiceListening(), 500);
+        }
+      };
+
+      this._voiceRec.start();
+    } catch (err) {
+      console.warn('Voice answer start error:', err);
+    }
+  }
+
+  _handleSpokenAnswer(transcript) {
+    const statusText = this.container.querySelector('#voice-ans-status');
+    if (statusText) statusText.textContent = `Heard: "${transcript}" — Searching match...`;
+
+    const gameArea = this.container.querySelector('#game-area');
+    if (!gameArea) return;
+
+    const clickableCandidates = Array.from(gameArea.querySelectorAll('button, .card-item, .choice-btn, .option-btn, [data-choice], [data-card-id], .game-card, .quiz-option, .bamboo-item'));
+
+    if (clickableCandidates.length === 0) return;
+
+    let matchedElement = null;
+
+    // Position-based matching ("first", "1", "one", "second", "2", "two", etc.)
+    if (transcript.includes('first') || transcript.includes('1') || transcript.includes('one') || transcript.includes('pehla') || transcript.includes('ek') || transcript.includes('a')) {
+      matchedElement = clickableCandidates[0];
+    } else if (transcript.includes('second') || transcript.includes('2') || transcript.includes('two') || transcript.includes('dusra') || transcript.includes('do') || transcript.includes('b')) {
+      matchedElement = clickableCandidates[1] || clickableCandidates[0];
+    } else if (transcript.includes('third') || transcript.includes('3') || transcript.includes('three') || transcript.includes('teesra') || transcript.includes('teen') || transcript.includes('c')) {
+      matchedElement = clickableCandidates[2] || clickableCandidates[0];
+    } else if (transcript.includes('fourth') || transcript.includes('4') || transcript.includes('four') || transcript.includes('chautha') || transcript.includes('char') || transcript.includes('d')) {
+      matchedElement = clickableCandidates[3] || clickableCandidates[0];
+    } else {
+      // Content-based matching: check element innerText against spoken phrase
+      matchedElement = clickableCandidates.find(el => {
+        const text = (el.innerText || el.textContent || '').trim().toLowerCase();
+        if (!text) return false;
+        return transcript.includes(text) || text.includes(transcript);
+      });
+    }
+
+    if (matchedElement) {
+      if (statusText) statusText.innerHTML = `✨ Selected by Voice: <strong>${matchedElement.innerText || 'Matching Choice'}</strong>`;
+      matchedElement.style.outline = '4px solid #10B981';
+      matchedElement.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        matchedElement.click();
+        setTimeout(() => {
+          if (matchedElement) {
+            matchedElement.style.outline = 'none';
+            matchedElement.style.transform = 'none';
+          }
+        }, 400);
+      }, 300);
+    }
+  }
+
   /**
    * Cleanup resources
    */
   cleanup() {
+    if (this._voiceRec) {
+      try { this._voiceRec.stop(); } catch {}
+      this._voiceRec = null;
+    }
+    this._voiceAnswerActive = false;
     if (this._popstateHandler) {
       window.removeEventListener('popstate', this._popstateHandler);
       this._popstateHandler = null;

@@ -43,11 +43,25 @@ function getIDB() {
 
 // Default Unified Patient Profile Blueprint
 function createDefaultPatientProfile(patientId = 'patient_meera_01') {
+  const isDemo = patientId === 'patient_meera_01' || patientId === 'meera_das';
   return {
     patientId,
     patient: {
       id: patientId,
-      name: 'Meera Das',
+      name: isDemo ? 'Meera Das' : 'New Patient',
+      preferredName: isDemo ? 'Meera' : 'Patient',
+      age: isDemo ? 72 : 68,
+      gender: isDemo ? 'Female' : 'Other',
+      phone: isDemo ? '9876543210' : '',
+      nativePlace: isDemo ? 'Guwahati, Assam' : '',
+      state: isDemo ? 'Assam' : '',
+      language: 'en',
+      emergencyPhone: isDemo ? '+919876543210' : '',
+      caregiverPhone: isDemo ? '+919876543210' : '',
+      doctorPhone: isDemo ? '+919876543212' : '',
+      diagnosisNotes: isDemo ? 'Early-stage mild cognitive impairment (MCI). Independent in daily routines with gentle prompts.' : 'Awaiting initial clinical assessment.',
+      stage: isDemo ? 'Mild MCI' : 'Baseline / Assessment',
+      createdAt: isDemo ? '2026-01-10T08:00:00.000Z' : new Date().toISOString(),
       preferredName: 'Meera',
       age: 72,
       gender: 'Female',
@@ -174,7 +188,7 @@ function createDefaultPatientProfile(patientId = 'patient_meera_01') {
         question: 'Do you remember the sweet and sour taste of green mango with rock salt?'
       }
     ],
-    gameHistory: [
+    gameHistory: isDemo ? [
       { gameId: 'hornbill', gameName: 'Hornbill Memory Nest', score: 90, accuracy: 95, timeTaken: 54, hintsUsed: 0, coinsEarned: 11, domain: 'Visual Memory', date: new Date(Date.now() - 3 * 86400000).toISOString() },
       { gameId: 'memory-moments', gameName: 'Memory Moments', score: 85, accuracy: 88, timeTaken: 62, hintsUsed: 1, coinsEarned: 10, domain: 'Episodic Recall', date: new Date(Date.now() - 2 * 86400000).toISOString() },
       { gameId: 'familiar-faces', gameName: 'Familiar Faces', score: 95, accuracy: 100, timeTaken: 45, hintsUsed: 0, coinsEarned: 12, domain: 'Face Recognition', date: new Date(Date.now() - 2 * 86400000).toISOString() },
@@ -182,26 +196,26 @@ function createDefaultPatientProfile(patientId = 'patient_meera_01') {
       { gameId: 'listen-remember', gameName: 'Listen & Remember', score: 90, accuracy: 92, timeTaken: 50, hintsUsed: 0, coinsEarned: 11, domain: 'Auditory Memory', date: new Date().toISOString() },
       { gameId: 'my-day', gameName: 'My Day', score: 85, accuracy: 90, timeTaken: 40, hintsUsed: 0, coinsEarned: 10, domain: 'Executive Function', date: new Date().toISOString() },
       { gameId: 'bamboo-sequence', gameName: 'Bamboo Sequence', score: 78, accuracy: 80, timeTaken: 70, hintsUsed: 2, coinsEarned: 8, domain: 'Pattern Sequence', date: new Date().toISOString() }
-    ],
-    reminders: [
+    ] : [],
+    reminders: isDemo ? [
       { id: 'rem_1', title: 'Morning Blood Pressure Medicine', category: 'medication', icon: '💊', time: '08:30 AM', period: 'Morning', notes: '1 tablet with a warm glass of water', active: true, completedToday: false },
       { id: 'rem_2', title: 'Drink Warm Water & Stretch', category: 'hydration', icon: '💧', time: '09:30 AM', period: 'Morning', notes: '1 full glass of warm water', active: true, completedToday: false },
       { id: 'rem_3', title: 'Gentle Sunlight Garden Walk', category: 'activity', icon: '🚶', time: '10:30 AM', period: 'Morning', notes: 'Breathe fresh air in the sunlight', active: true, completedToday: false },
       { id: 'rem_4', title: 'Afternoon Water & Tea', category: 'hydration', icon: '🍵', time: '02:00 PM', period: 'Afternoon', notes: 'Rest and enjoy warm ginger tea', active: true, completedToday: false },
       { id: 'rem_5', title: 'Call Family / Grandchildren', category: 'call', icon: '📞', time: '05:30 PM', period: 'Evening', notes: 'Call Raj or Riya to hear their voices', active: true, completedToday: false },
       { id: 'rem_6', title: 'Night Calcium & Relaxing Rest', category: 'medication', icon: '🌙', time: '08:45 PM', period: 'Night', notes: '1 tablet after dinner with warm milk', active: true, completedToday: false }
-    ],
+    ] : [],
     reminderLogs: [],
-    moodHistory: [
+    moodHistory: isDemo ? [
       { date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0], mood: 'great', emoji: '😊', label: 'Great', note: 'Went for morning garden walk' },
       { date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0], mood: 'good', emoji: '🙂', label: 'Good', note: 'Enjoyed afternoon tea with Raj' },
       { date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0], mood: 'okay', emoji: '😐', label: 'Okay', note: 'Relaxed peacefully at home' },
       { date: new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0], mood: 'great', emoji: '😊', label: 'Great', note: 'Spoke with granddaughter Riya' },
       { date: new Date().toISOString().split('T')[0], mood: 'good', emoji: '🙂', label: 'Good', note: 'Feeling alert and cheerful today' }
-    ],
-    wellnessHistory: [
+    ] : [],
+    wellnessHistory: isDemo ? [
       { date: new Date().toISOString().split('T')[0], type: 'breathing', name: '4-4 Guided Breathing', durationSeconds: 180, completed: true }
-    ],
+    ] : [],
     preferences: {
       language: 'en',
       regionalState: 'Assam',
@@ -1385,7 +1399,53 @@ const Storage = {
   // REMOTE REMINDERS & APPOINTMENTS (Module 4 & 6 Sync)
   // ------------------------------------------------------------
   saveNextAppointment(appt) {
-    this.set('next_appointment_' + (appt.patientUsername || 'meera_das'), appt);
+    const patientUser = (appt.patientUsername || 'meera_das').trim().toLowerCase().replace(/^@/, '');
+    this.set('next_appointment_' + patientUser, appt);
+
+    // Auto-sync into patient's reminders list (Requirement 11)
+    try {
+      const reminderTitle = `🩺 Doctor Visit: ${appt.doctorName || 'Doctor'} (${appt.type || 'Consultation'})`;
+      const reminderTime = appt.time || '11:00 AM';
+      const reminderDate = appt.date || new Date().toISOString().split('T')[0];
+      const reminderNotes = `${appt.instructions || 'Scheduled clinical consultation.'} Location: ${appt.hospitalClinic || 'Clinic'}`;
+
+      // Update patient profile reminders directly
+      const pId = 'patient_' + patientUser;
+      const patientProfile = this.getPatientProfile(pId);
+      patientProfile.reminders = (patientProfile.reminders || []).filter(r => !r.title.includes('Doctor Visit'));
+      patientProfile.reminders.push({
+        id: 'rem_visit_' + Date.now(),
+        title: reminderTitle,
+        category: 'doctor',
+        icon: '🩺',
+        time: reminderTime,
+        date: reminderDate,
+        period: reminderTime.toUpperCase().includes('PM') ? 'Afternoon' : 'Morning',
+        notes: reminderNotes,
+        active: true,
+        completedToday: false
+      });
+      this.savePatientProfile(patientProfile, true);
+
+      // Also ensure active reminders in current session has this entry
+      const activeList = (this.getReminders() || []).filter(r => !r.title.includes('Doctor Visit'));
+      activeList.push({
+        id: 'rem_visit_' + Date.now(),
+        title: reminderTitle,
+        category: 'doctor',
+        icon: '🩺',
+        time: reminderTime,
+        date: reminderDate,
+        period: reminderTime.toUpperCase().includes('PM') ? 'Afternoon' : 'Morning',
+        notes: reminderNotes,
+        active: true,
+        completedToday: false
+      });
+      this.setReminders(activeList);
+    } catch (e) {
+      console.warn('Failed to auto-sync appointment to reminders:', e);
+    }
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('smritiAppointmentUpdated', { detail: appt }));
     }
@@ -1393,15 +1453,42 @@ const Storage = {
   },
 
   getNextAppointment(patientUsername = 'meera_das') {
-    return this.get('next_appointment_' + (patientUsername || 'meera_das')) || {
-      doctorName: 'Dr. A. K. Barua',
-      specialization: 'Neurologist / Geriatric Specialist',
-      hospitalClinic: 'Guwahati Neurological Care Center',
-      date: '2026-09-25',
-      time: '11:00 AM',
-      type: 'Cognitive Review & Follow-up',
-      instructions: 'Bring blood test reports and daily adherence diary.'
-    };
+    const clean = (patientUsername || '').trim().toLowerCase().replace(/^@/, '');
+    const direct = this.get('next_appointment_' + clean);
+    if (direct) return direct;
+
+    // Only return demo fallback for meera_das; others start with no appointment scheduled
+    if (clean === 'meera_das' || clean === 'meera' || clean === '') {
+      return {
+        doctorName: 'Dr. A. K. Barua',
+        specialization: 'Neurologist / Geriatric Specialist',
+        hospitalClinic: 'Guwahati Neurological Care Center',
+        date: '2026-09-25',
+        time: '11:00 AM',
+        type: 'Cognitive Review & Follow-up',
+        instructions: 'Bring blood test reports and daily adherence diary.'
+      };
+    }
+    return null;
+  },
+
+  // ------------------------------------------------------------
+  // TWO-LAYER SECURITY & DEVICE PIN
+  // ------------------------------------------------------------
+  getDevicePin() {
+    return this.get('smriti_device_pin') || '1234';
+  },
+
+  setDevicePin(pin) {
+    this.set('smriti_device_pin', String(pin).trim());
+  },
+
+  isTwoLayerSecurityEnabled() {
+    return this.get('smriti_two_layer_security') !== false;
+  },
+
+  setTwoLayerSecurityEnabled(enabled) {
+    this.set('smriti_two_layer_security', !!enabled);
   },
 
   // ------------------------------------------------------------
