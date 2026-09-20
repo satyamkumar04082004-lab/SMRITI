@@ -112,7 +112,19 @@ const VoiceManager = {
     }
 
     const SpeechRec = this.getSpeechRecognitionConstructor();
-    const rec = new SpeechRec();
+    if (!SpeechRec) {
+      if (typeof onError === 'function') onError({ error: 'not-supported' });
+      return null;
+    }
+
+    let rec;
+    try {
+      rec = new SpeechRec();
+    } catch (e) {
+      console.warn('[VoiceManager] SpeechRecognition instantiation error:', e);
+      if (typeof onError === 'function') onError(e);
+      return null;
+    }
     rec.continuous = continuous;
     rec.interimResults = interimResults;
     rec.lang = lang || this.getLocaleForLang();

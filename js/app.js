@@ -320,7 +320,7 @@ function showVoiceNavigationModal() {
       if (TTS && TTS.isSupported()) TTS.speak(`Opening ${name}`);
       setTimeout(() => {
         modal.remove();
-        if (rec) { try { rec.stop(); } catch {} }
+        try { VoiceManager.stopListening(); } catch {}
         window.location.hash = target;
       }, 600);
     }
@@ -330,12 +330,12 @@ function showVoiceNavigationModal() {
   modal.querySelectorAll('.btn-voice-dest').forEach(b => {
     b.addEventListener('click', () => {
       modal.remove();
-      if (rec) { try { rec.stop(); } catch {} }
+      try { VoiceManager.stopListening(); } catch {}
       window.location.hash = b.getAttribute('data-route');
     });
   });
   modal.querySelector('#btn-close-voice-nav').addEventListener('click', () => {
-    if (rec) { try { rec.stop(); } catch {} }
+    try { VoiceManager.stopListening(); } catch {}
     modal.remove();
   });
 
@@ -683,93 +683,81 @@ function renderSaathiDrawer() {
 
   // Close drawer on overlay click or button click
   saathiDrawerEl.querySelector('#btn-close-saathi-drawer').addEventListener('click', () => {
+    try {
+      if (VoiceManager.getActiveOwner() === 'saathi') VoiceManager.stopListening();
+    } catch {}
     toggleSaathiDrawer(false);
   });
   saathiDrawerEl.addEventListener('click', (e) => {
-    if (e.target === saathiDrawerEl) toggleSaathiDrawer(false);
+    if (e.target === saathiDrawerEl) {
+      try {
+        if (VoiceManager.getActiveOwner() === 'saathi') VoiceManager.stopListening();
+      } catch {}
+      toggleSaathiDrawer(false);
+    }
   });
 
-  // Attach speech recognition with active pulse & auto-transcription
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let saathiRec = null;
-
+  // Attach speech recognition with active pulse & auto-transcription via VoiceManager
   if (micBtn) {
     micBtn.addEventListener('click', async () => {
-      if (!SpeechRecognition) {
+      if (!VoiceManager.isSupported()) {
         if (window.SmritiToast) window.SmritiToast.show('Speech recognition not supported in this browser', 'info');
         return;
       }
       try {
-        if (saathiRec) {
-          saathiRec.stop();
-          saathiRec = null;
+        if (VoiceManager.isActive() && VoiceManager.getActiveOwner() === 'saathi') {
+          VoiceManager.stopListening();
           micBtn.style.background = '#F3F4F6';
           micBtn.style.boxShadow = 'none';
           if (inputEl) inputEl.placeholder = 'Type or speak a message...';
           return;
         }
 
-        // Cleanly ensure microphone permission is available
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            await navigator.mediaDevices.getUserMedia({ audio: true });
-          } catch (permErr) {
-            console.warn('Microphone permission check:', permErr);
-          }
-        }
-
-        saathiRec = new SpeechRecognition();
-        saathiRec.continuous = false;
-        saathiRec.interimResults = true;
-        saathiRec.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
-        
         micBtn.style.background = '#FECDD3';
         micBtn.style.boxShadow = '0 0 14px rgba(239, 68, 68, 0.6)';
         if (inputEl) inputEl.placeholder = '🎙️ Listening... Speak your thoughts to Saathi';
 
-        saathiRec.onresult = (ev) => {
-          let interimText = '';
-          let finalText = '';
-          for (let i = 0; i < ev.results.length; i++) {
-            const transcript = ev.results[i][0].transcript;
-            if (ev.results[i].isFinal) {
-              finalText += transcript;
-            } else {
-              interimText += transcript;
+        VoiceManager.startListening({
+          owner: 'saathi',
+          continuous: false,
+          interimResults: true,
+          onResult: (ev) => {
+            let interimText = '';
+            let finalText = '';
+            for (let i = 0; i < ev.results.length; i++) {
+              const transcript = ev.results[i][0].transcript;
+              if (ev.results[i].isFinal) {
+                finalText += transcript;
+              } else {
+                interimText += transcript;
+              }
             }
-          }
-          if (inputEl) {
-            inputEl.value = finalText || interimText;
-          }
-          if (finalText.trim()) {
+            if (inputEl) {
+              inputEl.value = finalText || interimText;
+            }
+            if (finalText.trim()) {
+              micBtn.style.background = '#F3F4F6';
+              micBtn.style.boxShadow = 'none';
+              if (inputEl) {
+                inputEl.placeholder = 'Type or speak a message...';
+                inputEl.value = '';
+              }
+              sendSaathiMessage(finalText.trim());
+              VoiceManager.stopListening();
+            }
+          },
+          onError: () => {
             micBtn.style.background = '#F3F4F6';
             micBtn.style.boxShadow = 'none';
-            if (inputEl) {
-              inputEl.placeholder = 'Type or speak a message...';
-              inputEl.value = '';
-            }
-            sendSaathiMessage(finalText.trim());
-            try { saathiRec.stop(); } catch {}
-            saathiRec = null;
+            if (inputEl) inputEl.placeholder = 'Type or speak a message...';
+            if (window.SmritiToast) window.SmritiToast.show('Could not catch your voice clearly. Tap mic to retry.', 'info');
+          },
+          onEnd: () => {
+            micBtn.style.background = '#F3F4F6';
+            micBtn.style.boxShadow = 'none';
+            if (inputEl) inputEl.placeholder = 'Type or speak a message...';
           }
-        };
-
-        saathiRec.onerror = () => {
-          micBtn.style.background = '#F3F4F6';
-          micBtn.style.boxShadow = 'none';
-          if (inputEl) inputEl.placeholder = 'Type or speak a message...';
-          saathiRec = null;
-          if (window.SmritiToast) window.SmritiToast.show('Could not catch your voice clearly. Tap mic to retry.', 'info');
-        };
-
-        saathiRec.onend = () => {
-          micBtn.style.background = '#F3F4F6';
-          micBtn.style.boxShadow = 'none';
-          if (inputEl) inputEl.placeholder = 'Type or speak a message...';
-          saathiRec = null;
-        };
-
-        saathiRec.start();
+        });
       } catch (err) {
         console.warn('Saathi mic error:', err);
         micBtn.style.background = '#F3F4F6';

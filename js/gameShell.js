@@ -684,11 +684,16 @@ class GameController {
    * Cleanup resources
    */
   cleanup() {
+    this._voiceAnswerActive = false;
+    try {
+      if (typeof VoiceManager !== 'undefined' && VoiceManager.getActiveOwner() === 'game') {
+        VoiceManager.stopListening();
+      }
+    } catch (e) {}
     if (this._voiceRec) {
       try { this._voiceRec.stop(); } catch {}
       this._voiceRec = null;
     }
-    this._voiceAnswerActive = false;
     if (this._popstateHandler) {
       window.removeEventListener('popstate', this._popstateHandler);
       this._popstateHandler = null;
