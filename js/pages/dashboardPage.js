@@ -149,6 +149,15 @@ export default function DashboardPage(container) {
               return 'Print Clinical Details';
             })()}
           </button>
+          <button class="chip-btn ${activeTab === 'notes' ? 'active' : ''}" data-tab="notes" style="min-height: 48px; font-size: 1rem; font-weight: 700;">
+            📝 ${(() => {
+              const l = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
+              if (l === 'hi') return 'क्लिनिकल नोट्स';
+              if (l === 'bn') return 'ক্লিনিক্যাল নোটস';
+              if (l === 'as') return 'ক্লিনিকেল টোকা';
+              return 'Clinical Notes & Log';
+            })()}
+          </button>
         </div>
 
         <!-- 1. PATIENT ANALYTICS DASHBOARD -->
@@ -392,6 +401,90 @@ export default function DashboardPage(container) {
           </div>
         ` : ''}
 
+        <!-- 4. CAREGIVER DAILY CLINICAL NOTES & OBSERVATIONS -->
+        ${activeTab === 'notes' ? `
+          <div class="card card-elevated mb-md" style="padding: 1.5rem; border-radius: 18px; background: #FFFDF9; border: 2px solid #FED7AA;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <h3 style="color: #9A3412; margin: 0; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                  <span>📝</span> <span>Daily Clinical Notes for ${linkedPatient.name}</span>
+                </h3>
+                <p class="text-muted" style="margin: 0.2rem 0 0 0; font-size: 0.92rem;">
+                  Log daily behavioral observations, mood swings, or medicine adherence. Directly synchronized to Doctor & Specialist Portal.
+                </p>
+              </div>
+              <span style="background: #FFEDD5; color: #C2410C; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 800;">
+                ⚡ Live Sync to Doctor Portal
+              </span>
+            </div>
+
+            <!-- Add Clinical Note Form -->
+            <form id="form-caregiver-clinical-note" style="background: #FFFFFF; border: 1.5px solid #FDBA74; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(249, 115, 22, 0.08);">
+              <h4 style="margin: 0 0 0.85rem 0; color: #7C2D12; font-size: 1.1rem; font-weight: 800;">
+                ➕ Record New Daily Clinical & Behavioral Observation
+              </h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; margin-bottom: 0.85rem;">
+                <div>
+                  <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #7C2D12; margin-bottom: 4px;">Observation Title *</label>
+                  <input type="text" id="inp-note-title" class="form-input" placeholder="e.g. Morning Confusion, Mood uplift after garden walk" required style="width: 100%; height: 42px; font-size: 0.95rem;" />
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #7C2D12; margin-bottom: 4px;">Category *</label>
+                  <select id="inp-note-cat" class="form-input" style="width: 100%; height: 42px; font-size: 0.95rem;">
+                    <option value="Behavioral Observation">Behavioral Observation</option>
+                    <option value="Medication Adherence">Medication Adherence</option>
+                    <option value="Sleep Pattern & Agitation">Sleep Pattern & Agitation</option>
+                    <option value="Memory & Recall Accuracy">Memory & Recall Accuracy</option>
+                    <option value="General Health & Appetite">General Health & Appetite</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #7C2D12; margin-bottom: 4px;">Detailed Clinical Notes *</label>
+                <textarea id="inp-note-body" class="form-input" rows="3" placeholder="Describe symptoms, duration, triggers, or noticeable cognitive changes..." required style="width: 100%; font-size: 0.95rem; padding: 0.75rem; line-height: 1.5;"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background: #C2410C; border-color: #C2410C; font-weight: 800; min-height: 44px; padding: 0.5rem 1.5rem; border-radius: 10px; cursor: pointer;">
+                💾 Save Note & Sync to Doctor Portal
+              </button>
+            </form>
+
+            <!-- Past Clinical Notes List -->
+            <h4 style="color: #9A3412; font-size: 1.15rem; font-weight: 800; margin: 0 0 0.75rem 0;">
+              📑 Synced Clinical Observations Log (${(Storage.getClinicalNotes(linkedPatientUsername) || []).length})
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              ${(Storage.getClinicalNotes(linkedPatientUsername) || []).map(cn => `
+                <div style="background: #FFFFFF; border: 1.5px solid #FED7AA; border-radius: 12px; padding: 1.1rem; position: relative;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem; gap: 0.5rem;">
+                    <div>
+                      <span style="background: #FFEDD5; color: #9A3412; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">
+                        ${cn.category || 'Clinical Note'}
+                      </span>
+                      <h5 style="margin: 0.35rem 0 0 0; color: #7C2D12; font-size: 1.1rem; font-weight: 800;">
+                        ${cn.title}
+                      </h5>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span style="color: #9A3412; font-size: 0.82rem; font-weight: 600;">
+                        ${cn.date || 'Recent'}
+                      </span>
+                      <button class="btn btn-sm btn-ghost btn-delete-clinical-note" data-id="${cn.id}" style="color: #DC2626; padding: 2px 6px;" title="Delete Note">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                  <p style="color: #431407; margin: 0.35rem 0 0 0; font-size: 0.95rem; line-height: 1.5;">
+                    ${cn.note || cn.notes || ''}
+                  </p>
+                  <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #9A3412; font-weight: 600;">
+                    Logged by: ${cn.caregiverName || currentUser.name} • Instantly visible in Doctor Portal
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
       </div>
     `;
 
@@ -502,6 +595,47 @@ export default function DashboardPage(container) {
         window.print();
       });
     }
+
+    // Caregiver Daily Clinical Notes Form Submission & Sync to Doctor
+    const noteForm = container.querySelector('#form-caregiver-clinical-note');
+    if (noteForm) {
+      noteForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = container.querySelector('#inp-note-title')?.value.trim();
+        const category = container.querySelector('#inp-note-cat')?.value;
+        const note = container.querySelector('#inp-note-body')?.value.trim();
+
+        if (!title || !note) return alert('Please enter both title and clinical observation text.');
+
+        Storage.saveClinicalNote({
+          patientUsername: linkedPatientUsername,
+          caregiverName: currentUser.name || 'Primary Caregiver',
+          title,
+          category,
+          note,
+          date: new Date().toLocaleDateString('en-IN')
+        });
+
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Clinical observation saved and synced to Doctor Portal! ✓', 'success');
+        }
+        render();
+      });
+    }
+
+    // Delete Clinical Note
+    container.querySelectorAll('.btn-delete-clinical-note').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        if (id && confirm('Delete this clinical note?')) {
+          Storage.deleteClinicalNote(id, linkedPatientUsername);
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Clinical note removed.', 'info');
+          }
+          render();
+        }
+      });
+    });
   }
 
   render();

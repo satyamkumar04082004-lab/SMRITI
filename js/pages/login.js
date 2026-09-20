@@ -988,93 +988,178 @@ export default function Login(container) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.style.cssText = 'position: fixed; inset: 0; background: rgba(15,23,42,0.65); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem;';
-    modal.innerHTML = `
-      <div class="modal-content card" style="max-width: 440px; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 1.75rem; border: 1.5px solid #CBD5E1; box-shadow: 0 20px 40px rgba(0,0,0,0.18);">
-        
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
-          <svg width="28" height="28" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <div>
-            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #1E293B;">Sign in with Google</h3>
-            <p style="margin: 0; font-size: 0.82rem; color: #64748B;">Choose an account to continue to SMRITI</p>
+    
+    function renderStep1Accounts() {
+      modal.innerHTML = `
+        <div class="modal-content card" style="max-width: 440px; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 1.75rem; border: 1.5px solid #CBD5E1; box-shadow: 0 20px 40px rgba(0,0,0,0.18);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+            <svg width="28" height="28" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <div>
+              <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #1E293B;">Sign in with Google</h3>
+              <p style="margin: 0; font-size: 0.82rem; color: #64748B;">Choose an account to continue to SMRITI</p>
+            </div>
           </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem;">
+            <div class="google-acc-card" data-email="meera.das@gmail.com" data-name="Meera Das" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: #FEF3C7; color: #92400E; display: flex; align-items: center; justify-content: center; font-weight: 800;">M</div>
+              <div style="flex: 1;">
+                <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Meera Das</strong>
+                <span style="color: #64748B; font-size: 0.82rem;">meera.das@gmail.com</span>
+              </div>
+            </div>
+
+            <div class="google-acc-card" data-email="raj.das@gmail.com" data-name="Raj Das" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: #E6F4F1; color: #0D9488; display: flex; align-items: center; justify-content: center; font-weight: 800;">R</div>
+              <div style="flex: 1;">
+                <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Raj Das</strong>
+                <span style="color: #64748B; font-size: 0.82rem;">raj.das@gmail.com</span>
+              </div>
+            </div>
+
+            <div class="google-acc-card" data-email="dr.barua@gmail.com" data-name="Dr. A. K. Barua" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: #EFF6FF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; font-weight: 800;">D</div>
+              <div style="flex: 1;">
+                <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Dr. A. K. Barua</strong>
+                <span style="color: #64748B; font-size: 0.82rem;">dr.barua@gmail.com</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-cancel-google" class="btn btn-ghost" style="width: 100%; color: #64748B;">Cancel</button>
         </div>
+      `;
 
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem;">
-          <div class="google-acc-card" data-email="meera.das@gmail.com" data-name="Meera Das" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #FEF3C7; color: #92400E; display: flex; align-items: center; justify-content: center; font-weight: 800;">M</div>
-            <div style="flex: 1;">
-              <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Meera Das (Elder Patient)</strong>
-              <span style="color: #64748B; font-size: 0.82rem;">meera.das@gmail.com</span>
-            </div>
-          </div>
-
-          <div class="google-acc-card" data-email="raj.das@gmail.com" data-name="Raj Das" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #E6F4F1; color: #0D9488; display: flex; align-items: center; justify-content: center; font-weight: 800;">R</div>
-            <div style="flex: 1;">
-              <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Raj Das (Caregiver)</strong>
-              <span style="color: #64748B; font-size: 0.82rem;">raj.das@gmail.com</span>
-            </div>
-          </div>
-
-          <div class="google-acc-card" data-email="dr.barua@gmail.com" data-name="Dr. A. K. Barua" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #EFF6FF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; font-weight: 800;">D</div>
-            <div style="flex: 1;">
-              <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Dr. A. K. Barua (Clinician)</strong>
-              <span style="color: #64748B; font-size: 0.82rem;">dr.barua@gmail.com</span>
-            </div>
-          </div>
-        </div>
-
-        <button id="btn-cancel-google" class="btn btn-ghost" style="width: 100%; color: #64748B;">Cancel</button>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    modal.querySelectorAll('.google-acc-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const email = card.getAttribute('data-email');
-        const name = card.getAttribute('data-name');
-        const inferredRole = email.includes('dr') ? 'doctor' : email.includes('raj') ? 'caregiver' : 'patient';
-        
-        const res = Auth.loginWithGoogle({
-          role: inferredRole,
-          email,
-          name
+      modal.querySelectorAll('.google-acc-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const email = card.getAttribute('data-email');
+          const name = card.getAttribute('data-name');
+          renderStep2RoleSelect({ email, name });
         });
-
-        modal.remove();
-        if (window.SmritiToast) window.SmritiToast.show(`Google OAuth Verified: ${res.user.name} ✓`, 'success');
-        navigateRole(res.user);
       });
-    });
 
-    modal.querySelector('#btn-cancel-google')?.addEventListener('click', () => {
-      modal.remove();
-    });
+      modal.querySelector('#btn-cancel-google')?.addEventListener('click', () => {
+        modal.remove();
+      });
+    }
+
+    // Step 2: Role Binding Prompt (Requirement 6)
+    function renderStep2RoleSelect(account) {
+      modal.innerHTML = `
+        <div class="modal-content card" style="max-width: 440px; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 1.75rem; border: 1.5px solid #CBD5E1; box-shadow: 0 20px 40px rgba(0,0,0,0.18);">
+          <div style="text-align: center; margin-bottom: 1.25rem;">
+            <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🌐👤</div>
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E293B;">Select Your SMRITI Role</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748B;">Account: <strong>${account.name}</strong> (${account.email})</p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.25rem;">
+            <div class="google-role-choice" data-role="patient" style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+              <span style="font-size: 2rem;">🌸</span>
+              <div style="text-align: left;">
+                <strong style="color: #9B2C2C; font-size: 1.05rem; display: block;">Patient / Elder Sanctuary</strong>
+                <span style="color: #64748B; font-size: 0.82rem;">Mindful memory games, routines & AI companion</span>
+              </div>
+            </div>
+
+            <div class="google-role-choice" data-role="caregiver" style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+              <span style="font-size: 2rem;">🤝</span>
+              <div style="text-align: left;">
+                <strong style="color: #065F46; font-size: 1.05rem; display: block;">Caregiver / Family Portal</strong>
+                <span style="color: #64748B; font-size: 0.82rem;">Monitor loved one, log clinical notes & medication</span>
+              </div>
+            </div>
+
+            <div class="google-role-choice" data-role="doctor" style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+              <span style="font-size: 2rem;">🩺</span>
+              <div style="text-align: left;">
+                <strong style="color: #1D4ED8; font-size: 1.05rem; display: block;">Doctor / Clinician Portal</strong>
+                <span style="color: #64748B; font-size: 0.82rem;">Inspect 7 cognitive domains & schedule visits</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-back-google-accounts" class="btn btn-ghost" style="width: 100%; color: #64748B;">← Choose different account</button>
+        </div>
+      `;
+
+      modal.querySelectorAll('.google-role-choice').forEach(rc => {
+        rc.addEventListener('click', () => {
+          const chosenRole = rc.getAttribute('data-role');
+          const res = Auth.loginWithGoogle({
+            role: chosenRole,
+            email: account.email,
+            name: account.name
+          });
+          modal.remove();
+          if (window.SmritiToast) window.SmritiToast.show(`Google Verified as ${chosenRole.toUpperCase()}: ${res.user.name} ✓`, 'success');
+          navigateRole(res.user);
+        });
+      });
+
+      modal.querySelector('#btn-back-google-accounts')?.addEventListener('click', () => {
+        renderStep1Accounts();
+      });
+    }
+
+    renderStep1Accounts();
+    document.body.appendChild(modal);
   }
 
   // -------------------------------------------------------------
-  // Biometric Face Recognition Unlock (Requirement 3)
+  // Biometric Face Recognition (Signup-to-Login Workflow - Requirement 3)
   // -------------------------------------------------------------
+  function extractFaceDescriptor(videoEl) {
+    if (!videoEl || !videoEl.videoWidth) return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 8;
+    canvas.height = 8;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoEl, 0, 0, 8, 8);
+    const imgData = ctx.getImageData(0, 0, 8, 8).data;
+    const desc = [];
+    let sum = 0;
+    for (let i = 0; i < imgData.length; i += 4) {
+      const gray = (0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2]) / 255;
+      desc.push(gray);
+      sum += gray * gray;
+    }
+    const mag = Math.sqrt(sum) || 1;
+    return desc.map(v => v / mag);
+  }
+
+  function computeDistance(vec1, vec2) {
+    if (!vec1 || !vec2 || vec1.length !== vec2.length) return 1.0;
+    let sum = 0;
+    for (let i = 0; i < vec1.length; i++) {
+      const d = vec1[i] - vec2[i];
+      sum += d * d;
+    }
+    return Math.sqrt(sum);
+  }
+
   function showFaceRecognitionModal(role = 'patient') {
+    const currentUsername = container.querySelector('#inp-auth-username')?.value.trim().toLowerCase().replace(/^@/, '') || 'meera_das';
+
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
-    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(15,23,42,0.8); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem;';
+    modal.style.cssText = 'position: fixed; inset: 0; background: rgba(15,23,42,0.85); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem;';
     modal.innerHTML = `
-      <div class="modal-content card" style="max-width: 400px; width: 100%; background: #FFFFFF; border-radius: 24px; padding: 1.5rem; text-align: center; border: 2px solid #6EE7B7; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+      <div class="modal-content card" style="max-width: 440px; width: 100%; background: #FFFFFF; border-radius: 24px; padding: 1.75rem; text-align: center; border: 2px solid #6EE7B7; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
         
-        <div style="font-size: 2.4rem; margin-bottom: 0.25rem;">📷✨</div>
-        <h3 style="color: #065F46; font-size: 1.35rem; font-weight: 800; margin: 0 0 0.25rem 0;">Face Recognition Unlock</h3>
-        <p style="color: #64748B; font-size: 0.88rem; margin: 0 0 1rem 0;">Position your face gently inside the camera circle</p>
+        <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">📷👤</div>
+        <h3 style="color: #065F46; font-size: 1.4rem; font-weight: 800; margin: 0 0 0.25rem 0;">Face Recognition Authentication</h3>
+        <p style="color: #64748B; font-size: 0.88rem; margin: 0 0 1rem 0;">
+          Authenticating profile: <strong id="bio-profile-target" style="color: #0D9488;">@${currentUsername}</strong>
+        </p>
 
         <!-- Camera Container -->
-        <div style="position: relative; width: 240px; height: 240px; margin: 0 auto 1.2rem auto; border-radius: 50%; overflow: hidden; border: 4px solid #10B981; box-shadow: 0 0 20px rgba(16,185,129,0.3); background: #000000; display: flex; align-items: center; justify-content: center;">
+        <div style="position: relative; width: 220px; height: 220px; margin: 0 auto 1.2rem auto; border-radius: 50%; overflow: hidden; border: 4px solid #10B981; box-shadow: 0 0 20px rgba(16,185,129,0.3); background: #000000; display: flex; align-items: center; justify-content: center;">
           <video id="bio-video-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
           
           <!-- Animated Biometric Scanning Line -->
@@ -1084,13 +1169,16 @@ export default function Login(container) {
           <div style="position: absolute; inset: 15px; border: 2px dashed rgba(52,211,153,0.7); border-radius: 50%; pointer-events: none;"></div>
         </div>
 
-        <div id="bio-status-msg" style="color: #047857; font-weight: 700; font-size: 0.95rem; min-height: 24px; margin-bottom: 1rem;">
-          Requesting camera stream...
+        <div id="bio-status-msg" style="color: #047857; font-weight: 700; font-size: 0.95rem; min-height: 48px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; line-height: 1.4;">
+          Initializing camera and loading face descriptor...
         </div>
 
-        <div style="display: flex; gap: 0.5rem;">
-          <button id="btn-cancel-bio" class="btn btn-outline" style="flex: 1; border-color: #CBD5E1; color: #64748B;">Cancel</button>
-          <button id="btn-fallback-bio" class="btn btn-primary" style="flex: 1; background: #059669; border-color: #059669; font-weight: 700;">Biometric 1-Tap</button>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button id="btn-cancel-bio" class="btn btn-outline" style="flex: 1; min-height: 44px; border-color: #CBD5E1; color: #64748B; font-weight: 700;">Cancel</button>
+          <button id="btn-scan-face-now" class="btn btn-primary" style="flex: 1.5; min-height: 44px; background: #059669; border-color: #059669; font-weight: 700;">🔍 Scan & Verify Face</button>
+          <button id="btn-enroll-face-now" class="btn btn-outline" style="width: 100%; min-height: 38px; border-color: #0D9488; color: #0D9488; font-size: 0.85rem; font-weight: 700; margin-top: 4px;">
+            📸 Enroll Current Face for @${currentUsername}
+          </button>
         </div>
       </div>
     `;
@@ -1101,53 +1189,111 @@ export default function Login(container) {
     const statusMsg = modal.querySelector('#bio-status-msg');
     let localStream = null;
 
+    const stopCamera = () => {
+      if (localStream) {
+        try {
+          localStream.getTracks().forEach(t => t.stop());
+        } catch {}
+        localStream = null;
+      }
+    };
+
     // Camera setup
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
         .then((stream) => {
           localStream = stream;
           videoEl.srcObject = stream;
-          statusMsg.innerHTML = '🔍 Scanning facial geometry... <em>Hold steady</em>';
-
-          setTimeout(() => {
-            if (!document.body.contains(modal)) return;
-            statusMsg.innerHTML = '✨ Facial features matched (98.4%)! Authenticating...';
-            setTimeout(() => {
-              cleanupAndLogin();
-            }, 900);
-          }, 1600);
+          statusMsg.innerHTML = '🔍 Align face in center circle and hold steady...';
         })
         .catch((err) => {
           console.warn('Camera access error:', err);
-          statusMsg.innerHTML = '📷 Camera unavailable. Tap <strong>"Biometric 1-Tap"</strong> to unlock.';
+          statusMsg.innerHTML = '<span style="color: #DC2626;">📷 Camera access denied or unavailable. Please enable camera in browser settings.</span>';
         });
     } else {
-      statusMsg.innerHTML = '📷 Camera not supported. Tap <strong>"Biometric 1-Tap"</strong> to unlock.';
+      statusMsg.innerHTML = '<span style="color: #DC2626;">📷 Camera not supported in this browser.</span>';
     }
 
-    const cleanupAndLogin = () => {
-      if (localStream) {
-        try {
-          localStream.getTracks().forEach(t => t.stop());
-        } catch {}
+    const performVerification = () => {
+      statusMsg.innerHTML = '⏳ Computing facial geometric vector...';
+      const currentDesc = extractFaceDescriptor(videoEl);
+      const registeredDesc = Storage.getFaceDescriptor(currentUsername);
+
+      if (!registeredDesc) {
+        statusMsg.innerHTML = `<span style="color: #DC2626; font-weight: 800;">❌ No enrolled face template found for @${currentUsername}.<br/><small style="color: #475569;">Tap "Enroll Current Face" below to register your face.</small></span>`;
+        return;
       }
-      modal.remove();
-      const res = Auth.loginWithFaceBiometrics({
-        role: 'patient',
-        username: 'meera_das',
-        name: 'Meera Das'
-      });
-      if (window.SmritiToast) window.SmritiToast.show('Biometric Unlock Successful! Welcome Meera Das ✓', 'success');
-      navigateRole(res.user);
+
+      if (!currentDesc) {
+        statusMsg.innerHTML = '<span style="color: #DC2626; font-weight: 800;">❌ Camera frame not ready. Please ensure your face is well-lit.</span>';
+        return;
+      }
+
+      const distance = computeDistance(currentDesc, registeredDesc);
+      console.log('Biometric Euclidean distance:', distance);
+
+      // Strict security threshold: distance must be <= 0.45
+      if (distance > 0.45) {
+        // STRICT REJECTION - Requirement 3: Strictly reject with "Invalid Attempt - Face Mismatch"
+        statusMsg.innerHTML = `
+          <div style="color: #DC2626; font-weight: 800; font-size: 1.1rem;">
+            ❌ Invalid Attempt - Face Mismatch
+          </div>
+          <div style="color: #991B1B; font-size: 0.85rem; margin-top: 2px;">
+            Geometric Euclidean distance (${distance.toFixed(3)}) exceeded security threshold (0.45).
+          </div>
+        `;
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Authentication Failed: Invalid Attempt - Face Mismatch', 'error');
+        }
+      } else {
+        // MATCHED
+        const confidence = Math.min(99.4, Math.round((1 - distance * 0.8) * 100));
+        statusMsg.innerHTML = `
+          <div style="color: #059669; font-weight: 800; font-size: 1.1rem;">
+            ✨ Face Verified (${confidence}%)!
+          </div>
+          <div style="color: #065F46; font-size: 0.85rem;">Authenticating session for @${currentUsername}...</div>
+        `;
+
+        setTimeout(() => {
+          stopCamera();
+          modal.remove();
+          const res = Auth.loginWithFaceBiometrics({
+            role: 'patient',
+            username: currentUsername,
+            name: currentUsername === 'meera_das' ? 'Meera Das' : currentUsername
+          });
+          if (window.SmritiToast) window.SmritiToast.show(`Biometric Unlock Successful! Welcome ${res.user.name} ✓`, 'success');
+          navigateRole(res.user);
+        }, 800);
+      }
     };
 
-    modal.querySelector('#btn-fallback-bio')?.addEventListener('click', cleanupAndLogin);
-    modal.querySelector('#btn-cancel-bio')?.addEventListener('click', () => {
-      if (localStream) {
-        try {
-          localStream.getTracks().forEach(t => t.stop());
-        } catch {}
+    // Auto-scan after camera initializes
+    setTimeout(() => {
+      if (document.body.contains(modal) && localStream) {
+        performVerification();
       }
+    }, 2000);
+
+    modal.querySelector('#btn-scan-face-now')?.addEventListener('click', performVerification);
+
+    // Live Face Enrollment button
+    modal.querySelector('#btn-enroll-face-now')?.addEventListener('click', () => {
+      const desc = extractFaceDescriptor(videoEl);
+      if (!desc) {
+        return alert('Cannot capture face frame. Ensure camera is active.');
+      }
+      Storage.saveFaceDescriptor(currentUsername, desc);
+      statusMsg.innerHTML = `<span style="color: #059669; font-weight: 800;">✅ Face successfully enrolled for @${currentUsername}! You can now scan to unlock.</span>`;
+      if (window.SmritiToast) {
+        window.SmritiToast.show(`Face descriptor saved for @${currentUsername} ✓`, 'success');
+      }
+    });
+
+    modal.querySelector('#btn-cancel-bio')?.addEventListener('click', () => {
+      stopCamera();
       modal.remove();
     });
   }

@@ -628,10 +628,11 @@ export default function Home(container) {
 
   function trigger1TapEmergencySOS(triggerType = 'Manual SOS') {
     const user = Storage.getUser() || { name: 'Meera Das' };
-    const emergencyContacts = Storage.getEmergencyContacts() || [];
-    const profile = Storage.getPatientProfile();
-    const emergencyPhone = emergencyContacts[0]?.phone || profile?.patient?.emergencyPhone || profile?.patient?.caregiverPhone || '+919876543210';
-    const cleanPhone = emergencyPhone.replace(/[^0-9+]/g, '');
+    const emergency = Storage.getEmergencyContacts() || {};
+    const cgName = emergency.caregiverName || emergency.primaryName || 'Raj Das (Son)';
+    const cgPhone = (emergency.caregiverPhone || emergency.primaryPhone || '9876543210').replace(/[^0-9+]/g, '');
+    const lovedName = emergency.lovedOneName || 'Ananya Das (Daughter)';
+    const lovedPhone = (emergency.lovedOnePhone || '9876543211').replace(/[^0-9+]/g, '');
 
     const dispatchAlert = (lat, lng, isEstimated = false) => {
       const gpsLink = `https://maps.google.com/?q=${lat},${lng}`;
@@ -639,7 +640,11 @@ export default function Home(container) {
 
       Storage.saveEmergencyAlert({
         type: 'Emergency SOS Broadcast',
-        message: `SOS Triggered (${triggerType}) at Lat ${lat.toFixed(4)}, Lng ${lng.toFixed(4)}. Live Link: ${gpsLink}`,
+        message: `SOS Broadcast (${triggerType}) to ${cgName} (${cgPhone}) & ${lovedName} (${lovedPhone}) at Lat ${lat.toFixed(4)}, Lng ${lng.toFixed(4)}. Live Link: ${gpsLink}`,
+        recipients: [
+          { name: cgName, phone: cgPhone, role: 'Caregiver' },
+          { name: lovedName, phone: lovedPhone, role: 'Loved One' }
+        ],
         lat: lat,
         lng: lng,
         trackingLink: gpsLink,
@@ -647,16 +652,20 @@ export default function Home(container) {
         isEstimated
       });
 
-      // 1. Open SMS app with live GPS coordinates link
+      // 1. Open SMS app sending live GPS coordinates link to BOTH numbers
       try {
-        window.open(`sms:${cleanPhone}?body=${encodeURIComponent(alertMsg)}`, '_blank');
+        const dualSmsUri = `sms:${cgPhone},${lovedPhone}?body=${encodeURIComponent(alertMsg)}`;
+        window.open(dualSmsUri, '_blank');
       } catch (e) {
-        console.warn('SMS dispatch error:', e);
+        console.warn('Dual SMS dispatch error, trying primary:', e);
+        try {
+          window.open(`sms:${cgPhone}?body=${encodeURIComponent(alertMsg)}`, '_blank');
+        } catch (err2) {}
       }
 
-      // 2. Simultaneously trigger direct emergency phone call (tel:)
+      // 2. Simultaneously trigger direct emergency phone call (tel:) to primary caregiver
       try {
-        window.location.href = `tel:${cleanPhone}`;
+        window.location.href = `tel:${cgPhone}`;
       } catch (e) {
         console.warn('Call dispatch error:', e);
       }

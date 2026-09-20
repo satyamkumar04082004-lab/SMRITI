@@ -24,15 +24,28 @@ export default function EmergencyPage(container) {
         <!-- Giant Primary Contact Call Button -->
         <div class="card card-elevated text-center mb-md" style="padding: 1.75rem 1rem; border: 3px solid #EF4444; background: linear-gradient(180deg, #FFFFFF, #FFF5F5); border-radius: 20px;">
           <div style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; color: #DC2626; font-weight: 700; margin-bottom: 0.5rem;">
-            Primary Family Contact
+            Primary Family Caregiver
           </div>
           
           <button id="btn-call-primary" class="btn btn-primary btn-block" style="min-height: 76px; font-size: 1.55rem; border-radius: 16px; background: #DC2626; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35); display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
-            🛟 CALL ${contacts.primaryName.toUpperCase()}
+            🛟 CALL ${(contacts.caregiverName || contacts.primaryName || 'CAREGIVER').toUpperCase()}
           </button>
 
           <div style="margin-top: 0.75rem; color: var(--gray-500); font-size: 1rem;">
-            📞 <strong>${contacts.primaryPhone}</strong> (${contacts.relation})
+            📞 <strong>${contacts.caregiverPhone || contacts.primaryPhone}</strong> (${contacts.relation || 'Son'})
+          </div>
+        </div>
+
+        <!-- Loved One / Secondary Emergency Contact -->
+        <div class="card card-elevated text-center mb-md" style="padding: 1.25rem 1rem; border: 2px solid #F59E0B; background: linear-gradient(180deg, #FFFFFF, #FFFDF5); border-radius: 16px;">
+          <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #D97706; font-weight: 700; margin-bottom: 0.4rem;">
+            Loved One / Secondary Contact
+          </div>
+          <button id="btn-call-loved" class="btn btn-outline btn-block" style="min-height: 56px; font-size: 1.2rem; border-radius: 12px; border-color: #D97706; color: #B45309; background: #FFFBEB; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            ❤️ CALL ${(contacts.lovedOneName || 'Ananya Das').toUpperCase()}
+          </button>
+          <div style="margin-top: 0.5rem; color: #78716C; font-size: 0.95rem;">
+            📞 <strong>${contacts.lovedOnePhone || '9876543211'}</strong> (Family / Loved One)
           </div>
         </div>
 
@@ -85,12 +98,18 @@ export default function EmergencyPage(container) {
           ${isEditing ? `
             <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.85rem;">
               <div class="form-group">
-                <label class="form-label">Primary Contact Name</label>
-                <input type="text" id="edit-primary-name" class="form-input" value="${contacts.primaryName}" />
+                <label class="form-label">Caregiver Name & Phone</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="edit-primary-name" class="form-input" placeholder="Caregiver Name" value="${contacts.caregiverName || contacts.primaryName || ''}" style="flex: 1;" />
+                  <input type="tel" id="edit-primary-phone" class="form-input" placeholder="Phone Number" value="${contacts.caregiverPhone || contacts.primaryPhone || ''}" style="flex: 1;" />
+                </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Primary Phone Number</label>
-                <input type="text" id="edit-primary-phone" class="form-input" value="${contacts.primaryPhone}" />
+                <label class="form-label">Loved One Name & Phone</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="edit-loved-name" class="form-input" placeholder="Loved One Name" value="${contacts.lovedOneName || 'Ananya Das'}" style="flex: 1;" />
+                  <input type="tel" id="edit-loved-phone" class="form-input" placeholder="Phone Number" value="${contacts.lovedOnePhone || '9876543211'}" style="flex: 1;" />
+                </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Doctor Phone Number</label>
@@ -133,7 +152,17 @@ export default function EmergencyPage(container) {
     const callPrimaryBtn = container.querySelector('#btn-call-primary');
     if (callPrimaryBtn) {
       callPrimaryBtn.addEventListener('click', () => {
-        callTarget = { name: contacts.primaryName, phone: contacts.primaryPhone };
+        callTarget = { name: contacts.caregiverName || contacts.primaryName, phone: contacts.caregiverPhone || contacts.primaryPhone };
+        showConfirmCallModal = true;
+        render();
+      });
+    }
+
+    // Loved one call button
+    const callLovedBtn = container.querySelector('#btn-call-loved');
+    if (callLovedBtn) {
+      callLovedBtn.addEventListener('click', () => {
+        callTarget = { name: contacts.lovedOneName || 'Loved One', phone: contacts.lovedOnePhone || '9876543211' };
         showConfirmCallModal = true;
         render();
       });
@@ -173,12 +202,25 @@ export default function EmergencyPage(container) {
     const saveContactsBtn = container.querySelector('#btn-save-contacts');
     if (saveContactsBtn) {
       saveContactsBtn.addEventListener('click', () => {
-        contacts.primaryName = container.querySelector('#edit-primary-name').value.trim() || contacts.primaryName;
-        contacts.primaryPhone = container.querySelector('#edit-primary-phone').value.trim() || contacts.primaryPhone;
-        contacts.doctorPhone = container.querySelector('#edit-doctor-phone').value.trim() || contacts.doctorPhone;
+        const cgName = container.querySelector('#edit-primary-name')?.value.trim() || contacts.caregiverName || contacts.primaryName;
+        const cgPhone = container.querySelector('#edit-primary-phone')?.value.trim() || contacts.caregiverPhone || contacts.primaryPhone;
+        const lovedName = container.querySelector('#edit-loved-name')?.value.trim() || contacts.lovedOneName || 'Ananya Das';
+        const lovedPhone = container.querySelector('#edit-loved-phone')?.value.trim() || contacts.lovedOnePhone || '9876543211';
+        const docPhone = container.querySelector('#edit-doctor-phone')?.value.trim() || contacts.doctorPhone;
+
+        contacts = {
+          ...contacts,
+          primaryName: cgName,
+          primaryPhone: cgPhone,
+          caregiverName: cgName,
+          caregiverPhone: cgPhone,
+          lovedOneName: lovedName,
+          lovedOnePhone: lovedPhone,
+          doctorPhone: docPhone
+        };
         Storage.setEmergencyContacts(contacts);
         isEditing = false;
-        if (window.SmritiToast) window.SmritiToast.show('Emergency contacts updated!', 'success');
+        if (window.SmritiToast) window.SmritiToast.show('Emergency contacts updated for Caregiver & Loved One! ✓', 'success');
         render();
       });
     }

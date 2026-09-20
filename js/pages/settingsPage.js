@@ -45,9 +45,10 @@ export default function SettingsPage(container) {
             <div><strong>Phone:</strong> ${user.phone}</div>
             <div><strong>Role:</strong> <span style="background: #E6F4F1; color: var(--teal-dark); padding: 3px 10px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; text-transform: capitalize;">${user.role}</span></div>
             <div style="border-top: 1px dashed #E2E8F0; margin-top: 6px; padding-top: 8px;">
-              <div style="font-size: 0.9rem; color: var(--gray-500); margin-bottom: 4px;">EMERGENCY & MEDICAL CONTACTS:</div>
-              <div><strong>Primary Contact:</strong> ${(emergency && emergency.primaryName) || 'Not set'} (${(emergency && emergency.primaryPhone) || 'Not set'})</div>
-              <div><strong>Doctor:</strong> ${(emergency && emergency.doctorName) || 'Not set'} (${(emergency && emergency.doctorPhone) || 'Not set'})</div>
+              <div style="font-size: 0.9rem; color: var(--gray-500); margin-bottom: 6px; font-weight: 700;">🚨 LIVE SOS EMERGENCY CONTACTS (DUAL-DISPATCH):</div>
+              <div><strong>1. Caregiver Number:</strong> ${(emergency && (emergency.caregiverName || emergency.primaryName)) || 'Raj Das'} — <span style="color: #DC2626; font-weight: 700;">${(emergency && (emergency.caregiverPhone || emergency.primaryPhone)) || '9876543210'}</span></div>
+              <div><strong>2. Loved One Number:</strong> ${(emergency && emergency.lovedOneName) || 'Ananya Das'} — <span style="color: #DC2626; font-weight: 700;">${(emergency && emergency.lovedOnePhone) || '9876543211'}</span></div>
+              <div><strong>3. Doctor:</strong> ${(emergency && emergency.doctorName) || 'Dr. A. K. Barua'} (${(emergency && emergency.doctorPhone) || '9876543212'})</div>
             </div>
           </div>
         ` : `
@@ -79,16 +80,31 @@ export default function SettingsPage(container) {
             </div>
 
             <div style="border-top: 1px solid #E2E8F0; padding-top: 10px; margin-top: 4px;">
-              <h4 style="margin: 0 0 8px 0; color: #DC2626; font-size: 1.05rem;">🛟 Emergency Contacts</h4>
+              <h4 style="margin: 0 0 6px 0; color: #DC2626; font-size: 1.05rem;">🛟 Dynamic Emergency SOS Contacts (Dispatched to Both)</h4>
+              <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: #64748B;">Both phone numbers will receive the live GPS tracking link when SOS or VoiceGuard is triggered.</p>
               
-              <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-                <input type="text" id="input-prof-emg-name" class="form-input" style="flex: 1;" placeholder="Primary Contact Name" value="${(emergency && emergency.primaryName) || ''}" />
-                <input type="tel" id="input-prof-emg-phone" class="form-input" style="flex: 1;" placeholder="Phone" value="${(emergency && emergency.primaryPhone) || ''}" />
+              <div style="margin-bottom: 8px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1E293B; margin-bottom: 3px;">1. Caregiver Contact (Name & Phone)</label>
+                <div style="display: flex; gap: 10px;">
+                  <input type="text" id="input-prof-caregiver-name" class="form-input" style="flex: 1;" placeholder="Caregiver Name" value="${(emergency && (emergency.caregiverName || emergency.primaryName)) || 'Raj Das'}" required />
+                  <input type="tel" id="input-prof-caregiver-phone" class="form-input" style="flex: 1;" placeholder="Caregiver 10-digit Phone" value="${(emergency && (emergency.caregiverPhone || emergency.primaryPhone)) || '9876543210'}" required />
+                </div>
               </div>
 
-              <div style="display: flex; gap: 10px;">
-                <input type="text" id="input-prof-doc-name" class="form-input" style="flex: 1;" placeholder="Doctor Name" value="${(emergency && emergency.doctorName) || ''}" />
-                <input type="tel" id="input-prof-doc-phone" class="form-input" style="flex: 1;" placeholder="Doctor Phone" value="${(emergency && emergency.doctorPhone) || ''}" />
+              <div style="margin-bottom: 8px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1E293B; margin-bottom: 3px;">2. Loved One Contact (Name & Phone)</label>
+                <div style="display: flex; gap: 10px;">
+                  <input type="text" id="input-prof-loved-name" class="form-input" style="flex: 1;" placeholder="Loved One Name" value="${(emergency && emergency.lovedOneName) || 'Ananya Das'}" required />
+                  <input type="tel" id="input-prof-loved-phone" class="form-input" style="flex: 1;" placeholder="Loved One 10-digit Phone" value="${(emergency && emergency.lovedOnePhone) || '9876543211'}" required />
+                </div>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1E293B; margin-bottom: 3px;">3. Doctor / Specialist Contact</label>
+                <div style="display: flex; gap: 10px;">
+                  <input type="text" id="input-prof-doc-name" class="form-input" style="flex: 1;" placeholder="Doctor Name" value="${(emergency && emergency.doctorName) || 'Dr. A. K. Barua'}" />
+                  <input type="tel" id="input-prof-doc-phone" class="form-input" style="flex: 1;" placeholder="Doctor Phone" value="${(emergency && emergency.doctorPhone) || '9876543212'}" />
+                </div>
               </div>
             </div>
 
@@ -273,10 +289,12 @@ export default function SettingsPage(container) {
         const role = container.querySelector('#select-prof-role').value;
         const phone = container.querySelector('#input-prof-phone').value.trim();
 
-        const emgName = container.querySelector('#input-prof-emg-name').value.trim();
-        const emgPhone = container.querySelector('#input-prof-emg-phone').value.trim();
-        const docName = container.querySelector('#input-prof-doc-name').value.trim();
-        const docPhone = container.querySelector('#input-prof-doc-phone').value.trim();
+        const cgName = container.querySelector('#input-prof-caregiver-name')?.value.trim() || 'Raj Das';
+        const cgPhone = container.querySelector('#input-prof-caregiver-phone')?.value.trim() || '9876543210';
+        const lovedName = container.querySelector('#input-prof-loved-name')?.value.trim() || 'Ananya Das';
+        const lovedPhone = container.querySelector('#input-prof-loved-phone')?.value.trim() || '9876543211';
+        const docName = container.querySelector('#input-prof-doc-name')?.value.trim() || 'Dr. A. K. Barua';
+        const docPhone = container.querySelector('#input-prof-doc-phone')?.value.trim() || '9876543212';
 
         if (!name || !phone) {
           alert('Please enter your name and phone number.');
@@ -291,10 +309,14 @@ export default function SettingsPage(container) {
 
         emergency = {
           ...emergency,
-          primaryName: emgName || emergency.primaryName,
-          primaryPhone: emgPhone || emergency.primaryPhone,
-          doctorName: docName || emergency.doctorName,
-          doctorPhone: docPhone || emergency.doctorPhone
+          primaryName: cgName,
+          primaryPhone: cgPhone,
+          caregiverName: cgName,
+          caregiverPhone: cgPhone,
+          lovedOneName: lovedName,
+          lovedOnePhone: lovedPhone,
+          doctorName: docName,
+          doctorPhone: docPhone
         };
         Storage.setEmergencyContacts(emergency);
 

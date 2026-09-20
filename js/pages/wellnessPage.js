@@ -14,7 +14,257 @@ export default function WellnessPage(container) {
   let cycleCount = 0;
 
   function getGuides() {
-    const lang = I18n.lang;
+    const lang = I18n.lang || 'en';
+
+    if (lang === 'bn') {
+      return [
+        {
+          id: 'sleep',
+          icon: '🌙',
+          title: 'শান্তিময় ঘুম ও সন্ধ্যার প্রশান্তি',
+          summary: 'নিয়মিত বিশ্রাম স্মৃতিশক্তি, মেজাজ ও প্রাত্যহিক শক্তিকে সতেজ করে।',
+          whatItIs: 'ভালো মানের ঘুম মস্তিষ্ককে সারাদিনের স্মৃতি গুছিয়ে রাখতে এবং পরদিনের জন্য সতেজ হতে সাহায্য করে।',
+          habits: [
+            'ঘুমানোর আগে শান্ত পরিবেশ তৈরি করুন (ঈষদুষ্ণ দুধ, মৃদু সঙ্গীত বা বই পড়া)।',
+            'শোবার ঘরটি মৃদু আলোকিত, শান্ত এবং আরামদায়ক রাখুন।',
+            'শোবার ঠিক আগে ভারী খাবার বা মোবাইল স্ক্রিন দেখা এড়িয়ে চলুন।'
+          ],
+          whenToAskDoctor: 'যদি অনিদ্রা কয়েক সপ্তাহ ধরে থাকে বা দিনে অতিরিক্ত দুর্বলতা তৈরি করে।'
+        },
+        {
+          id: 'hydration',
+          icon: '💧',
+          title: 'দৈনিক জলপান ও সতেজতা',
+          summary: 'পর্যাপ্ত জল শরীরকে সতেজ, শান্ত ও মনকে সজাগ রাখে।',
+          whatItIs: 'জল রক্ত সঞ্চালনে সাহায্য করে এবং মস্তিষ্কের প্রতিটি কোষকে সুস্থভাবে সচল রাখে।',
+          habits: [
+            'সারা দিন চোখের সামনে পরিষ্কার জলের জগ বা বোতল রাখুন।',
+            'সাধারণ জল ভালো না লাগলে আদা চা বা লেবু জল পান করতে পারেন।',
+            'তেষ্টা পাওয়ার অপেক্ষা না করে সারাদিন অল্প অল্প করে জল খান।'
+          ],
+          whenToAskDoctor: 'যদি মুখ অতিরিক্ত শুকিয়ে যায়, মাথা ঘোরে বা গিলতে সমস্যা হয়।'
+        },
+        {
+          id: 'nutrition',
+          icon: '🥗',
+          title: 'পুষ্টিকর ও সুষম খাবার',
+          summary: 'টাটকা শাকসবজি, ফলমূল ও ঘরে তৈরি সুষম আহার।',
+          whatItIs: 'পুষ্টিগুণে সমৃদ্ধ খাবার শরীর ও মনকে সারাদিন সমান শক্তি যোগায়।',
+          habits: [
+            'সবুজ শাকসবজি, মরশুমি ফল ও গরম হালকা খাবার খান।',
+            'আখরোট, বাদাম ও স্বাস্থ্যকর তেল পরিমিত পরিমাণে গ্রহণ করুন।',
+            'পরিবারের সাথে নির্দিষ্ট সময়ে হাসিমুখে আহারের আনন্দ নিন।'
+          ],
+          whenToAskDoctor: 'যদি ক্ষুধামন্দা হঠাৎ দেখা দেয়, দ্রুত ওজন কমে যায় বা বদহজম চলতে থাকে।'
+        },
+        {
+          id: 'movement',
+          icon: '🚶',
+          title: 'মৃদু শারীরিক সঞ্চালন ও প্রাতঃভ্রমণ',
+          summary: 'দৈনিক ছোট পদচারণা, হালকা হাত-পা নাড়াচাড়া ও বাগানের যত্ন।',
+          whatItIs: 'হালকা চলাফেরা মস্তিষ্কে রক্তপ্রবাহ বাড়ায় ও মেজাজ প্রফুল্ল রাখে।',
+          habits: [
+            'সকালে বা বিকেলে ১৫-২০ মিনিটের স্নিগ্ধ বাতাসে হাঁটুন।',
+            'চেয়ারে বসে হাত, কাঁধ ও পায়ের গোড়ালি আলতো করে নাড়াচাড়া করুন।',
+            'ঘরের বারান্দা বা বাগানের গাছে জল দিন।'
+          ],
+          whenToAskDoctor: 'যদি হাঁটার সময় গিঁটে তীব্র ব্যথা হয়, ভারসাম্য হারায় বা বুক ধড়ফড় করে।'
+        },
+        {
+          id: 'breathing',
+          icon: '🫁',
+          title: 'প্রশান্ত শ্বাসপ্রশ্বাস ও শিথিলকরণ',
+          summary: 'মানসিক চাপ দূর করতে এবং মনকে একাগ্র করতে সহজ ৪-৪ শ্বাসক্রিয়া।',
+          whatItIs: 'ধীরগতির গভীর শ্বাস শরীরের স্নায়ুতন্ত্রকে তাৎক্ষণিক প্রশান্তি দেয়।',
+          habits: [
+            '৪-৪ শ্বাস অনুশীলন: ৪ গণনা পর্যন্ত ধীরে ধীরে শ্বাস নিন, ৪ গণনায় ধীরে ধীরে ছাড়ুন।',
+            'কোলে হাত রেখে বুকের ওঠানামা শান্তভাবে অনুভব করুন।',
+            'এক কাপ চায়ের সাথে ব্যালকনিতে বসে নিঃশ্বাস অনুভব করুন।'
+          ],
+          whenToAskDoctor: 'যদি বুকে অস্বাভাবিক চাপ, উদ্বেগ বা শ্বাসকষ্ট অনুভব হয়।'
+        },
+        {
+          id: 'social',
+          icon: '☕',
+          title: 'সামাজিক আনন্দ ও প্রিয়জনদের সান্নিধ্য',
+          summary: 'গল্প ভাগ করা, ফোনে কথা বলা ও প্রতিবেশীদের সাথে মেলামেশা।',
+          whatItIs: 'স্নেহময় কথপোকথন মস্তিষ্ককে সক্রিয় রাখে এবং অন্তরে আনন্দ আনে।',
+          habits: [
+            'প্রতিদিন সন্তান, নাতি-নাতনি বা বন্ধুদের সাথে ফোনে ১০ মিনিট কথা বলুন।',
+            'পুরানো পারিবারিক ছবির অ্যালবাম দেখে মধুর স্মৃতিগুলি মনে করুন।',
+            'পাড়ার সান্ধ্য আড্ডা বা সামাজিক অনুষ্ঠানে অংশগ্রহণ করুন।'
+          ],
+          whenToAskDoctor: 'যদি দীর্ঘদিন একাকীত্ব ও মনমরা ভাব কাটিয়ে ওঠা সম্ভব না হয়।'
+        }
+      ];
+    }
+
+    if (lang === 'ne') {
+      return [
+        {
+          id: 'sleep',
+          icon: '🌙',
+          title: 'शान्त निद्रा र साँझको विश्राम',
+          summary: 'नियमित विश्रामले स्मरणशक्ति, मुड र दैनिक ऊर्जालाई नयाँ जीवन दिन्छ।',
+          whatItIs: 'राम्रो निद्राले मस्तिष्कलाई दिनभरिका सम्झनाहरू व्यवस्थित गर्न र भोलिको लागि ताजा बनाउन मद्दत गर्छ।',
+          habits: [
+            'सुत्नुअघि शान्त वातावरण बनाउनुहोस् (मनतातो दूध, मधुर पुस्तक वा शान्त संगीत)।',
+            'सुत्ने कोठा मधुर उज्यालो, शान्त र आरामदायक राख्नुहोस्।',
+            'सुत्नुअघि धेरै भारी भोजन वा मोबाइल स्क्रिनबाट बच्नुहोस्।'
+          ],
+          whenToAskDoctor: 'यदि अनिद्रा हप्तौंसम्म रह्यो वा दिनमा अत्यधिक थकान भयो भने।'
+        },
+        {
+          id: 'hydration',
+          icon: '💧',
+          title: 'दैनिक पानी पिउने बानी र ताजगी',
+          summary: 'पर्याप्त पानीले शरीरलाई ताजा र दिमागलाई चनाखो राख्छ।',
+          whatItIs: 'पानीले रक्तसञ्चार सुधार गर्छ र मस्तिष्कका कोशिकाहरूलाई राम्रोसँग काम गर्न मद्दत गर्छ।',
+          habits: [
+            'दिनभरि आँखा अगाडि सफा पानीको जग वा बोतल राख्नुहोस्।',
+            'सादा पानी मन नपरे कागती पानी वा जडीबुटी चिया पिउनुहोस्।',
+            'तिर्खा लाग्नु अगावै समय-समयमा थोरै-थोरै पानी पिउनुहोस्।'
+          ],
+          whenToAskDoctor: 'यदि मुख धेरै सुक्यो, चक्कर लाग्यो वा निल्न गाह्रो भयो भने।'
+        },
+        {
+          id: 'nutrition',
+          icon: '🥗',
+          title: 'पौष्टिक र सन्तुलित खानपान',
+          summary: 'ताजा सागसब्जी, फलफूल र घरमै बनेको सन्तुलित खाना।',
+          whatItIs: 'पोषणयुक्त खानाले शरीर र मनलाई स्थिर ऊर्जा प्रदान गर्दछ।',
+          habits: [
+            'हरिया सागपात, मौसमी फलफूल र तातो घरको खाना समावेश गर्नुहोस्।',
+            'ओखर, बदाम र स्वस्थ चिल्लो पदार्थ सन्तुलित मात्रामा लिनुहोस्।',
+            'परिवारसँग मिलेर हाँसोखुसीका साथ खानाको आनन्द लिनुहोस्।'
+          ],
+          whenToAskDoctor: 'यदि भोक अचानक हराएमा वा तौल तीव्र गतिमा घट्न थालेमा।'
+        },
+        {
+          id: 'movement',
+          icon: '🚶',
+          title: 'सहज शारीरिक हलचल र हिँडडुल',
+          summary: 'बिहानीको छोटो पैदल यात्रा र बँगैचाको हेरचाह।',
+          whatItIs: 'हल्का हिँडडुलले मस्तिष्कमा रगतको बहाव बढाउँछ र मनलाई प्रफुल्ल राख्छ।',
+          habits: [
+            'बिहान वा साँझ १५-२० मिनेट आनन्दपूर्वक हिँड्नुहोस्।',
+            'कुर्सीमा बसेर हातखुट्टा र घाँटी बिस्तारै तन्काउनुहोस्।',
+            'गमला वा बँगैचाका फूलहरूमा पानी हाल्नुहोस्।'
+          ],
+          whenToAskDoctor: 'यदि हिँड्दा जोर्नी दुख्ने, सास फुल्ने वा सन्तुलन गुम्ने समस्या भएमा।'
+        },
+        {
+          id: 'breathing',
+          icon: '🫁',
+          title: 'प्रशान्त श्वासप्रश्वास र ध्यान',
+          summary: 'तनाव कम गर्न र मन एकाग्र बनाउन सरल ४-४ श्वास अभ्यास।',
+          whatItIs: 'बिस्तारै गहिरो श्वास लिँदा स्नायु प्रणाली शान्त हुन्छ।',
+          habits: [
+            '४-४ श्वास विधि: ४ सेकेन्ड बिस्तारै श्वास लिनुहोस्, ४ सेकेन्डमा बिस्तारै छोड्नुहोस्।',
+            'काखमा हात राखेर छातीको चाल शान्तपूर्वक अनुभव गर्नुहोस्।',
+            'बँगैचामा बसेर चियाको चुस्कीसँगै श्वासमा ध्यान दिनुहोस्।'
+          ],
+          whenToAskDoctor: 'यदि छातीमा भारीपन वा लगातार सास फेर्न कठिनाइ भएमा।'
+        },
+        {
+          id: 'social',
+          icon: '☕',
+          title: 'सामाजिक सम्बन्ध र प्रियजनहरूसँग सामिप्यता',
+          summary: 'कथाहरू साटासाट गर्ने, फोनमा कुरा गर्ने र आफन्त भेट्ने।',
+          whatItIs: 'आत्मीय कुराकानीले मस्तिष्कलाई सक्रिय बनाउँछ र मनमा खुशी ल्याउँछ।',
+          habits: [
+            'दैनिक छोराछोरी वा साथीभाइसँग १० मिनेट फोनमा कुरा गर्नुहोस्।',
+            'पुराना फोटोहरू हेर्दै रमाइला सम्झनाहरू ताजा गर्नुहोस्।',
+            'छिमेकीहरूसँग चिया गफ वा धार्मिक-सांस्कृतिक कार्यक्रममा भाग लिनुहोस्।'
+          ],
+          whenToAskDoctor: 'यदि लामो समयसम्म एक्लोपन र उदासी महसुस भइरह्यो भने।'
+        }
+      ];
+    }
+
+    if (lang === 'brx') {
+      return [
+        {
+          id: 'sleep',
+          icon: '🌙',
+          title: 'सान्थि उन्दुनाय आरो गोसोनि गोजोन',
+          summary: 'सानफ्रोमबोनि मोजां उन्दुनाया गोसोखांनाय, गोसो आरो देहायारि शक्तिखौ गोदान खालामो।',
+          whatItIs: 'मोजां उन्दुनाया मेगनाव गोसोखांफोरखौ सामलायनो आरो गाबोननि थाखाय गोदानै जागायनो हेफाजाब होयो।',
+          habits: [
+            'उन्दुनो थांनायनि सिगां गोजोन थासारि खालाम (दुदुं दुरुं गाइखेर लों, मोजां गान खनासं)।',
+            'उन्दुग्रा खथाखौ गुसु, गोजोन आरो गोरोबथि लाखि।',
+            'उन्दुनायनि सिगां मोबायल स्क्रिन नायनाय नागार।'
+          ],
+          whenToAskDoctor: 'जुदि उन्दुनायनि जेंना गोबाव जायोब्ला डाक्टरखौ सावराय।'
+        },
+        {
+          id: 'hydration',
+          icon: '💧',
+          title: 'सानफ्रोमबो दै लोंनाय आरो गोसो साबसिन',
+          summary: 'मोजां दै लोंनाया देहाखौ गोहो गोनां आरो सांग्रां लाखियो।',
+          whatItIs: 'दैया थै दावबायनायखौ मोजां खालामो आरो मेगन-मोगोननि सेलफोरखौ खामानि मावनो हेफाजाब होयो।',
+          habits: [
+            'सानसेयाव नोंनि सिगांआव साफा दैनि जग लाखि।',
+            'दैनि अनगायै साहा एबा लेबु दै लोंनो हागौ।',
+            'दै गंनायखौ नेनानै थानायनि सोलाय सानफ्रोमबो इसे इसे दै लोंबाय था।'
+          ],
+          whenToAskDoctor: 'जुदि खुगा सुख्रोब जायो, खर’ गिदिङोब्ला डाक्टरखौ सावराय।'
+        },
+        {
+          id: 'nutrition',
+          icon: '🥗',
+          title: 'नेवसिग्रा आदार आरो देहायारि शक्ति',
+          summary: 'गोथां मेगं-थायगं, फिथाइ आरो नखरनि साबसिन आदार।',
+          whatItIs: 'मोजां आदारा देहा आरो गोसोखौ मोजां शक्ति होयो।',
+          habits: [
+            'गोथां बिलाइ, बोथोरनि फिथाइ आरो नखरनि उन्दै आदार जा।',
+            'बादाम आरो मोजां थाव इसे जा।',
+            'नखरनि सुबुंफोरजों लोगोसे सानफ्रोमबो रंजानानै जा।'
+          ],
+          whenToAskDoctor: 'जुदि उखैनाय खम जायो एबा देहा गिलिर खम जायोब्ला सावराय।'
+        },
+        {
+          id: 'movement',
+          icon: '🚶',
+          title: 'मोजाङै थाबायनाय आरो देहायारि सोलोंथाइ',
+          summary: 'फुंनि थाबायनाय आरो बारिनि बिबारफोरखौ नायदिं खालामनाय।',
+          whatItIs: 'इसे थाबायनाया मेगनाव थै दावबायनाय बारायहोयो आरो गोसो मोजां खालामो।',
+          habits: [
+            'फुं एबा बेलासियाव १५-२० मिनिट थाबाय।',
+            'सिनिआव जिरायनानै आखाय-आथिं इसि लोरहो।',
+            'बारिनि बिबार-लाइफांआव दै हो।'
+          ],
+          whenToAskDoctor: 'जुदि आथिंआव सानाय जायो एबा थाबायनायाव जेंना जायोब्ला सावराय।'
+        },
+        {
+          id: 'breathing',
+          icon: '🫁',
+          title: 'गोजोन हाबनाय-एंगारनाय आरो गोसो',
+          summary: 'गोसोखौ गोजोन खालामनो थाखाय ४-४ हाबनाय-एंगारनाय सोलोंथाइ।',
+          whatItIs: 'लाहैनै हाबनाय लानाया देहाखौ गोजोन खालामो।',
+          habits: [
+            '४-४ सोलोंथाइ: ४ साननायाव लाहैनै हाबनाय ला, ४ साननायाव लाहैनै एंगार।',
+            'आखायखौ खफिआव दोननानै गोसोखौ गोजोन खालाम।',
+            'साहा लोंनानै बारिनि बारखौ लानो सोलों।'
+          ],
+          whenToAskDoctor: 'जुदि बिखा सानाय एबा हाबनायाव गोब्राब जायोब्ला डाक्टरखौ सावराय।'
+        },
+        {
+          id: 'social',
+          icon: '☕',
+          title: 'लोगो-फोरजों सावरायनाय आरो अनलाइन',
+          summary: 'खोथा रायलायनाय, फन खालामनाय आरो लोगोफोरखौ लोगो हमनाय।',
+          whatItIs: 'मोजां खोथा रायलायनाया गोसोखांनायखौ गोहो गोनां खालामो।',
+          habits: [
+            'सानफ्रोमबो फिसा-फिसौ एबा लोगोफोरजों १० मिनिट फनाव रायलाय।',
+            'गोजाम फथ’फोरखौ लोगोसे नाय आरो रंजा।',
+            'नखरनि आरो गामिनि आखा-फाखायाव बाहागो ला।'
+          ],
+          whenToAskDoctor: 'जुदि गोबाव सम हारसिं मोनबाय थायोब्ला सावराय।'
+        }
+      ];
+    }
+
     if (lang === 'hi') {
       return [
         {
@@ -238,24 +488,136 @@ export default function WellnessPage(container) {
     ];
   }
 
+  function getStrings(lang = I18n.lang) {
+    const dict = {
+      bn: {
+        headerTitle: 'সুস্থতা ও মানসিক প্রশান্তি 🌿',
+        headerSub: 'সুস্থ জীবন, মানসিক প্রশান্তি ও ইতিবাচক শক্তির সহজ প্রাত্যহিক অভ্যাস।',
+        breathTitle: '🫁 ৪-৪ নির্দেশিত শ্বাস-প্রশ্বাস ব্যায়াম',
+        breathSub: 'উদ্বেগ কমাতে ও হৃদস্পন্দন শান্ত করতে বৃত্তের প্রসারণ ও সংকোচন অনুসরণ করুন।',
+        startBreathText: '▶ শ্বাস ব্যায়াম শুরু করুন',
+        stopBreathText: '⏹ ব্যায়াম সমাপ্ত করুন',
+        readyText: 'শান্ত শ্বাস নিতে প্রস্তুত?',
+        disclaimerTitle: 'শিক্ষামূলক তথ্য:',
+        disclaimerText: 'এই নির্দেশিকা সাধারণ স্বাস্থ্য সচেতনতা ও আত্ম-যত্নের জন্য। এটি ব্যক্তিগত চিকিৎসা পরামর্শ বা প্রেসক্রিপশন নয়। সর্বদা যোগ্য চিকিৎসকের পরামর্শ নিন।',
+        backText: '🏠 হোমে ফিরে যান',
+        whatIsLabel: '💡 এটি কী',
+        habitsLabel: '🌱 কোমল উপকারী অভ্যাস',
+        docLabel: '🩺 চিকিৎসকের সাথে কখন যোগাযোগ করবেন:',
+        inhaleMsg: 'ধীরে ধীরে শ্বাস নিন... 🌸',
+        exhaleMsg: 'ধীরে ধীরে শ্বাস ছাড়ুন... 🍃',
+        doneMsg: 'চমৎকার! আপনি এখন শান্ত ও সতেজ অনুভব করছেন। ✨'
+      },
+      ne: {
+        headerTitle: 'स्वास्थ्य र मानसिक शान्ति 🌿',
+        headerSub: 'स्वस्थ जीवन, शान्ति र सकारात्मक ऊर्जाका लागि सरल दैनिक अभ्यासहरू।',
+        breathTitle: '🫁 ४-४ निर्देशित श्वासप्रश्वास अभ्यास',
+        breathSub: 'तनाव कम गर्न र मुटुको धड्कन शान्त पार्न फैलँदो वृत्तलाई पछ्याउनुहोस्।',
+        startBreathText: '▶ श्वास अभ्यास सुरु गर्नुहोस्',
+        stopBreathText: '⏹ अभ्यास बन्द गर्नुहोस्',
+        readyText: 'शान्त श्वास लिन तयार हुनुहुन्छ?',
+        disclaimerTitle: 'शैक्षिक जानकारी:',
+        disclaimerText: 'यो मार्गदर्शन सामान्य स्वास्थ्य शिक्षा र आत्म-हेरचाहको लागि हो। यो व्यक्तिगत चिकित्सा सल्लाह वा उपचार होइन। कृपया योग्य चिकित्सकसँग परामर्श लिनुहोस्।',
+        backText: '🏠 गृहपृष्ठमा फर्कनुहोस्',
+        whatIsLabel: '💡 यो के हो',
+        habitsLabel: '🌱 कोमल उपयोगी बानीहरू',
+        docLabel: '🩺 डाक्टरसँग कहिले परामर्श लिने:',
+        inhaleMsg: 'बिस्तारै श्वास भित्र लिनुहोस्... 🌸',
+        exhaleMsg: 'बिस्तारै श्वास बाहिर छोड्नुहोस्... 🍃',
+        doneMsg: 'धेरै राम्रो! तपाईं अहिले शान्त र ताजा महसुस गर्दै हुनुहुन्छ। ✨'
+      },
+      brx: {
+        headerTitle: 'गोरोबथि आरो गोसोनि शान्ति 🌿',
+        headerSub: 'मोजां जिउ, शान्ति आरो मोजां गोहोनि थाखाय गोरलै सानफ्रोमबोनि हाबा।',
+        breathTitle: '🫁 ४-४ हां लानाय आनजाद',
+        breathSub: 'गोसोनि दावराव खमायनो बे गुवार जानाय बेन्दोंखौ नाय।',
+        startBreathText: '▶ हां लानाय आनजाद जागाय',
+        stopBreathText: '⏹ आनजाद बन्द खालाम',
+        readyText: 'शान्तियै हां लानो थियारि?',
+        disclaimerTitle: 'सोंलोंथाइ मन्थार:',
+        disclaimerText: 'बे गांगौआ देहानि सोंलोंथाइ आरो गावनो गाव नायदिंनि थाखायसो। बेयो डाक्टरनि बिथोन नङा। थाबैनो डाक्टरखौ सावराय।',
+        backText: '🏠 नखर’ आव थांफिन',
+        whatIsLabel: '💡 बेयो माथार',
+        habitsLabel: '🌱 मोजां अखोलफोर',
+        docLabel: '🩺 डाक्टरखौ माब्ला सावरायगोन:',
+        inhaleMsg: 'लाहै-लाहै हां सिङाव ला... 🌸',
+        exhaleMsg: 'लाहै-लाहै हां बाइज्राव गार... 🍃',
+        doneMsg: 'जोबोत मोजां! नों गोसो शान्ति आरो गोदान गोहो मोनबाय। ✨'
+      },
+      hi: {
+        headerTitle: 'स्वास्थ्य और शांत आदतें 🌿',
+        headerSub: 'स्वस्थ जीवन, शांति और सकारात्मक ऊर्जा के लिए सरल दैनिक अभ्यास।',
+        breathTitle: '🫁 ४-४ निर्देशित श्वास अभ्यास',
+        breathSub: 'तनाव दूर करने और हृदय गति को शांत करने के लिए फैलते वृत्त का अनुसरण करें।',
+        startBreathText: '▶ श्वास अभ्यास शुरू करें',
+        stopBreathText: '⏹ अभ्यास समाप्त करें',
+        readyText: 'शांत श्वास लेने के लिए तैयार?',
+        disclaimerTitle: 'शैक्षणिक सूचना:',
+        disclaimerText: 'यह मार्गदर्शिका सामान्य स्वास्थ्य शिक्षा और आत्म-देखभाल प्रेरणा प्रदान करती है। यह व्यक्तिगत चिकित्सा सलाह या निदान नहीं है। हमेशा अपने योग्य चिकित्सक से परामर्श लें।',
+        backText: '🏠 होम पर वापस जाएं',
+        whatIsLabel: '💡 यह क्या है',
+        habitsLabel: '🌱 कोमल उपयोगी आदतें',
+        docLabel: '🩺 डॉक्टर से कब संपर्क करें:',
+        inhaleMsg: 'धीरे-धीरे सांस अंदर लें... 🌸',
+        exhaleMsg: 'धीरे-धीरे सांस बाहर छोड़ें... 🍃',
+        doneMsg: 'बहुत बढ़िया! आप शांत और तरोताजा महसूस कर रहे हैं। ✨'
+      },
+      as: {
+        headerTitle: 'সুস্থতা আৰু মানসিক শান্তি 🌿',
+        headerSub: 'সুস্থ জীৱন আৰু মনৰ আনন্দৰ বাবে দৈনিক সহজ অভ্যাস।',
+        breathTitle: '🫁 ৪-৪ নিৰ্দেশিত উশাহ অনুশীলন',
+        breathSub: 'মানসিক চাপ দূৰ কৰিবলৈ শান্ত বৃত্তটো লক্ষ্য কৰক।',
+        startBreathText: '▶ উশাহ অনুশীলন আৰম্ভ কৰক',
+        stopBreathText: '⏹ অনুশীলন সমাপ্ত কৰক',
+        readyText: 'প্ৰশান্ত উশাহ লবলৈ সাজুনে?',
+        disclaimerTitle: 'শিক্ষামূলক জাননী:',
+        disclaimerText: 'এই পথপ্ৰদৰ্শনে সাধাৰণ সুস্থতা আৰু যত্নৰ বাবে সহায় কৰে। ব্যক্তিগত স্বাস্থ্যৰ বাবে চিকিৎসকৰ পৰামৰ্শ লওক।',
+        backText: '🏠 ঘৰলৈ উভতি যাওক',
+        whatIsLabel: '💡 ই কি',
+        habitsLabel: '🌱 মৃদু উপকাৰী অভ্যাস',
+        docLabel: '🩺 চিকিৎসকৰ ওচৰলৈ কেতিয়া যাব:',
+        inhaleMsg: 'লাহেকৈ উশাহ ভিতৰলৈ লওক... 🌸',
+        exhaleMsg: 'লাহেকৈ উশাহ এৰি দিয়ক... 🍃',
+        doneMsg: 'বৰ সুন্দৰ! আপুনি এতিয়া শান্ত অনুভৱ কৰিছে। ✨'
+      },
+      en: {
+        headerTitle: 'Wellness & Mindful Habits 🌿',
+        headerSub: 'Simple, peaceful daily practices for healthy living and joyful energy.',
+        breathTitle: '🫁 4-4 Guided Breathing Exercise',
+        breathSub: 'Follow the soothing expanding circle to release tension and calm your heartbeat.',
+        startBreathText: '▶ Start Breathing Exercise',
+        stopBreathText: '⏹ Stop Exercise',
+        readyText: 'Ready to breathe peacefully?',
+        disclaimerTitle: 'Educational Notice:',
+        disclaimerText: 'This guide provides general wellness education and self-care inspiration. It is not medical advice, diagnosis, or prescription. Always consult your qualified doctor or healthcare provider for personal medical guidance.',
+        backText: '🏠 Back to Home',
+        whatIsLabel: '💡 What it is',
+        habitsLabel: '🌱 Gentle Helpful Habits',
+        docLabel: '🩺 When to consult a professional:',
+        inhaleMsg: 'Breathe in gently... 🌸',
+        exhaleMsg: 'Breathe out slowly... 🍃',
+        doneMsg: 'Wonderful job! You feel calmer and centered. ✨'
+      }
+    };
+    return dict[lang] || dict.en;
+  }
+
   function render() {
     const guides = getGuides();
-    const isHindi = I18n.lang === 'hi';
-    const isAssamese = I18n.lang === 'as';
-
-    const headerTitle = isHindi ? 'स्वास्थ्य और शांत आदतें 🌿' : (isAssamese ? 'সুস্থতা আৰু মানসিক শান্তি 🌿' : 'Wellness & Mindful Habits');
-    const headerSub = isHindi ? 'स्वस्थ जीवन, शांति और सकारात्मक ऊर्जा के लिए सरल दैनिक अभ्यास।' : (isAssamese ? 'সুস্থ জীৱন আৰু মনৰ আনন্দৰ বাবে দৈনিক সহজ অভ্যাস।' : 'Simple, peaceful daily practices for healthy living and joyful energy.');
-    const breathTitle = isHindi ? '🫁 ४-४ निर्देशित श्वास अभ्यास' : (isAssamese ? '🫁 ৪-৪ নিৰ্দেশিত উশাহ অনুশীলন' : '🫁 4-4 Guided Breathing Exercise');
-    const breathSub = isHindi ? 'तनाव दूर करने और हृदय गति को शांत करने के लिए फैलते वृत्त का अनुसरण करें।' : (isAssamese ? 'মানসিক চাপ দূৰ কৰিবলৈ শান্ত বৃত্তটো লক্ষ্য কৰক।' : 'Follow the soothing expanding circle to release tension and calm your heartbeat.');
-    const startBreathText = isHindi ? '▶ श्वास अभ्यास शुरू करें' : (isAssamese ? '▶ উশাহ অনুশীলন আৰম্ভ কৰক' : '▶ Start Breathing Exercise');
-    const stopBreathText = isHindi ? '⏹ अभ्यास समाप्त करें' : (isAssamese ? '⏹ অনুশীলন সমাপ্ত কৰক' : '⏹ Stop Exercise');
-    const readyText = isHindi ? 'शांत श्वास लेने के लिए तैयार?' : (isAssamese ? 'প্ৰশান্ত উশাহ লবলৈ সাজুনে?' : 'Ready to breathe peacefully?');
-    const disclaimerTitle = isHindi ? 'शैक्षणिक सूचना:' : (isAssamese ? 'শিক্ষামূলক জাননী:' : 'Educational Notice:');
-    const disclaimerText = isHindi ? 'यह मार्गदर्शिका सामान्य स्वास्थ्य शिक्षा और आत्म-देखभाल प्रेरणा प्रदान करती है। यह व्यक्तिगत चिकित्सा सलाह या निदान नहीं है। हमेशा अपने योग्य चिकित्सक से परामर्श लें।' : (isAssamese ? 'এই পথপ্ৰদৰ্শনে সাধাৰণ সুস্থতা আৰু যত্নৰ বাবে সহায় কৰে। ব্যক্তিগত স্বাস্থ্যৰ বাবে চিকিৎসকৰ পৰামৰ্শ লওক।' : 'This guide provides general wellness education and self-care inspiration. It is not medical advice, diagnosis, or prescription. Always consult your qualified doctor or healthcare provider for personal medical guidance.');
-    const backText = isHindi ? '🏠 होम पर वापस जाएं' : (isAssamese ? '🏠 ঘৰলৈ উভতি যাওক' : '🏠 Back to Home');
-    const whatIsLabel = isHindi ? '💡 यह क्या है' : (isAssamese ? '💡 ই কি' : '💡 What it is');
-    const habitsLabel = isHindi ? '🌱 कोमल उपयोगी आदतें' : (isAssamese ? '🌱 মৃদু উপকাৰী অভ্যাস' : '🌱 Gentle Helpful Habits');
-    const docLabel = isHindi ? '🩺 डॉक्टर से कब संपर्क करें:' : (isAssamese ? '🩺 চিকিৎসকৰ ওচৰলৈ কেতিয়া যাব:' : '🩺 When to consult a professional:');
+    const txt = getStrings();
+    const headerTitle = txt.headerTitle;
+    const headerSub = txt.headerSub;
+    const breathTitle = txt.breathTitle;
+    const breathSub = txt.breathSub;
+    const startBreathText = txt.startBreathText;
+    const stopBreathText = txt.stopBreathText;
+    const readyText = txt.readyText;
+    const disclaimerTitle = txt.disclaimerTitle;
+    const disclaimerText = txt.disclaimerText;
+    const backText = txt.backText;
+    const whatIsLabel = txt.whatIsLabel;
+    const habitsLabel = txt.habitsLabel;
+    const docLabel = txt.docLabel;
 
     container.innerHTML = `
       <div class="container page-enter" style="max-width: 720px; padding-bottom: 2rem;">
@@ -349,12 +711,11 @@ export default function WellnessPage(container) {
     const circle = container.querySelector('#breath-circle');
     const timerText = container.querySelector('#breath-timer-text');
     const instruction = container.querySelector('#breath-instruction');
-    const isHindi = I18n.lang === 'hi';
-    const isAssamese = I18n.lang === 'as';
+    const txt = getStrings();
 
     function startBreathing() {
       isBreathing = true;
-      btnToggleBreath.textContent = isHindi ? '⏹ अभ्यास समाप्त करें' : (isAssamese ? '⏹ সমাপ্ত কৰক' : '⏹ Stop Exercise');
+      btnToggleBreath.textContent = txt.stopBreathText;
       btnToggleBreath.style.background = '#DC2626';
       cycleCount = 0;
       runPhase('inhale');
@@ -363,11 +724,11 @@ export default function WellnessPage(container) {
     function stopBreathing() {
       isBreathing = false;
       clearTimeout(breathInterval);
-      btnToggleBreath.textContent = isHindi ? '▶ श्वास अभ्यास शुरू करें' : (isAssamese ? '▶ আৰম্ভ কৰক' : '▶ Start Breathing Exercise');
+      btnToggleBreath.textContent = txt.startBreathText;
       btnToggleBreath.style.background = '#2563EB';
       if (circle) circle.style.transform = 'scale(1)';
       if (timerText) timerText.textContent = '🕊️';
-      if (instruction) instruction.textContent = isHindi ? 'शांत श्वास लेने के लिए तैयार?' : (isAssamese ? 'প্ৰশান্ত উশাহ লবলৈ সাজুনে?' : 'Ready to breathe peacefully?');
+      if (instruction) instruction.textContent = txt.readyText;
     }
 
     function runPhase(phase) {
@@ -377,13 +738,13 @@ export default function WellnessPage(container) {
 
       if (phase === 'inhale') {
         if (circle) circle.style.transform = 'scale(1.4)';
-        const inMsg = isHindi ? 'धीरे-धीरे सांस अंदर लें... 🌸' : (isAssamese ? 'লাহেকৈ উশাহ ভিতৰলৈ লওক... 🌸' : 'Breathe in gently... 🌸');
+        const inMsg = txt.inhaleMsg;
         if (instruction) instruction.textContent = inMsg;
         if (timerText) timerText.textContent = '4';
         if (TTS && TTS.isSupported() && cycleCount === 0) TTS.speak(inMsg);
       } else {
         if (circle) circle.style.transform = 'scale(1)';
-        const outMsg = isHindi ? 'धीरे-धीरे सांस बाहर छोड़ें... 🍃' : (isAssamese ? 'লাহেকৈ উশাহ এৰি দিয়ক... 🍃' : 'Breathe out slowly... 🍃');
+        const outMsg = txt.exhaleMsg;
         if (instruction) instruction.textContent = outMsg;
         if (timerText) timerText.textContent = '4';
         if (TTS && TTS.isSupported() && cycleCount === 0) TTS.speak(outMsg);
@@ -402,7 +763,7 @@ export default function WellnessPage(container) {
             cycleCount++;
             if (cycleCount >= 4) {
               stopBreathing();
-              const doneMsg = isHindi ? 'बहुत बढ़िया! आप शांत और तरोताजा महसूस कर रहे हैं। ✨' : (isAssamese ? 'বৰ সুন্দৰ! আপুনি এতিয়া শান্ত অনুভৱ কৰিছে। ✨' : 'Wonderful job! You feel calmer and centered. ✨');
+              const doneMsg = txt.doneMsg;
               if (instruction) instruction.textContent = doneMsg;
               if (TTS && TTS.isSupported()) TTS.speak(doneMsg);
             } else {

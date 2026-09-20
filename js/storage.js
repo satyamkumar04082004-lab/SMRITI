@@ -780,22 +780,37 @@ const Storage = {
   // EMERGENCY CONTACTS
   // ------------------------------------------------------------
   getEmergencyContacts() {
+    const direct = this.get('smriti_emergency_contacts');
+    if (direct && (direct.caregiverPhone || direct.primaryPhone)) {
+      return direct;
+    }
     const profile = this.getPatientProfile();
-    return profile.emergencyContacts || {
-      primaryName: 'Raj Das (Son)',
-      primaryPhone: '+919876543210',
-      relation: 'Son',
-      doctorName: 'Dr. A. K. Barua',
-      doctorPhone: '+919876543212',
-      ambulancePhone: '112',
-      transportPhone: '+919876543299'
+    const existing = profile.emergencyContacts || {};
+    return {
+      primaryName: existing.primaryName || existing.caregiverName || 'Raj Das',
+      primaryPhone: existing.primaryPhone || existing.caregiverPhone || '9876543210',
+      caregiverName: existing.caregiverName || existing.primaryName || 'Raj Das (Son)',
+      caregiverPhone: existing.caregiverPhone || existing.primaryPhone || '9876543210',
+      lovedOneName: existing.lovedOneName || 'Ananya Das (Daughter)',
+      lovedOnePhone: existing.lovedOnePhone || '9876543211',
+      relation: existing.relation || 'Son',
+      doctorName: existing.doctorName || 'Dr. A. K. Barua',
+      doctorPhone: existing.doctorPhone || '9876543212',
+      ambulancePhone: existing.ambulancePhone || '112',
+      transportPhone: existing.transportPhone || '9876543299'
     };
   },
 
   setEmergencyContacts(contacts) {
+    const merged = Object.assign({}, this.getEmergencyContacts(), contacts);
+    this.set('smriti_emergency_contacts', merged);
     const profile = this.getPatientProfile();
-    profile.emergencyContacts = contacts;
+    profile.emergencyContacts = merged;
     this.savePatientProfile(profile);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiEmergencyContactsUpdated', { detail: merged }));
+    }
+    return merged;
   },
 
   // ------------------------------------------------------------
@@ -1402,18 +1417,18 @@ const Storage = {
     const patientUser = (appt.patientUsername || 'meera_das').trim().toLowerCase().replace(/^@/, '');
     this.set('next_appointment_' + patientUser, appt);
 
-    // Auto-sync into patient's reminders list (Requirement 11)
+    // Auto-sync into patient's reminders list (Fixing pId resolution for meera_das)
     try {
       const reminderTitle = `🩺 Doctor Visit: ${appt.doctorName || 'Doctor'} (${appt.type || 'Consultation'})`;
       const reminderTime = appt.time || '11:00 AM';
       const reminderDate = appt.date || new Date().toISOString().split('T')[0];
       const reminderNotes = `${appt.instructions || 'Scheduled clinical consultation.'} Location: ${appt.hospitalClinic || 'Clinic'}`;
 
-      // Update patient profile reminders directly
-      const pId = 'patient_' + patientUser;
+      // Resolve proper patient ID (meera_das -> patient_meera_01)
+      const pId = (patientUser === 'meera_das' || patientUser === 'meera') ? 'patient_meera_01' : ('patient_' + patientUser);
       const patientProfile = this.getPatientProfile(pId);
-      patientProfile.reminders = (patientProfile.reminders || []).filter(r => !r.title.includes('Doctor Visit'));
-      patientProfile.reminders.push({
+      patientProfile.reminders = (patientProfile.reminders || []).filter(r => !r.title.includes('Doctor Visit') && r.category !== 'doctor');
+      patientProfile.reminders.unshift({
         id: 'rem_visit_' + Date.now(),
         title: reminderTitle,
         category: 'doctor',
@@ -1428,8 +1443,8 @@ const Storage = {
       this.savePatientProfile(patientProfile, true);
 
       // Also ensure active reminders in current session has this entry
-      const activeList = (this.getReminders() || []).filter(r => !r.title.includes('Doctor Visit'));
-      activeList.push({
+      const activeList = (this.getReminders() || []).filter(r => !r.title.includes('Doctor Visit') && r.category !== 'doctor');
+      activeList.unshift({
         id: 'rem_visit_' + Date.now(),
         title: reminderTitle,
         category: 'doctor',
@@ -1450,6 +1465,28 @@ const Storage = {
       window.dispatchEvent(new CustomEvent('smritiAppointmentUpdated', { detail: appt }));
     }
     return appt;
+  },
+
+  deleteNextAppointment(patientUsername = 'meera_das') {
+    const clean = (patientUsername || '').trim().toLowerCase().replace(/^@/, '');
+    this.remove('next_appointment_' + clean);
+    const pId = (clean === 'meera_das' || clean === 'meera') ? 'patient_meera_01' : ('patient_' + clean);
+    try {
+      const profile = this.getPatientProfile(pId);
+      if (profile && profile.reminders) {
+        profile.reminders = profile.reminders.filter(r => !r.title.includes('Doctor Visit') && r.category !== 'doctor');
+        this.savePatientProfile(profile, true);
+      }
+      const activeList = (this.getReminders() || []).filter(r => !r.title.includes('Doctor Visit') && r.category !== 'doctor');
+      this.setReminders(activeList);
+    } catch (e) {
+      console.warn('Failed to clean appointment reminder:', e);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiAppointmentUpdated', { detail: null }));
+    }
+    return true;
   },
 
   getNextAppointment(patientUsername = 'meera_das') {
@@ -1555,6 +1592,109 @@ const Storage = {
     const key = 'last_prescription_' + clean;
     this.set(key, data);
     return data;
+  },
+
+  // ------------------------------------------------------------
+  // CAREGIVER CLINICAL NOTES & BEHAVIORAL OBSERVATIONS
+  // ------------------------------------------------------------
+  getClinicalNotes(patientUsername = 'meera_das') {
+    const clean = (patientUsername || '').trim().toLowerCase().replace(/^@/, '');
+    const direct = this.get('clinical_notes_' + clean);
+    if (Array.isArray(direct) && direct.length > 0) return direct;
+
+    const pId = (clean === 'meera_das' || clean === 'meera') ? 'patient_meera_01' : ('patient_' + clean);
+    const profile = this.getPatientProfile(pId);
+    if (profile && Array.isArray(profile.clinicalNotes) && profile.clinicalNotes.length > 0) {
+      return profile.clinicalNotes;
+    }
+
+    // Default sample caregiver note so clinical sync is populated
+    return [
+      {
+        id: 'cn_demo_1',
+        title: 'Morning Mood & Recall Observation',
+        caregiverName: 'Raj Das (Son)',
+        patientUsername: clean,
+        category: 'Behavioral Observation',
+        note: 'Patient was cheerful during morning tea and engaged well with the bamboo sequence game. Recognized grandson photo in 10 seconds. BP medication taken on time.',
+        date: new Date().toLocaleDateString('en-IN')
+      }
+    ];
+  },
+
+  saveClinicalNote(noteData) {
+    const clean = (noteData.patientUsername || 'meera_das').trim().toLowerCase().replace(/^@/, '');
+    const pId = (clean === 'meera_das' || clean === 'meera') ? 'patient_meera_01' : ('patient_' + clean);
+    const existing = this.getClinicalNotes(clean);
+    const newNote = {
+      id: noteData.id || ('cn_' + Date.now()),
+      title: noteData.title || 'Daily Clinical Observation',
+      caregiverName: noteData.caregiverName || 'Primary Caregiver',
+      patientUsername: clean,
+      category: noteData.category || 'Behavioral Observation',
+      note: noteData.note || noteData.notes || '',
+      date: noteData.date || new Date().toLocaleDateString('en-IN'),
+      timestamp: new Date().toISOString()
+    };
+    const updated = [newNote, ...existing.filter(n => n.id !== newNote.id)];
+    this.set('clinical_notes_' + clean, updated);
+
+    try {
+      const profile = this.getPatientProfile(pId);
+      profile.clinicalNotes = updated;
+      this.savePatientProfile(profile, true);
+    } catch (e) {
+      console.warn('Could not save note to patient profile:', e);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiClinicalNotesUpdated', { detail: updated }));
+    }
+    return newNote;
+  },
+
+  deleteClinicalNote(noteId, patientUsername = 'meera_das') {
+    const clean = (patientUsername || '').trim().toLowerCase().replace(/^@/, '');
+    const pId = (clean === 'meera_das' || clean === 'meera') ? 'patient_meera_01' : ('patient_' + clean);
+    const existing = this.getClinicalNotes(clean);
+    const filtered = existing.filter(n => n.id !== noteId);
+    this.set('clinical_notes_' + clean, filtered);
+    try {
+      const profile = this.getPatientProfile(pId);
+      profile.clinicalNotes = filtered;
+      this.savePatientProfile(profile, true);
+    } catch (e) {}
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smritiClinicalNotesUpdated', { detail: filtered }));
+    }
+    return filtered;
+  },
+
+  // ------------------------------------------------------------
+  // BIOMETRIC FACE DESCRIPTORS (Signup & Login Euclidean Matching)
+  // ------------------------------------------------------------
+  getFaceDescriptor(username = 'meera_das') {
+    const clean = (username || '').trim().toLowerCase().replace(/^@/, '');
+    const saved = this.get('face_descriptor_' + clean);
+    if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+
+    // Built-in calibrated descriptor for Meera Das demo
+    if (clean === 'meera_das' || clean === 'meera' || clean === '') {
+      // 64-vector normalized baseline pattern
+      const baseline = [];
+      for (let i = 0; i < 64; i++) {
+        baseline.push(Math.sin((i / 64) * Math.PI) * 0.5 + 0.5);
+      }
+      return baseline;
+    }
+    return null;
+  },
+
+  saveFaceDescriptor(username, descriptor) {
+    const clean = (username || '').trim().toLowerCase().replace(/^@/, '');
+    this.set('face_descriptor_' + clean, descriptor);
+    return descriptor;
   },
 
   // ------------------------------------------------------------

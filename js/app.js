@@ -241,6 +241,7 @@ function showVoiceNavigationModal() {
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec = null;
+  let isNavigating = false;
 
   async function startListening() {
     const statusEl = modal.querySelector('#voice-nav-status');
@@ -281,11 +282,19 @@ function showVoiceNavigationModal() {
 
       rec.onerror = () => {
         if (iconEl) iconEl.style.transform = 'scale(1)';
-        if (statusEl) statusEl.innerHTML = 'Could not catch that clearly. Tap <strong>"🎙️ Speak Again"</strong> or choose below:';
+        if (statusEl && !isNavigating) statusEl.innerHTML = 'Could not catch that clearly. Tap <strong>"🎙️ Speak Again"</strong> or choose below:';
       };
 
       rec.onend = () => {
         if (iconEl) iconEl.style.transform = 'scale(1)';
+        // Keep listening continuously while the modal is open
+        if (document.body.contains(modal) && !isNavigating) {
+          setTimeout(() => {
+            if (document.body.contains(modal) && !isNavigating) {
+              try { rec.start(); } catch {}
+            }
+          }, 350);
+        }
       };
 
       rec.start();
@@ -328,6 +337,7 @@ function showVoiceNavigationModal() {
     }
 
     if (target) {
+      isNavigating = true;
       if (statusEl) statusEl.innerHTML = `Navigating to <strong>${name}</strong>...`;
       if (TTS && TTS.isSupported()) TTS.speak(`Opening ${name}`);
       setTimeout(() => {
@@ -681,6 +691,11 @@ function renderSaathiDrawer() {
 
   document.body.appendChild(saathiDrawerEl);
 
+  // Declare elements first to avoid any Temporal Dead Zone ReferenceError
+  const inputEl = saathiDrawerEl.querySelector('#saathi-text-input');
+  const sendBtn = saathiDrawerEl.querySelector('#btn-saathi-send');
+  const micBtn = saathiDrawerEl.querySelector('#btn-saathi-mic');
+
   // Close drawer on overlay click or button click
   saathiDrawerEl.querySelector('#btn-close-saathi-drawer').addEventListener('click', () => {
     toggleSaathiDrawer(false);
@@ -689,9 +704,8 @@ function renderSaathiDrawer() {
     if (e.target === saathiDrawerEl) toggleSaathiDrawer(false);
   });
 
-  // Attach speech recognition with active pulse & auto-transcription (Requirement 8)
+  // Attach speech recognition with active pulse & auto-transcription
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const micBtn = saathiDrawerEl.querySelector('#btn-saathi-mic');
   let saathiRec = null;
 
   if (micBtn) {
@@ -706,6 +720,7 @@ function renderSaathiDrawer() {
           saathiRec = null;
           micBtn.style.background = '#F3F4F6';
           micBtn.style.boxShadow = 'none';
+          if (inputEl) inputEl.placeholder = 'Type or speak a message...';
           return;
         }
 
@@ -720,23 +735,38 @@ function renderSaathiDrawer() {
 
         saathiRec = new SpeechRecognition();
         saathiRec.continuous = false;
-        saathiRec.interimResults = false;
+        saathiRec.interimResults = true;
         saathiRec.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
         
         micBtn.style.background = '#FECDD3';
-        micBtn.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.5)';
+        micBtn.style.boxShadow = '0 0 14px rgba(239, 68, 68, 0.6)';
         if (inputEl) inputEl.placeholder = '🎙️ Listening... Speak your thoughts to Saathi';
 
         saathiRec.onresult = (ev) => {
-          const txt = ev.results[0][0].transcript;
-          micBtn.style.background = '#F3F4F6';
-          micBtn.style.boxShadow = 'none';
-          if (inputEl) {
-            inputEl.placeholder = 'Type or speak a message...';
-            inputEl.value = txt;
+          let interimText = '';
+          let finalText = '';
+          for (let i = 0; i < ev.results.length; i++) {
+            const transcript = ev.results[i][0].transcript;
+            if (ev.results[i].isFinal) {
+              finalText += transcript;
+            } else {
+              interimText += transcript;
+            }
           }
-          sendSaathiMessage(txt);
-          saathiRec = null;
+          if (inputEl) {
+            inputEl.value = finalText || interimText;
+          }
+          if (finalText.trim()) {
+            micBtn.style.background = '#F3F4F6';
+            micBtn.style.boxShadow = 'none';
+            if (inputEl) {
+              inputEl.placeholder = 'Type or speak a message...';
+              inputEl.value = '';
+            }
+            sendSaathiMessage(finalText.trim());
+            try { saathiRec.stop(); } catch {}
+            saathiRec = null;
+          }
         };
 
         saathiRec.onerror = () => {
@@ -764,9 +794,6 @@ function renderSaathiDrawer() {
   }
 
   // Handle message sending
-  const inputEl = saathiDrawerEl.querySelector('#saathi-text-input');
-  const sendBtn = saathiDrawerEl.querySelector('#btn-saathi-send');
-
   const onSend = () => {
     const text = inputEl.value.trim();
     if (!text) return;

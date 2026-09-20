@@ -622,44 +622,68 @@ class GameController {
 
   _handleSpokenAnswer(transcript) {
     const statusText = this.container.querySelector('#voice-ans-status');
-    if (statusText) statusText.textContent = `Heard: "${transcript}" — Searching match...`;
+    const cleanTranscript = (transcript || '').trim().toLowerCase();
+    if (!cleanTranscript) return;
 
-    const gameArea = this.container.querySelector('#game-area');
+    if (statusText) statusText.textContent = `Heard: "${cleanTranscript}" — Searching match...`;
+
+    const gameArea = this.container.querySelector('#game-area') || this.container;
     if (!gameArea) return;
 
-    const clickableCandidates = Array.from(gameArea.querySelectorAll('button, .card-item, .choice-btn, .option-btn, [data-choice], [data-card-id], .game-card, .quiz-option, .bamboo-item'));
+    const clickableCandidates = Array.from(gameArea.querySelectorAll(
+      'button, .card-item, .choice-btn, .option-btn, [data-choice], [data-answer], [data-card-id], .game-card, .quiz-option, .bamboo-item, .memory-card, [role="button"]'
+    )).filter(el => {
+      // Exclude voice toggle and control buttons themselves
+      return !el.id?.includes('voice') && !el.id?.includes('quit') && !el.classList.contains('btn-ghost');
+    });
 
     if (clickableCandidates.length === 0) return;
 
     let matchedElement = null;
 
-    // Position-based matching ("first", "1", "one", "second", "2", "two", etc.)
-    if (transcript.includes('first') || transcript.includes('1') || transcript.includes('one') || transcript.includes('pehla') || transcript.includes('ek') || transcript.includes('a')) {
-      matchedElement = clickableCandidates[0];
-    } else if (transcript.includes('second') || transcript.includes('2') || transcript.includes('two') || transcript.includes('dusra') || transcript.includes('do') || transcript.includes('b')) {
-      matchedElement = clickableCandidates[1] || clickableCandidates[0];
-    } else if (transcript.includes('third') || transcript.includes('3') || transcript.includes('three') || transcript.includes('teesra') || transcript.includes('teen') || transcript.includes('c')) {
-      matchedElement = clickableCandidates[2] || clickableCandidates[0];
-    } else if (transcript.includes('fourth') || transcript.includes('4') || transcript.includes('four') || transcript.includes('chautha') || transcript.includes('char') || transcript.includes('d')) {
-      matchedElement = clickableCandidates[3] || clickableCandidates[0];
-    } else {
-      // Content-based matching: check element innerText against spoken phrase
-      matchedElement = clickableCandidates.find(el => {
-        const text = (el.innerText || el.textContent || '').trim().toLowerCase();
-        if (!text) return false;
-        return transcript.includes(text) || text.includes(transcript);
-      });
+    // 1. CONTENT-BASED MATCHING FIRST (Matches spoken words like "Apple", "Tea", "Elephant", etc.)
+    matchedElement = clickableCandidates.find(el => {
+      const label = (
+        el.innerText || 
+        el.textContent || 
+        el.getAttribute('data-choice') || 
+        el.getAttribute('data-answer') || 
+        el.getAttribute('data-name') || 
+        el.getAttribute('aria-label') || 
+        ''
+      ).trim().toLowerCase().replace(/^[a-d0-9][.)\-:]\s*/i, '').trim();
+
+      if (!label || label.length < 2) return false;
+      
+      // Direct word or substring match
+      return cleanTranscript.includes(label) || label.includes(cleanTranscript);
+    });
+
+    // 2. POSITION-BASED MATCHING (Strict word boundary matching — avoids matching 'a' inside 'apple')
+    if (!matchedElement) {
+      if (/\b(first|1st|one|pehla|prothom|ek|option a)\b/i.test(cleanTranscript)) {
+        matchedElement = clickableCandidates[0];
+      } else if (/\b(second|2nd|two|dusra|dwitiyo|do|option b)\b/i.test(cleanTranscript)) {
+        matchedElement = clickableCandidates[1] || clickableCandidates[0];
+      } else if (/\b(third|3rd|three|teesra|tritiyo|teen|option c)\b/i.test(cleanTranscript)) {
+        matchedElement = clickableCandidates[2] || clickableCandidates[0];
+      } else if (/\b(fourth|4th|four|chautha|chaturtha|char|option d)\b/i.test(cleanTranscript)) {
+        matchedElement = clickableCandidates[3] || clickableCandidates[0];
+      }
     }
 
     if (matchedElement) {
-      if (statusText) statusText.innerHTML = `✨ Selected by Voice: <strong>${matchedElement.innerText || 'Matching Choice'}</strong>`;
+      const matchLabel = (matchedElement.innerText || matchedElement.getAttribute('data-choice') || 'Selected Option').trim();
+      if (statusText) statusText.innerHTML = `✨ Selected by Voice: <strong>${matchLabel}</strong>`;
       matchedElement.style.outline = '4px solid #10B981';
+      matchedElement.style.boxShadow = '0 0 16px rgba(16, 185, 129, 0.6)';
       matchedElement.style.transform = 'scale(1.05)';
       setTimeout(() => {
         matchedElement.click();
         setTimeout(() => {
           if (matchedElement) {
             matchedElement.style.outline = 'none';
+            matchedElement.style.boxShadow = 'none';
             matchedElement.style.transform = 'none';
           }
         }, 400);

@@ -463,6 +463,16 @@ container.innerHTML = `
                       ✓ Injected in Patient Reminders
                     </div>
                   </div>
+
+                  <!-- Edit & Delete Action Buttons (Requirement 4) -->
+                  <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid #E2E8F0;">
+                    <button id="btn-edit-appt" class="btn btn-sm btn-outline" style="border-color: #2563EB; color: #1D4ED8; font-weight: 700; background: #EFF6FF; border-radius: 8px;">
+                      ✏️ Edit Visit
+                    </button>
+                    <button id="btn-delete-appt" class="btn btn-sm btn-outline" style="border-color: #EF4444; color: #DC2626; font-weight: 700; background: #FEF2F2; border-radius: 8px;">
+                      🗑️ Cancel / Delete Visit
+                    </button>
+                  </div>
                 </div>
               ` : `
                 <div style="background: #FFFFFF; border: 1.5px dashed #CBD5E1; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; text-align: center; color: #64748B;">
@@ -705,6 +715,39 @@ container.innerHTML = `
           window.SmritiToast.show('Next visit scheduled and auto-synced to patient reminders! ✓', 'success');
         }
         render();
+      });
+    }
+
+    // Edit Visit button listener
+    const editApptBtn = container.querySelector('#btn-edit-appt');
+    if (editApptBtn && nextAppointment) {
+      editApptBtn.addEventListener('click', () => {
+        const dateInp = container.querySelector('#inp-appt-date');
+        const timeInp = container.querySelector('#inp-appt-time');
+        const typeInp = container.querySelector('#inp-appt-type');
+        const notesInp = container.querySelector('#inp-appt-notes');
+        if (dateInp && nextAppointment.date) dateInp.value = nextAppointment.date;
+        if (timeInp && nextAppointment.time) timeInp.value = nextAppointment.time;
+        if (typeInp && nextAppointment.type) typeInp.value = nextAppointment.type;
+        if (notesInp && nextAppointment.instructions) notesInp.value = nextAppointment.instructions;
+        apptForm?.scrollIntoView({ behavior: 'smooth' });
+        if (window.SmritiToast) {
+          window.SmritiToast.show('Consultation details loaded into the form below. Tap Save to apply updates! ✏️', 'info');
+        }
+      });
+    }
+
+    // Delete Visit button listener
+    const deleteApptBtn = container.querySelector('#btn-delete-appt');
+    if (deleteApptBtn) {
+      deleteApptBtn.addEventListener('click', () => {
+        if (confirm(`Are you sure you want to cancel and delete the scheduled consultation for @${patientUsername}? This will immediately remove it from the patient's daily routine reminders.`)) {
+          Storage.deleteNextAppointment(patientUsername);
+          if (window.SmritiToast) {
+            window.SmritiToast.show('Scheduled consultation removed and patient routine purged! ✓', 'info');
+          }
+          render();
+        }
       });
     }
 
