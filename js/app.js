@@ -1,3 +1,4 @@
+import VoiceManager from './voiceManager.js';
 /* ============================================================
    SMRITI (स्मृति) — SPA Router & App Initialization
    Google Stitch Sanctuary Design System & Antigravity Workflow Engine
@@ -239,68 +240,45 @@ function showVoiceNavigationModal() {
   `;
   document.body.appendChild(modal);
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let rec = null;
   let isNavigating = false;
 
-  async function startListening() {
+  function startListening() {
     const statusEl = modal.querySelector('#voice-nav-status');
     const iconEl = modal.querySelector('#voice-nav-icon');
 
-    if (!SpeechRecognition) {
+    if (!VoiceManager.isSupported()) {
       if (statusEl) {
         statusEl.innerHTML = 'Speech recognition is not supported in this browser. Please tap any destination below:';
       }
       return;
     }
 
-    try {
-      // Cleanly verify/request microphone access before initializing recognition
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (permErr) {
-          console.warn('Microphone permission check:', permErr);
-        }
-      }
+    if (statusEl) statusEl.innerHTML = '🎙️ Listening now... <em>Speak your destination clearly</em>';
+    if (iconEl) iconEl.style.transform = 'scale(1.25)';
 
-      if (rec) {
-        try { rec.stop(); } catch {}
-      }
-      rec = new SpeechRecognition();
-      rec.continuous = false;
-      rec.interimResults = false;
-      rec.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
-
-      if (statusEl) statusEl.innerHTML = '🎙️ Listening now... <em>Speak your destination clearly</em>';
-      if (iconEl) iconEl.style.transform = 'scale(1.25)';
-
-      rec.onresult = (event) => {
+    VoiceManager.startListening({
+      owner: 'nav',
+      continuous: false,
+      interimResults: false,
+      onResult: (event) => {
         const text = (event.results[0][0].transcript || '').toLowerCase();
         handleVoiceDestination(text);
-      };
-
-      rec.onerror = () => {
+      },
+      onError: () => {
         if (iconEl) iconEl.style.transform = 'scale(1)';
         if (statusEl && !isNavigating) statusEl.innerHTML = 'Could not catch that clearly. Tap <strong>"🎙️ Speak Again"</strong> or choose below:';
-      };
-
-      rec.onend = () => {
+      },
+      onEnd: () => {
         if (iconEl) iconEl.style.transform = 'scale(1)';
-        // Keep listening continuously while the modal is open
         if (document.body.contains(modal) && !isNavigating) {
           setTimeout(() => {
             if (document.body.contains(modal) && !isNavigating) {
-              try { rec.start(); } catch {}
+              startListening();
             }
           }, 350);
         }
-      };
-
-      rec.start();
-    } catch (err) {
-      console.warn('SpeechRecognition start failed:', err);
-    }
+      }
+    });
   }
 
   function handleVoiceDestination(text) {
@@ -510,6 +488,13 @@ function renderNav(activeHash) {
   }
 
   const user = Auth.getUser();
+
+  // Role-Based UI Fix: Strictly HIDE Patient Footer for Doctors
+  if ((user && user.role === 'doctor') || (activeHash && (activeHash.startsWith('#/doctor') || activeHash.startsWith('#/report')))) {
+    document.body.classList.remove('has-nav');
+    return;
+  }
+
   const isCaregiver = user && user.role === 'caregiver';
 
   const navItems = isCaregiver

@@ -1,3 +1,4 @@
+import VoiceManager from '../voiceManager.js';
 /* ============================================================
    SMRITI (स्मृति) — Google Stitch Sanctuary Home Dashboard
    Caregiver connection banner, 6-task daily progress meter,
@@ -37,17 +38,10 @@ export default function Home(container) {
   let thoughtIndex = 0;
 
   // Real-time 6-task tracking
-  let defaultTasks = [
-    { id: 'bp_med', title: 'Morning Blood Pressure Medicine', completed: false },
-    { id: 'morning_water', title: 'Drink 2 glasses of warm water', completed: true },
-    { id: 'memory_game', title: 'Play 1 Cognitive Game (Bamboo Sequence)', completed: false },
-    { id: 'deep_breath', title: '5-Minute Mindful Breathing', completed: true },
-    { id: 'photo_reminisce', title: 'View 1 Family Memory in Vault', completed: false },
-    { id: 'evening_walk', title: 'Gentle 15-Minute Garden Walk', completed: false }
-  ];
-
-  let completedTasksCount = defaultTasks.filter(t => t.completed).length;
-  let totalTasksCount = 6;
+  // Dynamic Daily Tasks from Storage (All start strictly uncompleted until user acts)
+  const dailyTasks = Storage.getDailyTasks();
+  let completedTasksCount = dailyTasks.filter(t => t.completed).length;
+  let totalTasksCount = dailyTasks.length;
   let progressPercent = Math.round((completedTasksCount / totalTasksCount) * 100);
 
   function getTimeGreeting() {
@@ -690,44 +684,39 @@ export default function Home(container) {
     }
   }
 
-  let speechRecognizer = null;
   let isVoiceGuardActive = true;
   function initVoiceActivatedSOS() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    try {
-      speechRecognizer = new SpeechRecognition();
-      speechRecognizer.continuous = true;
-      speechRecognizer.interimResults = false;
-      const curLang = (typeof I18n !== 'undefined' && I18n.lang) || 'en';
-      speechRecognizer.lang = curLang === 'hi' ? 'hi-IN' : (curLang === 'bn' ? 'bn-IN' : 'en-IN');
-      
-      speechRecognizer.onresult = (e) => {
-        const text = (e.results[e.results.length - 1][0].transcript || '').toLowerCase();
-        if (text.includes('help') || text.includes('bachao') || text.includes('madad') || text.includes('emergency')) {
-          trigger1TapEmergencySOS('VoiceGuard Distress Trigger: ' + text);
-        }
-      };
+    if (!VoiceManager.isSupported()) return;
 
-      // Fix voice navigation stopping bug: automatically restart listener when browser triggers onend
-      speechRecognizer.onend = () => {
-        if (isVoiceGuardActive) {
-          try {
-            speechRecognizer.start();
-          } catch (e) {}
-        }
-      };
+    const startSOSListener = () => {
+      if (!isVoiceGuardActive) return;
+      if (VoiceManager.isActive() && VoiceManager.getActiveOwner() !== 'sos') return;
 
-      speechRecognizer.onerror = (err) => {
-        if (isVoiceGuardActive && err.error !== 'aborted') {
-          setTimeout(() => {
-            try { speechRecognizer.start(); } catch (e) {}
-          }, 1000);
+      VoiceManager.startListening({
+        owner: 'sos',
+        continuous: false,
+        interimResults: false,
+        onResult: (e) => {
+          const text = (e.results[e.results.length - 1][0].transcript || '').toLowerCase();
+          if (text.includes('help') || text.includes('bachao') || text.includes('madad') || text.includes('emergency')) {
+            trigger1TapEmergencySOS('VoiceGuard Distress Trigger: ' + text);
+          }
+        },
+        onError: () => {
+          if (isVoiceGuardActive && (!VoiceManager.isActive() || VoiceManager.getActiveOwner() === 'sos')) {
+            setTimeout(startSOSListener, 1500);
+          }
+        },
+        onEnd: () => {
+          if (isVoiceGuardActive && (!VoiceManager.isActive() || VoiceManager.getActiveOwner() === 'sos')) {
+            setTimeout(startSOSListener, 600);
+          }
         }
-      };
+      });
+    };
 
-      speechRecognizer.start();
-    } catch (err) {}
+    VoiceManager.registerBackgroundSOS(startSOSListener);
+    startSOSListener();
   }
 
   function checkGeofenceSafety() {

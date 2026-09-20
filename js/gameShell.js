@@ -1,3 +1,4 @@
+import VoiceManager from './voiceManager.js';
 /* ============================================================
    SMRITI — Shared Game Shell
    Common game framework: start screen → play → result screen
@@ -585,39 +586,27 @@ class GameController {
 
   _startVoiceListening() {
     if (!this._voiceAnswerActive || this.phase !== 'play') return;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!VoiceManager.isSupported()) return;
 
-    try {
-      if (this._voiceRec) {
-        try { this._voiceRec.stop(); } catch {}
-      }
-      this._voiceRec = new SpeechRecognition();
-      this._voiceRec.continuous = true;
-      this._voiceRec.interimResults = false;
-      this._voiceRec.lang = I18n.lang === 'hi' ? 'hi-IN' : (I18n.lang === 'bn' ? 'bn-IN' : (I18n.lang === 'as' ? 'as-IN' : 'en-IN'));
-
-      this._voiceRec.onresult = (e) => {
+    VoiceManager.startListening({
+      owner: 'game',
+      continuous: false,
+      interimResults: false,
+      onResult: (e) => {
         const transcript = (e.results[e.results.length - 1][0].transcript || '').trim().toLowerCase();
         this._handleSpokenAnswer(transcript);
-      };
-
-      this._voiceRec.onerror = () => {
+      },
+      onError: () => {
         if (this._voiceAnswerActive && this.phase === 'play') {
-          setTimeout(() => this._startVoiceListening(), 1200);
+          setTimeout(() => this._startVoiceListening(), 800);
         }
-      };
-
-      this._voiceRec.onend = () => {
+      },
+      onEnd: () => {
         if (this._voiceAnswerActive && this.phase === 'play') {
-          setTimeout(() => this._startVoiceListening(), 500);
+          setTimeout(() => this._startVoiceListening(), 400);
         }
-      };
-
-      this._voiceRec.start();
-    } catch (err) {
-      console.warn('Voice answer start error:', err);
-    }
+      }
+    });
   }
 
   _handleSpokenAnswer(transcript) {

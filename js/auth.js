@@ -95,7 +95,7 @@ const Auth = {
   /**
    * Register User with Username & Password
    */
-  registerWithPassword({ name, username, password, phone, role = 'patient', extra = {} }) {
+  registerWithPassword({ name, username, password, phone, role = 'patient', age, gender, extra = {} }) {
     const cleanUser = (username || '').trim().toLowerCase().replace(/^@/, '');
     const cleanPass = String(password || '').trim();
 
@@ -116,16 +116,36 @@ const Auth = {
     // Save user password
     Storage.set('user_pwd_' + cleanUser, cleanPass);
 
+    const parsedAge = age ? parseInt(age, 10) : (extra.age ? parseInt(extra.age, 10) : undefined);
+    const resolvedGender = gender || extra.gender || 'Prefer not to say';
+
     const userPayload = {
       name: name || (cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1)),
       username: cleanUser,
       phone: phone || '9876543210',
       role,
+      age: parsedAge,
+      gender: resolvedGender,
       patientId: role === 'patient' ? ('patient_' + cleanUser) : undefined,
       authMethod: 'password',
       sessionToken: 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
       ...extra
     };
+    if (parsedAge) userPayload.age = parsedAge;
+    if (resolvedGender) userPayload.gender = resolvedGender;
+
+    // If registering as patient, ensure the patient profile has the name, age, and gender
+    if (role === 'patient') {
+      const pid = userPayload.patientId || ('patient_' + cleanUser);
+      const profile = Storage.getPatientProfile(pid);
+      if (profile && profile.patient) {
+        profile.patient.name = userPayload.name;
+        if (parsedAge) profile.patient.age = parsedAge;
+        if (resolvedGender) profile.patient.gender = resolvedGender;
+        profile.patient.phone = userPayload.phone;
+        Storage.savePatientProfile(profile);
+      }
+    }
 
     const saved = this.login(userPayload);
     return { success: true, user: saved };

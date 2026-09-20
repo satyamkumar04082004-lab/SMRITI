@@ -205,7 +205,35 @@ export const stitchTranslations = {
     g7Title: 'Bamboo Sequence',
     g7Desc: 'Repeat the glowing pattern',
     g7Tag: 'Pattern Memory',
-    g7Instruction: 'Watch glowing bamboo pads and repeat pattern'
+    g7Instruction: 'Watch glowing bamboo pads and repeat pattern',
+    // Memories & Life Story
+    memoriesTitle: 'Life Story & Memories',
+    memoriesSubtitle: 'Treasured moments with your loved ones',
+    memoriesBack: '⬅ Back',
+    memoriesGridView: '📱 Grid View',
+    memoriesStoryView: '📖 Story View',
+    memoriesAddFirst: '+ Add First Memory',
+    memoriesAddMemory: '+ Add Memory',
+    memoriesEmpty: 'No family memories added yet. Caregivers and family can add up to 30+ precious memories here.',
+    memoriesReflection: 'Reflection & Conversation Prompt',
+    memoriesReadAloud: '🔊 Listen to Story',
+    memoriesStopAudio: '⏹ Stop Audio',
+    memoriesSavedBadge: 'saved memories',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'Rewards & Badges',
+    rewardsSubtitle: 'Redeem your hard-earned coins for digital achievement badges and physical wellness gifts!',
+    rewardsBalance: 'Current Balance:',
+    rewardsCoins: 'Coins',
+    rewardsBadgeStore: 'Digital Milestone Badges',
+    rewardsPhysicalStore: 'Physical Wellness Store',
+    rewardsClaimed: 'Unlocked ✓',
+    rewardsRedeemFor: 'Redeem for',
+    rewardsNeedMore: 'Need more coins 🪙',
+    rewardsNotEnough: 'Keep playing games to earn more coins!',
+    rewardsCongratBadge: 'Congratulations! You unlocked the badge:',
+    rewardsPerk: 'Badge perk:',
+    rewardsPhysicalDispatch: 'Will be ordered and dispatched by your registered caregiver'
   },
 
   hi: {
@@ -405,7 +433,35 @@ export const stitchTranslations = {
     g7Title: 'बांस अनुक्रम',
     g7Desc: 'चमकदार पैटर्न को दोहराएं',
     g7Tag: 'पैटर्न स्मृति',
-    g7Instruction: 'चमकते बांस पैड को देखें और क्रम दोहराएं'
+    g7Instruction: 'चमकते बांस पैड को देखें और क्रम दोहराएं',
+    // Memories & Life Story
+    memoriesTitle: 'जीवन गाथा और यादें',
+    memoriesSubtitle: 'अपने प्रियजनों के साथ अनमोल पल',
+    memoriesBack: '⬅ वापस',
+    memoriesGridView: '📱 ग्रिड दृश्य',
+    memoriesStoryView: '📖 कहानी दृश्य',
+    memoriesAddFirst: '+ पहली याद जोड़ें',
+    memoriesAddMemory: '+ नई याद जोड़ें',
+    memoriesEmpty: 'अभी तक कोई पारिवारिक यादें नहीं जोड़ी गईं। देखभालकर्ता यहाँ 30+ यादें सहेज सकते हैं।',
+    memoriesReflection: 'स्मृति और बातचीत का विषय',
+    memoriesReadAloud: '🔊 कहानी सुनें',
+    memoriesStopAudio: '⏹ ऑडियो रोकें',
+    memoriesSavedBadge: 'सहेजी गई यादें',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'इनाम और बैज',
+    rewardsSubtitle: 'अपने अर्जित सिक्कों से डिजिटल बैज और शारीरिक उपहार प्राप्त करें!',
+    rewardsBalance: 'वर्तमान शेष:',
+    rewardsCoins: 'सिक्के',
+    rewardsBadgeStore: 'डिजिटल उपलब्धि बैज',
+    rewardsPhysicalStore: 'शारीरिक उपहार स्टोर',
+    rewardsClaimed: 'अनलॉक हुआ ✓',
+    rewardsRedeemFor: 'के बदले प्राप्त करें',
+    rewardsNeedMore: 'और सिक्कों की आवश्यकता है 🪙',
+    rewardsNotEnough: 'और सिक्के कमाने के लिए अभ्यास जारी रखें!',
+    rewardsCongratBadge: 'बधाई हो! आपने बैज अनलॉक किया:',
+    rewardsPerk: 'बैज का लाभ:',
+    rewardsPhysicalDispatch: 'देखभालकर्ता द्वारा आपके पते पर भेजा जाएगा'
   },
 
   bn: {
@@ -605,7 +661,35 @@ export const stitchTranslations = {
     g7Title: 'বাঁশের সুর অনুক্রম',
     g7Desc: 'উজ্জ্বল নকশা অনুসরণ করুন',
     g7Tag: 'প্যাটার্ন স্মৃতি',
-    g7Instruction: 'আলো জ্বলা প্যাডগুলি দেখে অনুক্রম পুনরাবৃত্তি করুন'
+    g7Instruction: 'আলো জ্বলা প্যাডগুলি দেখে অনুক্রম পুনরাবৃত্তি করুন',
+    // Memories & Life Story
+    memoriesTitle: 'জীবনকথা ও স্মৃতিমালা',
+    memoriesSubtitle: 'আপনার প্রিয়জনদের সাথে কাটানো মধুর মুহূর্তগুলি',
+    memoriesBack: '⬅ ফিরে যান',
+    memoriesGridView: '📱 গ্রিড ভিউ',
+    memoriesStoryView: '📖 গল্প ভিউ',
+    memoriesAddFirst: '+ প্রথম স্মৃতি যোগ করুন',
+    memoriesAddMemory: '+ নতুন স্মৃতি যোগ করুন',
+    memoriesEmpty: 'এখনও কোনো পারিবারিক স্মৃতি যোগ করা হয়নি। পরিবার এখানে ৩০+ স্মৃতি সংরক্ষণ করতে পারেন।',
+    memoriesReflection: 'স্মরণ ও কথোপকথনের প্রেরণা',
+    memoriesReadAloud: '🔊 গল্পটি শুনুন',
+    memoriesStopAudio: '⏹ অডিও থামান',
+    memoriesSavedBadge: 'সংরক্ষিত স্মৃতি',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'পুরস্কার ও অর্জন ব্যাজ',
+    rewardsSubtitle: 'আপনার উপার্জিত কয়েন দিয়ে বিশেষ ব্যাজ এবং উপহার সংগ্রহ করুন!',
+    rewardsBalance: 'বর্তমান ব্যালেন্স:',
+    rewardsCoins: 'কয়েন',
+    rewardsBadgeStore: 'ডিজিটাল মাইলফলক ব্যাজ',
+    rewardsPhysicalStore: 'সুস্থতা উপহার সামগ্রী',
+    rewardsClaimed: 'আনলক হয়েছে ✓',
+    rewardsRedeemFor: 'দিয়ে সংগ্রহ করুন',
+    rewardsNeedMore: 'আরও কয়েন প্রয়োজন 🪙',
+    rewardsNotEnough: 'আরও কয়েন অর্জন করতে খেলা চালিয়ে যান!',
+    rewardsCongratBadge: 'আপনি অর্জন করেছেন:',
+    rewardsPerk: 'বিশেষ সুবিধা:',
+    rewardsPhysicalDispatch: 'পরিচর্যাকারীর মাধ্যমে বাড়ির ঠিকানায় পৌঁছে যাবে'
   },
 
   as: {
@@ -805,7 +889,35 @@ export const stitchTranslations = {
     g7Title: 'বাঁহৰ সুৰ অনুক্ৰম',
     g7Desc: 'উজ্বল বিন্যাস অনুসৰণ কৰক',
     g7Tag: 'বিন্যাস স্মৃতি',
-    g7Instruction: 'পোহৰ হোৱা বাঁহৰ পেড চাই অনুক্ৰম পুনৰাবৃত্তি কৰক'
+    g7Instruction: 'পোহৰ হোৱা বাঁহৰ পেড চাই অনুক্ৰম পুনৰাবৃত্তি কৰক',
+    // Memories & Life Story
+    memoriesTitle: 'জীৱনগাঁথা আৰু স্মৃতি',
+    memoriesSubtitle: 'আপোনাৰ আপোনজনৰ সৈতে সোণালী মুহূৰ্তবোৰ',
+    memoriesBack: '⬅ উভতি যাওক',
+    memoriesGridView: '📱 গ্ৰিড দৃশ্য',
+    memoriesStoryView: '📖 কাহিনী দৃশ্য',
+    memoriesAddFirst: '+ প্ৰথম স্মৃতি যোগ কৰক',
+    memoriesAddMemory: '+ নতুন স্মৃতি যোগ কৰক',
+    memoriesEmpty: 'এতিয়ালৈ কোনো স্মৃতি যোগ কৰা হোৱা নাই। পৰিয়ালে ইয়াত ৩০+ স্মৃতি সংৰক্ষণ কৰিব পাৰে।',
+    memoriesReflection: 'স্মৃতিচাৰণ আৰু চিন্তাৰ সংকেত',
+    memoriesReadAloud: '🔊 কাহিনী শুনক',
+    memoriesStopAudio: '⏹ অডিঅ’ বন্ধ কৰক',
+    memoriesSavedBadge: 'সংৰক্ষিত স্মৃতি',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'পুৰস্কাৰ আৰু বেজ',
+    rewardsSubtitle: 'আপোনাৰ অৰ্জিত মুদ্ৰাৰে ডিজিটেল বেজ আৰু উপহাৰ লাভ কৰক!',
+    rewardsBalance: 'বৰ্তমান জমা:',
+    rewardsCoins: 'মুদ্ৰা',
+    rewardsBadgeStore: 'ডিজিটেল মাইলষ্টোন বেজ',
+    rewardsPhysicalStore: 'সুস্থতাৰ প্ৰাকৃতিক উপহাৰ',
+    rewardsClaimed: 'লাভ কৰা হ’ল ✓',
+    rewardsRedeemFor: 'বাবে সংগ্ৰহ কৰক',
+    rewardsNeedMore: 'আৰু মুদ্ৰা প্ৰয়োজন 🪙',
+    rewardsNotEnough: 'মুদ্ৰা অৰ্জন কৰিবলৈ অনুশীলন অব্যাহত ৰাখক!',
+    rewardsCongratBadge: 'আপুনি লাভ কৰিলে:',
+    rewardsPerk: 'বেজৰ সুবিধা:',
+    rewardsPhysicalDispatch: 'পৰিচর্যাকাৰীৰ দ্বাৰা ঘৰৰ ঠিকনাত পঠোৱা হ’ব'
   },
 
   mni: {
@@ -1005,7 +1117,35 @@ export const stitchTranslations = {
     g7Title: 'ৱাগী সুর অনুক্রম',
     g7Desc: 'ঙাল্লবা ৱাগী মতুং ইনবা',
     g7Tag: 'সুর নীংসিংবা',
-    g7Instruction: 'ঙাল্লবা ৱাগী পীদশিং য়েংদুনা অমুক হন্না তৌবীয়ু'
+    g7Instruction: 'ঙাল্লবা ৱাগী পীদশিং য়েংদুনা অমুক হন্না তৌবীয়ু',
+    // Memories & Life Story
+    memoriesTitle: 'পুনসি ৱারী অমসুং নীংশিংবা',
+    memoriesSubtitle: 'নহাক্কী নুংশিজরবা মীওইশিংগা লোয়ননা অখন্নবা তাঞ্জা',
+    memoriesBack: '⬅ হল্লকউ',
+    memoriesGridView: '📱 গ্রিদ ভ্যু',
+    memoriesStoryView: '📖 ৱারী ভ্যু',
+    memoriesAddFirst: '+ অহানবা নীংশিংবা হাপচিল্লু',
+    memoriesAddMemory: '+ অনৌবা নীংশিংবা হাপচিল্লু',
+    memoriesEmpty: 'হৌজিকফাওবা নীংশিংবা অমত্তা হাপচিন্দ্রি। ইমুংনা মসিদা ৩০+ নীংশিংবা হাপচিনবা য়াই।',
+    memoriesReflection: 'নীংশিংবা অমসুং ৱারী শানবগী ৱাহং',
+    memoriesReadAloud: '🔊 ৱারী তারিবা',
+    memoriesStopAudio: '⏹ অদিও লেপউ',
+    memoriesSavedBadge: 'নীংশিংবা থমখ্রে',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'মনা অমসুং বেজ',
+    rewardsSubtitle: 'নহাক্না তানখিবা শেনেকশিংগা লোয়ননা বেজ অমসুং পোত্থোকশিং লৌবা য়াই!',
+    rewardsBalance: 'হৌজিক লৈরিবা শেনেক:',
+    rewardsCoins: 'শেনেক',
+    rewardsBadgeStore: 'দিজিতেল মাইলস্তোন বেজ',
+    rewardsPhysicalStore: 'হকচাংগী পোত্থোক য়োল্লিবা',
+    rewardsClaimed: 'হান্না ফংখ্রে ✓',
+    rewardsRedeemFor: 'গীদমক লৌউ',
+    rewardsNeedMore: 'শেনেক অমুক্কা দরকার ওই 🪙',
+    rewardsNotEnough: 'শেনেক অমুক্কা তাননবগীদমক শান্নবা মখা চত্থবীরু!',
+    rewardsCongratBadge: 'নুংঙাইবা ফোংদোকচরি! বেজ ফংলে:',
+    rewardsPerk: 'বেজগী কান্নবা:',
+    rewardsPhysicalDispatch: 'নহাক্কী য়ুমদা য়ৌহনগনি'
   },
 
   brx: {
@@ -1205,7 +1345,35 @@ export const stitchTranslations = {
     g7Title: 'औवा सुर अनुक्रम',
     g7Desc: 'गोजों औवा महरखौ उनसं',
     g7Tag: 'महर गोसोखां',
-    g7Instruction: 'गोजों औवा प्याडफोरखौ नायनानै उनसं'
+    g7Instruction: 'गोजों औवा प्याडफोरखौ नायनानै उनसं',
+    // Memories & Life Story
+    memoriesTitle: 'जिउनि खोन्थाय आरो गोसोखांथि',
+    memoriesSubtitle: 'नोंथांनि अनजालु मानसिफोरजों गोसोखांथि समाव',
+    memoriesBack: '⬅ उल्था थां',
+    memoriesGridView: '📱 ग्रिड नुनो मोननाय',
+    memoriesStoryView: '📖 खोन्थाय नुनो मोननाय',
+    memoriesAddFirst: '+ गिबि गोसोखांथि होनाय',
+    memoriesAddMemory: '+ गोदान गोसोखांथि होनाय',
+    memoriesEmpty: 'दासिम जेबो नख’रनि गोसोखांथि सोनाय जायाखै। नख’रनि मानसिफोरा बेयाव ३०+ गोसोखांथि दोननो हायो।',
+    memoriesReflection: 'गोसोखांथि आरो सावरायनायनि सोंथि',
+    memoriesReadAloud: '🔊 खोन्थाय खोनासङा',
+    memoriesStopAudio: '⏹ अडिअ’ बन्द खालाम',
+    memoriesSavedBadge: 'दोनथुमनाय गोसोखांथि',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'बान्था आरो ब्याज',
+    rewardsSubtitle: 'नोंथांनि आरजिनाय रां-खावरिजों ब्याज आरो देहा सामलायनाय उपहार लायो!',
+    rewardsBalance: 'दानि रां-खावरि:',
+    rewardsCoins: 'रां-खावरि',
+    rewardsBadgeStore: 'डिजिटेल ब्याज',
+    rewardsPhysicalStore: 'देहा सामलायनाय दखान',
+    rewardsClaimed: 'मोनबाय ✓',
+    rewardsRedeemFor: 'थाखाय सोलाय',
+    rewardsNeedMore: 'गोबां रां-खावरि नांगौ 🪙',
+    rewardsNotEnough: 'रां-खावरि आरजिनो थाखाय गेलेबाय था!',
+    rewardsCongratBadge: 'गोजोननाय! नोंथाङा ब्याज मोनबाय:',
+    rewardsPerk: 'ब्याज खाबु:',
+    rewardsPhysicalDispatch: 'नोंथांनि नख’रनि थिखानायाव थिनहरनाय जागोन'
   },
 
   ne: {
@@ -1405,7 +1573,35 @@ export const stitchTranslations = {
     g7Title: 'बाँसको धुन अनुक्रम',
     g7Desc: 'चम्किलो ढाँचा दोहोर्याउनुहोस्',
     g7Tag: 'ढाँचा स्मृति',
-    g7Instruction: 'चम्किएका बाँसका प्याडहरू हेरेर क्रम दोहोर्याउनुहोस्'
+    g7Instruction: 'चम्किएका बाँसका प्याडहरू हेरेर क्रम दोहोर्याउनुहोस्',
+    // Memories & Life Story
+    memoriesTitle: 'जीवन कथा र सम्झनाहरू',
+    memoriesSubtitle: 'आफ्ना प्रियजनहरूसँग बिताएका अमूल्य क्षणहरू',
+    memoriesBack: '⬅ पछाडि फर्कनुहोस्',
+    memoriesGridView: '📱 ग्रिड दृश्य',
+    memoriesStoryView: '📖 कथा दृश्य',
+    memoriesAddFirst: '+ पहिलो सम्झना थप्नुहोस्',
+    memoriesAddMemory: '+ नयाँ सम्झना थप्नुहोस्',
+    memoriesEmpty: 'अहिलेसम्म पारिवारिक सम्झना थपिएको छैन। परिवारले यहाँ ३०+ सम्झनाहरू राख्न सक्छन्।',
+    memoriesReflection: 'सम्झना र कुराकानीको प्रश्न',
+    memoriesReadAloud: '🔊 कथा सुन्नुहोस्',
+    memoriesStopAudio: '⏹ अडियो बन्द गर्नुहोस्',
+    memoriesSavedBadge: 'सङ्कलित सम्झनाहरू',
+
+    // Rewards & Gamification Economy
+    rewardsTitle: 'पुरस्कार र ब्याजहरू',
+    rewardsSubtitle: 'कमाइएका सिक्काहरूबाट उपलब्धि ब्याज र स्वास्थ्य उपहारहरू प्राप्त गर्नुहोस्!',
+    rewardsBalance: 'हालको मौज्दात:',
+    rewardsCoins: 'सिक्का',
+    rewardsBadgeStore: 'डिजिटल ब्याजहरू',
+    rewardsPhysicalStore: 'स्वास्थ्य उपहार पसल',
+    rewardsClaimed: 'प्राप्त भयो ✓',
+    rewardsRedeemFor: 'मा साट्नुहोस्',
+    rewardsNeedMore: 'थप सिक्का चाहिन्छ 🪙',
+    rewardsNotEnough: 'थप सिक्का कमाउन अभ्यास जारी राख्नुहोस्!',
+    rewardsCongratBadge: 'तपाईंले प्राप्त गर्नुभयो:',
+    rewardsPerk: 'ब्याजको लाभ:',
+    rewardsPhysicalDispatch: 'हेरचाहकर्ता मार्फत घरको ठेगानामा पठाइनेछ'
   }
 
 };

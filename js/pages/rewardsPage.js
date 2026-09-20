@@ -369,9 +369,17 @@ export default function RewardsPage(container) {
     });
   }
 
+  const onLangChange = () => { render(); };
+  window.addEventListener('languageChanged', onLangChange);
+  window.addEventListener('smriti:languageChanged', onLangChange);
+
   render();
 
   return {
+    cleanup() {
+      window.removeEventListener('languageChanged', onLangChange);
+      window.removeEventListener('smriti:languageChanged', onLangChange);
+    }
     cleanup() {}
   };
 }

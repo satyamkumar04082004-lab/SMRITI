@@ -64,7 +64,13 @@ const Coins = {
    * @returns {number}
    */
   getBalance() {
-    return Storage.getCoins();
+    const user = Storage.getUser();
+    if (user && user.role === 'caregiver') {
+      const pId = user.linkedPatientId || (user.linkedPatientUsername ? ('patient_' + user.linkedPatientUsername) : 'patient_meera_01');
+      const profile = Storage.getPatientProfile(pId);
+      return (profile && typeof profile.coins === 'number') ? profile.coins : (Storage.getCoins() || 0);
+    }
+    return Storage.getCoins() || 0;
   },
 
   /**

@@ -363,7 +363,17 @@ const Storage = {
   // ------------------------------------------------------------
   getActivePatientId() {
     try {
-      return localStorage.getItem(this._key('active_patient_id')) || 'patient_meera_01';
+      const explicit = localStorage.getItem(this._key('active_patient_id'));
+      if (explicit) return explicit;
+      const user = this.getUser();
+      if (user) {
+        if (user.role === 'patient') {
+          return user.patientId || ('patient_' + (user.username || 'user'));
+        } else if (user.role === 'caregiver') {
+          return user.linkedPatientId || (user.linkedPatientUsername ? ('patient_' + user.linkedPatientUsername) : 'patient_meera_01');
+        }
+      }
+      return 'patient_meera_01';
     } catch {
       return 'patient_meera_01';
     }
@@ -1713,7 +1723,52 @@ const Storage = {
     const updated = Object.assign({}, current, settings);
     this.set('ai_settings', updated);
     return updated;
-  }
+  },
+
+  // ------------------------------------------------------------
+  // DAILY ROUTINE TASKS (Strict Real User Action Completion)
+  // ------------------------------------------------------------
+  getDailyTasks() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const stored = this.get('daily_tasks_state');
+    if (stored && stored.date === todayStr && Array.isArray(stored.tasks)) {
+      return stored.tasks;
+    }
+    // New day or initial run: strictly initialize all 6 tasks to completed: false
+    const initialTasks = [
+      { id: 'bp_med', title: 'Morning Blood Pressure Medicine', icon: '💊', completed: false },
+      { id: 'morning_water', title: 'Drink 2 glasses of warm water', icon: '💧', completed: false },
+      { id: 'memory_game', title: 'Play 1 Cognitive Game (Bamboo Sequence)', icon: '🎋', completed: false },
+      { id: 'deep_breath', title: '5-Minute Mindful Breathing', icon: '🫁', completed: false },
+      { id: 'photo_reminisce', title: 'View 1 Family Memory in Vault', icon: '🖼️', completed: false },
+      { id: 'evening_walk', title: 'Gentle 15-Minute Garden Walk', icon: '🚶', completed: false }
+    ];
+    this.set('daily_tasks_state', { date: todayStr, tasks: initialTasks });
+    return initialTasks;
+  },
+
+  completeDailyTask(taskId) {
+    const tasks = this.getDailyTasks().map(t => t.id === taskId ? { ...t, completed: true } : t);
+    const todayStr = new Date().toISOString().split('T')[0];
+    this.set('daily_tasks_state', { date: todayStr, tasks });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smriti:taskCompleted', { detail: { taskId } }));
+      window.dispatchEvent(new CustomEvent('smritiDataUpdated'));
+    }
+    return tasks;
+  },
+
+  toggleDailyTask(taskId) {
+    const tasks = this.getDailyTasks().map(t => t.id === taskId ? { ...t, completed: !t.completed } : t);
+    const todayStr = new Date().toISOString().split('T')[0];
+    this.set('daily_tasks_state', { date: todayStr, tasks });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smriti:taskCompleted', { detail: { taskId } }));
+      window.dispatchEvent(new CustomEvent('smritiDataUpdated'));
+    }
+    return tasks;
+  },
+
 };
 
 export default Storage;

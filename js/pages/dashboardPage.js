@@ -174,7 +174,12 @@ export default function DashboardPage(container) {
               <div class="stat-value" style="color: #9B2C2C;">${avgAccuracy}%</div>
               <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Overall performance</div>
             </div>
-            <div class="stat-card" style="border-top: 4px solid #D97706;">
+                        <div class="stat-card" style="border-top: 4px solid #F59E0B;">
+              <div class="stat-label">Patient Coins Earned</div>
+              <div class="stat-value" style="color: #D97706;">🪙 ${(patientProfile && typeof patientProfile.coins === 'number') ? patientProfile.coins : (Storage.getCoins() || 0)}</div>
+              <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Real-time balance</div>
+            </div>
+<div class="stat-card" style="border-top: 4px solid #D97706;">
               <div class="stat-label">Active Prescriptions</div>
               <div class="stat-value" style="color: #D97706;">${medicines.length}</div>
               <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Tracked medications</div>

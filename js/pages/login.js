@@ -794,6 +794,21 @@ export default function Login(container) {
               <label style="display: block; margin-bottom: 5px; color: #1E293B; font-weight: 700; font-size: 0.92rem;">Full Legal Name *</label>
               <input type="text" id="inp-auth-name" class="form-input" placeholder="e.g. Meera Das" required style="width: 100%; height: 46px; font-size: 1rem; padding-left: 12px; box-sizing: border-box; border-radius: 10px; border: 1.5px solid #CBD5E1;" />
             </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="display: block; margin-bottom: 5px; color: #1E293B; font-weight: 700; font-size: 0.92rem;">Age *</label>
+                <input type="number" id="inp-auth-age" class="form-input" placeholder="e.g. 68" min="1" max="120" value="68" required style="width: 100%; height: 46px; font-size: 1rem; padding-left: 12px; box-sizing: border-box; border-radius: 10px; border: 1.5px solid #CBD5E1;" />
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; color: #1E293B; font-weight: 700; font-size: 0.92rem;">Gender *</label>
+                <select id="inp-auth-gender" class="form-input" required style="width: 100%; height: 46px; font-size: 1rem; padding-left: 10px; box-sizing: border-box; border-radius: 10px; border: 1.5px solid #CBD5E1; background: #fff;">
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
             <div>
               <label style="display: block; margin-bottom: 5px; color: #1E293B; font-weight: 700; font-size: 0.92rem;">Mobile Phone (SMS & Verification) *</label>
               <input type="tel" id="inp-auth-phone" class="form-input" placeholder="10-digit number" value="9876543210" required style="width: 100%; height: 46px; font-size: 1rem; padding-left: 12px; box-sizing: border-box; border-radius: 10px; border: 1.5px solid #CBD5E1;" />
@@ -904,13 +919,18 @@ export default function Login(container) {
 
       if (authTab === 'signup') {
         const name = container.querySelector('#inp-auth-name')?.value.trim();
+        const age = container.querySelector('#inp-auth-age')?.value ? parseInt(container.querySelector('#inp-auth-age').value.trim(), 10) : undefined;
+        const gender = container.querySelector('#inp-auth-gender')?.value || 'Prefer not to say';
         const phone = container.querySelector('#inp-auth-phone')?.value.trim();
         const regRes = Auth.registerWithPassword({
           name,
           username,
           password,
           phone,
-          role: selectedRole
+          role: selectedRole,
+          age,
+          gender,
+          extra: { age, gender }
         });
 
         if (!regRes.success) {
@@ -989,10 +1009,12 @@ export default function Login(container) {
     modal.className = 'modal-overlay';
     modal.style.cssText = 'position: fixed; inset: 0; background: rgba(15,23,42,0.65); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem;';
     
+    let showCustomAccountInput = false;
+
     function renderStep1Accounts() {
       modal.innerHTML = `
         <div class="modal-content card" style="max-width: 440px; width: 100%; background: #FFFFFF; border-radius: 20px; padding: 1.75rem; border: 1.5px solid #CBD5E1; box-shadow: 0 20px 40px rgba(0,0,0,0.18);">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem;">
             <svg width="28" height="28" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -1000,8 +1022,11 @@ export default function Login(container) {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
             <div>
-              <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #1E293B;">Sign in with Google</h3>
-              <p style="margin: 0; font-size: 0.82rem; color: #64748B;">Choose an account to continue to SMRITI</p>
+              <div style="display: inline-flex; align-items: center; gap: 4px; background: #EEF2FF; color: #4338CA; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; margin-bottom: 2px;">
+                ⚙ prompt=select_account
+              </div>
+              <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #1E293B;">Choose Google Account</h3>
+              <p style="margin: 0; font-size: 0.82rem; color: #64748B;">Select an account to continue to SMRITI</p>
             </div>
           </div>
 
@@ -1029,6 +1054,28 @@ export default function Login(container) {
                 <span style="color: #64748B; font-size: 0.82rem;">dr.barua@gmail.com</span>
               </div>
             </div>
+
+            ${!showCustomAccountInput ? `
+              <div id="btn-show-custom-account" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px dashed #94A3B8; border-radius: 12px; cursor: pointer; background: #F8FAFC;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #F1F5F9; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800;">+</div>
+                <div style="flex: 1;">
+                  <strong style="color: #1E293B; font-size: 0.95rem; display: block;">Use another account</strong>
+                  <span style="color: #64748B; font-size: 0.82rem;">Sign in with any other Google account</span>
+                </div>
+              </div>
+            ` : `
+              <div style="border: 1.5px solid #4F46E5; border-radius: 12px; padding: 12px; background: #F5F3FF;">
+                <div style="font-size: 0.88rem; font-weight: 800; color: #4338CA; margin-bottom: 8px;">➕ Enter Custom Google Account</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <input type="text" id="inp-custom-g-name" class="form-input" placeholder="Full Name (e.g. Ananya Roy)" style="padding: 8px 10px; font-size: 0.9rem; border-radius: 8px; border: 1px solid #C7D2FE;" />
+                  <input type="email" id="inp-custom-g-email" class="form-input" placeholder="Google Email (e.g. ananya@gmail.com)" style="padding: 8px 10px; font-size: 0.9rem; border-radius: 8px; border: 1px solid #C7D2FE;" />
+                  <div style="display: flex; gap: 6px; margin-top: 2px;">
+                    <button id="btn-confirm-custom-g" class="btn btn-sm btn-primary" style="flex: 1; background: #4F46E5; border-color: #4F46E5;">Continue ➔</button>
+                    <button id="btn-cancel-custom-g" class="btn btn-sm btn-ghost" style="color: #64748B;">Back</button>
+                  </div>
+                </div>
+              </div>
+            `}
           </div>
 
           <button id="btn-cancel-google" class="btn btn-ghost" style="width: 100%; color: #64748B;">Cancel</button>
@@ -1041,6 +1088,24 @@ export default function Login(container) {
           const name = card.getAttribute('data-name');
           renderStep2RoleSelect({ email, name });
         });
+      });
+
+      modal.querySelector('#btn-show-custom-account')?.addEventListener('click', () => {
+        showCustomAccountInput = true;
+        renderStep1Accounts();
+      });
+
+      modal.querySelector('#btn-cancel-custom-g')?.addEventListener('click', () => {
+        showCustomAccountInput = false;
+        renderStep1Accounts();
+      });
+
+      modal.querySelector('#btn-confirm-custom-g')?.addEventListener('click', () => {
+        const customName = modal.querySelector('#inp-custom-g-name')?.value.trim();
+        const customEmail = modal.querySelector('#inp-custom-g-email')?.value.trim();
+        if (!customName) return alert('Please enter your name');
+        if (!customEmail || !customEmail.includes('@')) return alert('Please enter a valid Google email');
+        renderStep2RoleSelect({ email: customEmail, name: customName });
       });
 
       modal.querySelector('#btn-cancel-google')?.addEventListener('click', () => {
