@@ -550,31 +550,67 @@ export default function Home(container) {
       });
     }
 
-    // Mood Buttons Selection
+    // Mood Buttons Selection (How are you feeling today?)
     const moodBtns = container.querySelectorAll('.stitch-mood-btn');
     moodBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        moodBtns.forEach(b => b.classList.remove('active-mood'));
-        btn.classList.add('active-mood');
+      btn.addEventListener('click', (e) => {
+        try {
+          if (e && typeof e.preventDefault === 'function') e.preventDefault();
+          moodBtns.forEach(b => b.classList.remove('active-mood'));
+          btn.classList.add('active-mood');
 
-        const mood = btn.dataset.mood;
-        const emoji = btn.dataset.emoji;
+          const mood = btn.dataset.mood || 'good';
+          const emoji = btn.dataset.emoji || '😊';
+          const label = (typeof I18n !== 'undefined' && typeof I18n.t === 'function' ? I18n.t('mood.' + mood) : '') || mood;
 
-        const emojiEl = container.querySelector('#mood-feedback-emoji');
-        const titleEl = container.querySelector('#mood-feedback-title');
-        const descEl = container.querySelector('#mood-feedback-desc');
+          const emojiEl = container.querySelector('#mood-feedback-emoji');
+          const titleEl = container.querySelector('#mood-feedback-title');
+          const descEl = container.querySelector('#mood-feedback-desc');
 
-        if (emojiEl) emojiEl.textContent = emoji;
-        if (titleEl) titleEl.textContent = I18n.t('mood.feedback_title', { mood: I18n.t('mood.' + mood) });
-        if (descEl) {
-          descEl.textContent = I18n.t('mood.feedback_' + mood) || I18n.t('mood.feedback_good');
-        }
+          if (emojiEl) emojiEl.textContent = emoji;
+          if (titleEl) {
+            titleEl.textContent = (typeof I18n !== 'undefined' && typeof I18n.t === 'function') 
+              ? I18n.t('mood.feedback_title', { mood: label }) 
+              : `Checked in as ${label}`;
+          }
+          if (descEl) {
+            descEl.textContent = (typeof I18n !== 'undefined' && typeof I18n.t === 'function')
+              ? (I18n.t('mood.feedback_' + mood) || I18n.t('mood.feedback_good'))
+              : 'Thank you for sharing your mood today!';
+          }
 
-        // Save mood in Storage & Award 5 Coins
-        Storage.setTodayMood(mood, emoji);
-        Coins.add(5, `Mood Check-in: ${mood}`);
-        if (window.SmritiToast) {
-          window.SmritiToast.show(`Mood recorded: ${emoji} ${I18n.t('mood.' + mood)}! +5 Coins 🪙`, 'success');
+          // Save mood in Storage (guaranteed safe with multiple fallbacks)
+          try {
+            if (typeof Storage !== 'undefined') {
+              if (typeof Storage.setTodayMood === 'function') {
+                Storage.setTodayMood(mood, emoji, label);
+              } else if (typeof Storage.addMoodEntry === 'function') {
+                Storage.addMoodEntry(mood, emoji, label);
+              }
+            }
+          } catch (storageErr) {
+            console.warn('Storage save mood warning:', storageErr);
+          }
+
+          // Award 5 Coins safely
+          try {
+            if (typeof Coins !== 'undefined' && typeof Coins.add === 'function') {
+              Coins.add(5, `Mood Check-in: ${mood}`);
+            }
+          } catch (coinErr) {
+            console.warn('Coins add warning:', coinErr);
+          }
+
+          // Display toast notification safely
+          try {
+            if (window.SmritiToast && typeof window.SmritiToast.show === 'function') {
+              window.SmritiToast.show(`Mood recorded: ${emoji} ${label}! +5 Coins 🪙`, 'success');
+            }
+          } catch (toastErr) {
+            console.warn('Toast show warning:', toastErr);
+          }
+        } catch (err) {
+          console.error('Error handling mood selection:', err);
         }
       });
     });

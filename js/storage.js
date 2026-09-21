@@ -455,7 +455,9 @@ const Storage = {
       });
     }
 
-    window.dispatchEvent(new CustomEvent('smritiDataUpdated', { detail: { patientId: profile.patientId } }));
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('smritiDataUpdated', { detail: { patientId: profile.patientId } }));
+    }
   },
 
   // Partial update helper on the unified profile
@@ -502,12 +504,14 @@ const Storage = {
 
   notifySyncStatus() {
     const queue = this.getSyncQueue();
-    window.dispatchEvent(new CustomEvent('smritiSyncStatus', {
-      detail: {
-        isOnline: this.isOnline(),
-        pendingItems: queue.length
-      }
-    }));
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('smritiSyncStatus', {
+        detail: {
+          isOnline: this.isOnline(),
+          pendingItems: queue.length
+        }
+      }));
+    }
   },
 
   async flushSyncQueue() {
@@ -849,21 +853,35 @@ const Storage = {
   },
 
   addMoodEntry(moodKey, emoji, label, note = '') {
-    const profile = this.getPatientProfile();
-    profile.moodHistory = profile.moodHistory || [];
-    const today = new Date().toISOString().split('T')[0];
-    const existingIndex = profile.moodHistory.findIndex(m => m.date === today);
-    const newEntry = { date: today, mood: moodKey, emoji, label, note, timestamp: Date.now() };
+    try {
+      const profile = this.getPatientProfile() || {};
+      profile.moodHistory = profile.moodHistory || [];
+      const today = new Date().toISOString().split('T')[0];
+      const existingIndex = profile.moodHistory.findIndex(m => m.date === today);
+      const newEntry = { date: today, mood: moodKey, emoji, label: label || moodKey, note, timestamp: Date.now() };
 
-    if (existingIndex >= 0) {
-      profile.moodHistory[existingIndex] = newEntry;
-    } else {
-      profile.moodHistory.push(newEntry);
+      if (existingIndex >= 0) {
+        profile.moodHistory[existingIndex] = newEntry;
+      } else {
+        profile.moodHistory.push(newEntry);
+      }
+
+      this.savePatientProfile(profile);
+      if (typeof this.addJourneyXP === 'function') {
+        this.addJourneyXP(15);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('smritiDataUpdated'));
+      }
+      return profile.moodHistory;
+    } catch (e) {
+      console.error('Storage.addMoodEntry error:', e);
+      return [];
     }
+  },
 
-    this.savePatientProfile(profile);
-    this.addJourneyXP(15);
-    return profile.moodHistory;
+  setTodayMood(moodKey, emoji, label = '', note = '') {
+    return this.addMoodEntry(moodKey, emoji, label || moodKey, note);
   },
 
   getTodayMood() {

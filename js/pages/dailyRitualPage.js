@@ -140,13 +140,24 @@ export default function DailyRitualPage(container) {
   function attachEvents() {
     // Mood selection
     container.querySelectorAll('.mood-btn').forEach(b => {
-      b.addEventListener('click', () => {
-        const mood = b.getAttribute('data-mood');
-        const emoji = b.getAttribute('data-emoji');
-        const label = b.getAttribute('data-label');
-        Storage.addMoodEntry(mood, emoji, label);
-        todayMood = { mood, emoji, label };
-        render();
+      b.addEventListener('click', (e) => {
+        try {
+          if (e && typeof e.preventDefault === 'function') e.preventDefault();
+          const mood = b.getAttribute('data-mood') || 'good';
+          const emoji = b.getAttribute('data-emoji') || '🙂';
+          const label = b.getAttribute('data-label') || mood;
+          if (typeof Storage !== 'undefined') {
+            if (typeof Storage.setTodayMood === 'function') {
+              Storage.setTodayMood(mood, emoji, label);
+            } else if (typeof Storage.addMoodEntry === 'function') {
+              Storage.addMoodEntry(mood, emoji, label);
+            }
+          }
+          todayMood = { mood, emoji, label };
+          render();
+        } catch (err) {
+          console.error('Error handling ritual mood selection:', err);
+        }
       });
     });
 
