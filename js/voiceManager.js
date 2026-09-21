@@ -45,9 +45,7 @@ const VoiceManager = {
       } catch (err) {
         console.warn('[VoiceManager] Microphone access rejected:', err);
         this._permissionGranted = false;
-        if (window.SmritiToast) {
-          window.SmritiToast.show('Microphone access is needed for voice features. Please allow mic in browser settings.', 'warning');
-        }
+        // Microphone access rejected - fail silently without UI spam
         return false;
       }
     }
@@ -93,9 +91,7 @@ const VoiceManager = {
     onEnd = null
   }) {
     if (!this.isSupported()) {
-      if (window.SmritiToast) {
-        window.SmritiToast.show('Speech recognition is not supported in this browser.', 'info');
-      }
+      // Speech recognition not supported - fail silently
       return null;
     }
 

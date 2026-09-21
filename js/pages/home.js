@@ -739,9 +739,12 @@ export default function Home(container) {
             trigger1TapEmergencySOS('VoiceGuard Distress Trigger: ' + text);
           }
         },
-        onError: () => {
+        onError: (err) => {
+          if (err && (err.error === 'not-allowed' || err.error === 'permission-denied')) {
+            return; // Permission not allowed, do not spam retries
+          }
           if (isVoiceGuardActive && (!VoiceManager.isActive() || VoiceManager.getActiveOwner() === 'sos')) {
-            setTimeout(startSOSListener, 1500);
+            setTimeout(startSOSListener, 3000);
           }
         },
         onEnd: () => {
@@ -776,9 +779,7 @@ export default function Home(container) {
           trackingLink: `https://maps.google.com/?q=${latitude},${longitude}`,
           timestamp: new Date().toISOString()
         });
-        if (window.SmritiToast) {
-          window.SmritiToast.show('Safe zone boundary reached (~' + Math.round(dist) + 'm). Caregiver notified.', 'warning');
-        }
+        // Geofence alert logged silently to caregiver without popping up on patient UI
       }
     }, () => {});
   }

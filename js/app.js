@@ -749,8 +749,7 @@ function renderSaathiDrawer() {
   if (micBtn) {
     micBtn.addEventListener('click', async () => {
       if (!VoiceManager.isSupported()) {
-        if (window.SmritiToast) window.SmritiToast.show('Speech recognition not supported in this browser', 'info');
-        return;
+        return; // Fail silently without popup
       }
       try {
         if (VoiceManager.isActive() && VoiceManager.getActiveOwner() === 'saathi') {
