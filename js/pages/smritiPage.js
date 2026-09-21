@@ -1,3 +1,4 @@
+import VoiceManager from '../voiceManager.js';
 /* ============================================================
    SMRITI — AI Voice & Memory Companion Page
    Interactive conversational companion with dynamic context injection,
@@ -37,42 +38,7 @@ export default function SmritiPage(container) {
   let recognition = null;
   let isListening = false;
 
-  // Initialize Speech Recognition if available
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = I18n.lang === 'hi' ? 'hi-IN' : I18n.lang === 'bn' ? 'bn-IN' : I18n.lang === 'as' ? 'as-IN' : 'en-IN';
-
-    recognition.onstart = () => {
-      isListening = true;
-      companionState = 'LISTENING...';
-      updateUI();
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      isListening = false;
-      companionState = 'READY';
-      handleUserMessage(transcript);
-    };
-
-    recognition.onerror = (event) => {
-      console.warn('Speech recognition error:', event.error);
-      isListening = false;
-      companionState = 'READY';
-      updateUI();
-    };
-
-    recognition.onend = () => {
-      isListening = false;
-      if (companionState === 'LISTENING...') {
-        companionState = 'READY';
-      }
-      updateUI();
-    };
-  }
+  // Speech recognition is coordinated via centralized VoiceManager
 
   // Reactive Language Event Listener (eliminating page reloads)
   const onLanguageChanged = () => {
@@ -255,30 +221,79 @@ export default function SmritiPage(container) {
     const voiceBtn = container.querySelector('#btn-voice-toggle');
     if (voiceBtn) {
       voiceBtn.addEventListener('click', () => {
-        if (recognition) {
-          if (isListening) {
-            recognition.stop();
+        if (!VoiceManager.isSupported()) {
+          return;
+        }
+
+        if (isListening) {
+          VoiceManager.stopListening();
+          isListening = false;
+          companionState = 'READY';
+          updateUI();
+          return;
+        }
+
+        isListening = true;
+        companionState = 'LISTENING...';
+        updateUI();
+
+        let heardTranscript = '';
+        VoiceManager.startListening({
+          owner: 'saathi',
+          continuous: false,
+          interimResults: true,
+          lang: VoiceManager.getLocaleForLang(),
+          onStart: () => {
+            isListening = true;
+            companionState = 'LISTENING...';
+            updateUI();
+          },
+          onResult: (ev, transcript) => {
+            let finalStr = '';
+            let interimStr = '';
+            if (ev && ev.results) {
+              for (let i = 0; i < ev.results.length; i++) {
+                const tr = ev.results[i][0]?.transcript || '';
+                if (ev.results[i].isFinal) finalStr += (finalStr ? ' ' : '') + tr;
+                else interimStr += (interimStr ? ' ' : '') + tr;
+              }
+            }
+            const text = (finalStr || interimStr || transcript || '').trim();
+            if (text) {
+              heardTranscript = text;
+              if (input) input.value = text;
+            }
+            if (finalStr.trim()) {
+              const msg = finalStr.trim();
+              heardTranscript = '';
+              if (input) input.value = '';
+              isListening = false;
+              companionState = 'READY';
+              updateUI();
+              handleUserMessage(msg);
+              VoiceManager.stopListening();
+            }
+          },
+          onError: (err) => {
+            console.warn('Saathi speech error:', err);
             isListening = false;
             companionState = 'READY';
             updateUI();
-          } else {
-            try {
-              recognition.start();
-            } catch (e) {
-              console.warn('Recognition start issue:', e);
+          },
+          onEnd: () => {
+            isListening = false;
+            if (companionState === 'LISTENING...') {
+              companionState = 'READY';
+            }
+            updateUI();
+            const pending = heardTranscript.trim() || (input ? input.value.trim() : '');
+            if (pending) {
+              heardTranscript = '';
+              if (input) input.value = '';
+              handleUserMessage(pending);
             }
           }
-        } else {
-          isListening = true;
-          companionState = 'LISTENING...';
-          updateUI();
-          setTimeout(() => {
-            isListening = false;
-            companionState = 'READY';
-            updateUI();
-            handleUserMessage("Hello Smriti, what time is it and how is my progress today?");
-          }, 1200);
-        }
+        });
       });
     }
   }

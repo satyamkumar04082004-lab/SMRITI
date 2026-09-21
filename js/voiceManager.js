@@ -14,10 +14,12 @@ const VoiceManager = {
   _permissionGranted: null,
 
   isSupported() {
+    if (typeof window === 'undefined') return false;
     return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   },
 
   getSpeechRecognitionConstructor() {
+    if (typeof window === 'undefined') return null;
     return window.SpeechRecognition || window.webkitSpeechRecognition || null;
   },
 
@@ -36,17 +38,18 @@ const VoiceManager = {
 
   async checkOrRequestMicrophone() {
     if (this._permissionGranted === true) return true;
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(t => t.stop());
-        this._permissionGranted = true;
-        return true;
-      } catch (err) {
-        console.warn('[VoiceManager] Microphone access rejected:', err);
-        this._permissionGranted = false;
-        // Microphone access rejected - fail silently without UI spam
-        return false;
+        const status = await navigator.permissions.query({ name: 'microphone' });
+        if (status.state === 'granted') {
+          this._permissionGranted = true;
+          return true;
+        } else if (status.state === 'denied') {
+          this._permissionGranted = false;
+          return false;
+        }
+      } catch (e) {
+        // Fallback to native SpeechRecognition permission management
       }
     }
     return true;
@@ -91,7 +94,6 @@ const VoiceManager = {
     onEnd = null
   }) {
     if (!this.isSupported()) {
-      // Speech recognition not supported - fail silently
       return null;
     }
 
@@ -121,30 +123,64 @@ const VoiceManager = {
       if (typeof onError === 'function') onError(e);
       return null;
     }
+
     rec.continuous = continuous;
     rec.interimResults = interimResults;
+    rec.maxAlternatives = 3;
     rec.lang = lang || this.getLocaleForLang();
 
     this._activeRecognizer = rec;
     this._activeOwner = owner;
 
     rec.onstart = () => {
+      this._permissionGranted = true;
       if (typeof onStart === 'function') onStart();
     };
 
     rec.onresult = (event) => {
-      if (typeof onResult === 'function') onResult(event);
+      let fullTranscript = '';
+      let latestTranscript = '';
+      if (event && event.results) {
+        for (let i = 0; i < event.results.length; i++) {
+          const item = event.results[i];
+          if (item && item[0]) {
+            fullTranscript += (fullTranscript ? ' ' : '') + item[0].transcript;
+          }
+        }
+        const last = event.results[event.results.length - 1];
+        if (last && last[0]) {
+          latestTranscript = last[0].transcript;
+        }
+      }
+      const cleanTranscript = (fullTranscript || latestTranscript || '').trim();
+
+      if (typeof onResult === 'function') {
+        try {
+          onResult(event, cleanTranscript);
+        } catch (cbErr) {
+          console.error('[VoiceManager] onResult callback error:', cbErr);
+        }
+      }
+
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('smriti:voiceTranscript', {
+          detail: { owner, transcript: cleanTranscript, event }
+        }));
+      }
     };
 
     rec.onerror = (event) => {
-      const errCode = event.error || 'unknown';
-      console.warn(`[VoiceManager] Recognizer error (${owner}):`, errCode);
-
+      const errCode = event?.error || 'unknown';
       if (errCode === 'not-allowed' || errCode === 'service-not-allowed') {
         this._permissionGranted = false;
       }
-
-      if (typeof onError === 'function') onError(event);
+      if (typeof onError === 'function') {
+        try {
+          onError(event);
+        } catch (cbErr) {
+          console.error('[VoiceManager] onError callback error:', cbErr);
+        }
+      }
     };
 
     rec.onend = () => {
@@ -154,7 +190,13 @@ const VoiceManager = {
         this._activeOwner = null;
       }
 
-      if (typeof onEnd === 'function') onEnd();
+      if (typeof onEnd === 'function') {
+        try {
+          onEnd();
+        } catch (cbErr) {
+          console.error('[VoiceManager] onEnd callback error:', cbErr);
+        }
+      }
 
       if (wasOwner !== 'sos' && !this._activeOwner) {
         setTimeout(() => {

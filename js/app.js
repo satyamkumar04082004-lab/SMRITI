@@ -308,9 +308,19 @@ function showVoiceNavigationModal() {
       owner: 'nav',
       continuous: false,
       interimResults: false,
-      onResult: (event) => {
-        const text = (event.results[0][0].transcript || '').toLowerCase();
-        handleVoiceDestination(text);
+      onResult: (event, transcript) => {
+        let text = (transcript || '').toLowerCase().trim();
+        if (!text && event && event.results) {
+          for (let i = 0; i < event.results.length; i++) {
+            if (event.results[i] && event.results[i][0]) {
+              text += (text ? ' ' : '') + event.results[i][0].transcript;
+            }
+          }
+        }
+        text = text.toLowerCase().trim();
+        if (text) {
+          handleVoiceDestination(text);
+        }
       },
       onError: () => {
         if (iconEl) iconEl.style.transform = 'scale(1)';
@@ -323,7 +333,7 @@ function showVoiceNavigationModal() {
             if (document.body.contains(modal) && !isNavigating) {
               startListening();
             }
-          }, 350);
+          }, 400);
         }
       }
     });
@@ -764,24 +774,30 @@ function renderSaathiDrawer() {
         micBtn.style.boxShadow = '0 0 14px rgba(239, 68, 68, 0.6)';
         if (inputEl) inputEl.placeholder = '🎙️ Listening... Speak your thoughts to Saathi';
 
+        let transcriptBuffer = '';
         VoiceManager.startListening({
           owner: 'saathi',
           continuous: false,
           interimResults: true,
-          onResult: (ev) => {
-            let interimText = '';
+          onResult: (ev, transcript) => {
             let finalText = '';
-            for (let i = 0; i < ev.results.length; i++) {
-              const transcript = ev.results[i][0].transcript;
-              if (ev.results[i].isFinal) {
-                finalText += transcript;
-              } else {
-                interimText += transcript;
+            let interimText = '';
+            if (ev && ev.results) {
+              for (let i = 0; i < ev.results.length; i++) {
+                const tr = ev.results[i][0]?.transcript || '';
+                if (ev.results[i].isFinal) {
+                  finalText += (finalText ? ' ' : '') + tr;
+                } else {
+                  interimText += (interimText ? ' ' : '') + tr;
+                }
               }
             }
-            if (inputEl) {
-              inputEl.value = finalText || interimText;
+            const currentText = (finalText || interimText || transcript || '').trim();
+            if (currentText) {
+              transcriptBuffer = currentText;
+              if (inputEl) inputEl.value = currentText;
             }
+
             if (finalText.trim()) {
               micBtn.style.background = '#F3F4F6';
               micBtn.style.boxShadow = 'none';
@@ -789,7 +805,9 @@ function renderSaathiDrawer() {
                 inputEl.placeholder = 'Type or speak a message...';
                 inputEl.value = '';
               }
-              sendSaathiMessage(finalText.trim());
+              const msgToSend = finalText.trim();
+              transcriptBuffer = '';
+              sendSaathiMessage(msgToSend);
               VoiceManager.stopListening();
             }
           },
@@ -797,12 +815,17 @@ function renderSaathiDrawer() {
             micBtn.style.background = '#F3F4F6';
             micBtn.style.boxShadow = 'none';
             if (inputEl) inputEl.placeholder = 'Type or speak a message...';
-            if (window.SmritiToast) window.SmritiToast.show('Could not catch your voice clearly. Tap mic to retry.', 'info');
           },
           onEnd: () => {
             micBtn.style.background = '#F3F4F6';
             micBtn.style.boxShadow = 'none';
             if (inputEl) inputEl.placeholder = 'Type or speak a message...';
+            const pendingText = transcriptBuffer.trim() || (inputEl ? inputEl.value.trim() : '');
+            if (pendingText) {
+              transcriptBuffer = '';
+              if (inputEl) inputEl.value = '';
+              sendSaathiMessage(pendingText);
+            }
           }
         });
       } catch (err) {

@@ -592,9 +592,15 @@ class GameController {
       owner: 'game',
       continuous: false,
       interimResults: false,
-      onResult: (e) => {
-        const transcript = (e.results[e.results.length - 1][0].transcript || '').trim().toLowerCase();
-        this._handleSpokenAnswer(transcript);
+      onResult: (e, transcript) => {
+        let text = (transcript || '').trim().toLowerCase();
+        if (!text && e && e.results) {
+          const last = e.results[e.results.length - 1];
+          text = (last && last[0] ? last[0].transcript : '').trim().toLowerCase();
+        }
+        if (text) {
+          this._handleSpokenAnswer(text);
+        }
       },
       onError: () => {
         if (this._voiceAnswerActive && this.phase === 'play') {
@@ -614,55 +620,73 @@ class GameController {
     const cleanTranscript = (transcript || '').trim().toLowerCase();
     if (!cleanTranscript) return;
 
-    if (statusText) statusText.textContent = `Heard: "${cleanTranscript}" — Searching match...`;
+    if (statusText) statusText.textContent = `Heard: "${cleanTranscript}" — Matching...`;
 
     const gameArea = this.container.querySelector('#game-area') || this.container;
     if (!gameArea) return;
 
     const clickableCandidates = Array.from(gameArea.querySelectorAll(
-      'button, .card-item, .choice-btn, .option-btn, [data-choice], [data-answer], [data-card-id], .game-card, .quiz-option, .bamboo-item, .memory-card, [role="button"]'
+      'button, .card-item, .choice-btn, .option-btn, [data-choice], [data-answer], [data-card-id], .game-card, .quiz-option, .bamboo-item, .memory-card, [role="button"], .interactive-cell, .grid-cell'
     )).filter(el => {
-      // Exclude voice toggle and control buttons themselves
-      return !el.id?.includes('voice') && !el.id?.includes('quit') && !el.classList.contains('btn-ghost');
+      // Exclude voice toggle, quit, sound and control buttons
+      const id = (el.id || '').toLowerCase();
+      const cls = (el.className || '').toString().toLowerCase();
+      return !id.includes('voice') && !id.includes('quit') && !id.includes('mute') && !id.includes('sound') && !cls.includes('btn-ghost') && !cls.includes('game-header');
     });
 
     if (clickableCandidates.length === 0) return;
 
     let matchedElement = null;
 
-    // 1. CONTENT-BASED MATCHING FIRST (Matches spoken words like "Apple", "Tea", "Elephant", etc.)
+    // 1. CONTENT-BASED MATCHING (Matches spoken answer text against label, attributes, or emojis)
     matchedElement = clickableCandidates.find(el => {
       const label = (
+        el.getAttribute('data-answer') || 
+        el.getAttribute('data-choice') || 
+        el.getAttribute('data-name') || 
+        el.getAttribute('data-emoji') || 
+        el.getAttribute('aria-label') || 
         el.innerText || 
         el.textContent || 
-        el.getAttribute('data-choice') || 
-        el.getAttribute('data-answer') || 
-        el.getAttribute('data-name') || 
-        el.getAttribute('aria-label') || 
         ''
       ).trim().toLowerCase().replace(/^[a-d0-9][.)\-:]\s*/i, '').trim();
 
-      if (!label || label.length < 2) return false;
-      
-      // Direct word or substring match
+      if (!label || label.length < 1) return false;
       return cleanTranscript.includes(label) || label.includes(cleanTranscript);
     });
 
-    // 2. POSITION-BASED MATCHING (Strict word boundary matching — avoids matching 'a' inside 'apple')
+    // 2. POSITION & ORDINAL MATCHING (Supports 1-8 in English, Hindi, Bengali, Assamese)
     if (!matchedElement) {
-      if (/\b(first|1st|one|pehla|prothom|ek|option a)\b/i.test(cleanTranscript)) {
-        matchedElement = clickableCandidates[0];
-      } else if (/\b(second|2nd|two|dusra|dwitiyo|do|option b)\b/i.test(cleanTranscript)) {
-        matchedElement = clickableCandidates[1] || clickableCandidates[0];
-      } else if (/\b(third|3rd|three|teesra|tritiyo|teen|option c)\b/i.test(cleanTranscript)) {
-        matchedElement = clickableCandidates[2] || clickableCandidates[0];
-      } else if (/\b(fourth|4th|four|chautha|chaturtha|char|option d)\b/i.test(cleanTranscript)) {
-        matchedElement = clickableCandidates[3] || clickableCandidates[0];
+      const numberMap = [
+        { patterns: [/\b(first|1st|one|ek|pehla|prothom|card 1|option a|number 1|1)\b/i], idx: 0 },
+        { patterns: [/\b(second|2nd|two|do|dusra|dwitiyo|card 2|option b|number 2|2)\b/i], idx: 1 },
+        { patterns: [/\b(third|3rd|three|teen|teesra|tritiyo|card 3|option c|number 3|3)\b/i], idx: 2 },
+        { patterns: [/\b(fourth|4th|four|char|chautha|chaturtha|card 4|option d|number 4|4)\b/i], idx: 3 },
+        { patterns: [/\b(fifth|5th|five|panch|paanch|panchwa|card 5|number 5|5)\b/i], idx: 4 },
+        { patterns: [/\b(sixth|6th|six|chhah|che|chhatwa|card 6|number 6|6)\b/i], idx: 5 },
+        { patterns: [/\b(seventh|7th|seven|saat|satwa|card 7|number 7|7)\b/i], idx: 6 },
+        { patterns: [/\b(eighth|8th|eight|aath|athwa|card 8|number 8|8)\b/i], idx: 7 },
+      ];
+
+      for (const item of numberMap) {
+        if (item.patterns.some(p => p.test(cleanTranscript))) {
+          if (clickableCandidates[item.idx]) {
+            matchedElement = clickableCandidates[item.idx];
+            break;
+          }
+        }
       }
     }
 
     if (matchedElement) {
-      const matchLabel = (matchedElement.innerText || matchedElement.getAttribute('data-choice') || 'Selected Option').trim();
+      const matchLabel = (
+        matchedElement.getAttribute('data-answer') || 
+        matchedElement.getAttribute('data-choice') || 
+        matchedElement.innerText || 
+        matchedElement.textContent || 
+        'Option'
+      ).trim();
+
       if (statusText) statusText.innerHTML = `✨ Selected by Voice: <strong>${matchLabel}</strong>`;
       matchedElement.style.outline = '4px solid #10B981';
       matchedElement.style.boxShadow = '0 0 16px rgba(16, 185, 129, 0.6)';
@@ -676,7 +700,9 @@ class GameController {
             matchedElement.style.transform = 'none';
           }
         }, 400);
-      }, 300);
+      }, 250);
+    } else {
+      if (statusText) statusText.innerHTML = `Heard: "<em>${cleanTranscript}</em>"`;
     }
   }
 
