@@ -55,25 +55,73 @@ import BambooSequence from './games/bambooSequence.js';
 // --- Toast notification system ---
 const Toast = {
   _container: null,
+  _activeMessages: new Set(),
 
   init() {
+    if (this._container && document.body.contains(this._container)) return;
     this._container = document.createElement('div');
     this._container.className = 'toast-container';
+    this._container.style.pointerEvents = 'none';
     document.body.appendChild(this._container);
   },
 
-  show(message, type = 'info', duration = 3000) {
-    if (!this._container) this.init();
+  show(message, type = 'info', duration = 4000) {
+    if (!message) return;
+    if (this._activeMessages.has(message)) {
+      return; // Prevent duplicate notifications from stacking simultaneously
+    }
+    if (!this._container || !document.body.contains(this._container)) {
+      this.init();
+    }
+
+    this._activeMessages.add(message);
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    this._container.appendChild(toast);
-    setTimeout(() => {
+    toast.setAttribute('role', 'alert');
+    toast.style.cssText = 'pointer-events: auto; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;';
+
+    const msgSpan = document.createElement('span');
+    msgSpan.style.cssText = 'flex: 1; word-break: break-word;';
+    msgSpan.textContent = message;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'toast-close-btn';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Close notification');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.style.cssText = 'background: transparent; border: none; color: inherit; font-size: 1.35rem; line-height: 1; cursor: pointer; padding: 0 0 0 8px; margin-left: auto; opacity: 0.85; flex-shrink: 0; transition: opacity 0.15s ease;';
+    closeBtn.onmouseenter = () => { closeBtn.style.opacity = '1'; };
+    closeBtn.onmouseleave = () => { closeBtn.style.opacity = '0.85'; };
+
+    let isDismissed = false;
+    let timer = null;
+
+    const dismiss = () => {
+      if (isDismissed) return;
+      isDismissed = true;
+      if (timer) clearTimeout(timer);
+      this._activeMessages.delete(message);
       toast.style.opacity = '0';
       toast.style.transform = 'translateY(-10px)';
       toast.style.transition = 'all 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, duration);
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 300);
+    };
+
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismiss();
+    });
+
+    toast.appendChild(msgSpan);
+    toast.appendChild(closeBtn);
+    this._container.appendChild(toast);
+
+    if (duration > 0) {
+      timer = setTimeout(dismiss, duration);
+    }
   },
 };
 window.SmritiToast = Toast;
@@ -908,7 +956,7 @@ function navigate() {
   const root = document.getElementById('root');
   if (root) {
     const loadingState = root.querySelector('.loading-state');
-    if (loadingState) loadingState.remove();
+    if (loadingState && typeof loadingState.remove === 'function') loadingState.remove();
   }
 
   let hash = window.location.hash;
@@ -1101,7 +1149,7 @@ function init() {
     const root = document.getElementById('root');
     const loadingState = root ? root.querySelector('.loading-state') : null;
     if (loadingState && document.getElementById('page-content')) {
-      loadingState.remove();
+      if (typeof loadingState.remove === 'function') loadingState.remove();
     }
   }
 }

@@ -239,11 +239,6 @@ container.innerHTML = `
                 <div class="stat-value" style="color: #047857;">${avgAccuracy}%</div>
                 <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">${totalSessions > 0 ? 'Longitudinal stability' : 'Awaiting baseline trials'}</div>
               </div>
-              <div class="stat-card" style="border-top: 4px solid #F59E0B;">
-                <div class="stat-label">Patient Coins Earned</div>
-                <div class="stat-value" style="color: #D97706;">🪙 ${(activeProfile && typeof activeProfile.coins === 'number') ? activeProfile.coins : (Storage.getCoins() || 0)}</div>
-                <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Therapeutic reward balance</div>
-              </div>
               <div class="stat-card" style="border-top: 4px solid #D97706;">
                 <div class="stat-label">Task Adherence</div>
                 <div class="stat-value" style="color: #B45309;">${taskCompletionRate}%</div>

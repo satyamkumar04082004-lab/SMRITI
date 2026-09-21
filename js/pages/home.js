@@ -519,9 +519,10 @@ export default function Home(container) {
         markDoneBtn.innerHTML = `<span>✓</span> <span>${I18n.t('routine.completed')}</span>`;
         
         // Mark BP med task completed
-        const task = defaultTasks.find(t => t.id === 'bp_med');
+        Storage.completeDailyTask('bp_med');
+        const task = dailyTasks.find(t => t.id === 'bp_med');
         if (task) task.completed = true;
-        completedTasksCount = defaultTasks.filter(t => t.completed).length;
+        completedTasksCount = dailyTasks.filter(t => t.completed).length;
         progressPercent = Math.round((completedTasksCount / totalTasksCount) * 100);
         
         const fillEl = container.querySelector('#hero-progress-fill');
@@ -775,7 +776,8 @@ export default function Home(container) {
     window.removeEventListener('smriti:languageChanged', handleLangChange);
     window.removeEventListener('languageChanged', handleLangChange);
     isVoiceGuardActive = false;
-    if (speechRecognizer) {
+    VoiceManager.stopListening('sos');
+    if (typeof speechRecognizer !== 'undefined' && speechRecognizer) {
       try {
         speechRecognizer.stop();
       } catch (e) {}
